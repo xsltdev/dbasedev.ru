@@ -1,3 +1,6 @@
 title: Основы AQL
 nav:
     - index.md
+    - syntax.md
+    - data-types.md
+    - bind-parameters.md
