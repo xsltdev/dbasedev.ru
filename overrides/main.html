@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+<!-- Page title -->
+{% block htmltitle %} {% if page and page.meta and
+page.meta.title %}
+<title>{{ page.meta.title }} ⚡️ Базы данных</title>
+{% elif page and page.title and not page.is_homepage %}
+<title>{{ page.title }} ⚡️ Базы данных</title>
+{% else %}
+<title>Справочник по базам данных</title>
+{% endif %} {% endblock %}
+
+<!-- Link to source file -->
+{% block source %} {% if page and page.meta and
+page.meta.source %} {% include "partials/source-link.html"
+%} {% endif %} {% endblock %}
