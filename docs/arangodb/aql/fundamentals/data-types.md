@@ -1,43 +1,31 @@
-# Data types
+# Типы данных
 
-AQL supports both _primitive_ data types consisting of exactly one value and
-_compound_ data types comprised of multiple values. The following types are
-available:
+AQL поддерживает как _примитивные_ типы данных, состоящие ровно из одного значения, так и _составные_ типы данных, состоящие из нескольких значений. Доступны следующие типы:
 
-|             Data type | Description                                                 |
-| --------------------: | ----------------------------------------------------------- |
-|              **null** | An empty value, also: the absence of a value                |
-|           **boolean** | Boolean truth value with possible values _false_ and _true_ |
-|            **number** | Signed (real) number                                        |
-|            **string** | UTF-8 encoded text value                                    |
-|      **array** / list | Sequence of values, referred to by their positions          |
-| **object** / document | Sequence of values, referred to by their names              |
+|            Тип данных | Описание                                                                |
+| --------------------: | ----------------------------------------------------------------------- |
+|              **null** | Пустое значение, а также: отсутствие значения                           |
+|           **boolean** | Логическое значение истинности с возможными значениями `false` и `true` |
+|            **number** | Число со знаком, включая дробные (real)                                 |
+|            **string** | Текстовое значение в кодировке UTF-8                                    |
+|      **array** / list | Последовательность значений, на которые ссылаются их позиции            |
+| **object** / document | Последовательность значений, на которые ссылаются их имена              |
 
-## Primitive types
+## Примитивные типы
 
-### Null value
+### Значение Null
 
-A `null` value can be used to represent an empty or absent value.
-It is different from a numerical value of zero (`null != 0`) and other
-_falsy_ values (`false` or a zero-length string `""`).
-It is also known as _nil_ or _None_ in other languages.
+Значение `null` может использоваться для представления пустого или отсутствующего значения. Оно отличается от нулевого числового значения (`null != 0`) и других _ложных_ значений (`false` или строки нулевой длины `""`). Он также известен как `nil` или `None` на других языках.
 
-The system may return `null` in the absence of value, for example
-if you call a [function](functions.html) with unsupported values
-as arguments or if you try to [access an attribute](fundamentals-document-data.html)
-which does not exist.
+Система может вернуть `null` при отсутствии значения, например, если вы вызываете [функцию](../functions.md) с неподдерживаемыми значениями в качестве аргументов или пытаетесь получить доступ к несуществующему [атрибуту](document-data.md).
 
-### Boolean data type
+### Тип Boolean
 
-The Boolean data type has two possible values, `true` and `false`.
-They represent the two truth values in logic and mathematics.
+Тип данных _Boolean_ имеет два возможных значения: `true` и `false`. Они представляют два значения истинности в логике и математике.
 
-### Numeric literals
+### Числовые литералы
 
-Numeric literals can be integers or real values (floating-point numbers).
-They can optionally be signed with the `+` or `-` symbols.
-A decimal point `.` is used as separator for the optional fractional part.
-The scientific notation (_E-notation_) is also supported.
+Числовые литералы могут быть целыми числами или вещественными значениями (числа с плавающей запятой). При желании они могут быть подписаны символами `+` или `-`. Десятичная точка `.` используется в качестве разделителя для необязательной дробной части. Также поддерживается научная нотация (_E-нотация_).
 
 ```
   1
@@ -53,7 +41,7 @@ The scientific notation (_E-notation_) is also supported.
  -4.87E103
 ```
 
-The following notations are invalid and will throw a syntax error:
+Следующие обозначения недопустимы и вызовут синтаксическую ошибку:
 
 ```
  1.
@@ -62,35 +50,22 @@ The following notations are invalid and will throw a syntax error:
 00
 ```
 
-All numeric values are treated as 64-bit signed integer or 64-bit
-double-precision floating point values internally. The internal floating-point
-format used is IEEE 754.
+Все числовые значения обрабатываются как 64-битные целые числа со знаком или 64-битные значения с плавающей запятой двойной точности внутри. Используемый внутренний формат с плавающей запятой — IEEE 754.
 
-{% hint 'warning' %}
-When exposing any numeric integer values to JavaScript via
-[user-defined AQL functions](extending.html), numbers that exceed 32 bit
-precision are converted to floating-point values, so large integers can lose
-some bits of precision. The same is true when converting AQL numeric results to
-JavaScript (e.g. returning them to Foxx).
-{% endhint %}
+!!! warning ""
 
-Since ArangoDB v3.7.7, numeric integer literals can also be expressed as binary
-(base 2) or hexadecimal (base 16) number literals.
+    При представлении любых числовых целых значений в JavaScript с помощью [пользовательских функций AQL](extending.md) числа, точность которых превышает 32 бита, преобразуются в значения с плавающей запятой, поэтому большие целые числа могут потерять некоторые биты точности. То же самое верно и при преобразовании числовых результатов AQL в JavaScript (например, при возврате их в Foxx).
 
-- The prefix for binary integer literals is `0b`, e.g. `0b10101110`.
-- The prefix for hexadecimal integer literals is `0x`, e.g. `0xabcdef02`.
+Начиная с ArangoDB v3.7.7, числовые целые литералы также могут быть выражены как двоичные (по основанию 2) или шестнадцатеричные (по основанию 16) числовые литералы.
 
-Binary and hexadecimal integer literals can only be used for unsigned integers.
-The maximum supported value for binary and hexadecimal numeric literals is
-2<sup>32</sup> - 1, i.e. `0b11111111111111111111111111111111` (binary) or
-`0xffffffff` (hexadecimal).
+- рефикс для двоичных целочисленных литералов — `0b`, например. `0b10101110`.
+- Префикс для литералов шестнадцатеричных целых чисел равен `0x`, например. `0xabcdef02`.
 
-### String literals
+Двоичные и шестнадцатеричные целые литералы могут использоваться только для целых чисел без знака. Максимальное поддерживаемое значение для двоичных и шестнадцатеричных числовых литералов — 2<sup>32</sup> - 1, т. е. `0b11111111111111111111111111111111` (двоичное) или `0xffffffff` (шестнадцатеричное).
 
-String literals must be enclosed in single or double quotes. If the used quote
-character is to be used itself within the string literal, it must be escaped
-using the backslash symbol. A literal backslash also needs to be escaped with
-a backslash.
+### Строковые литералы
+
+Строковые литералы должны быть заключены в одинарные или двойные кавычки. Если используемый символ кавычки должен использоваться внутри строкового литерала, он должен быть экранирован с помощью символа обратной косой черты. Буквальный обратный слэш также должен быть экранирован с помощью обратной косой черты.
 
 ```aql
 "yikes!"
@@ -106,41 +81,28 @@ a backslash.
 'the path separator on Windows is \\'
 ```
 
-All string literals must be UTF-8 encoded. It is currently not possible to use
-arbitrary binary data if it is not UTF-8 encoded. A workaround to use binary
-data is to encode the data using [Base64](https://en.wikipedia.org/wiki/Base64){:target="\_blank"}
-or other algorithms on the application
-side before storing, and decoding it on application side after retrieval.
+Все строковые литералы должны иметь кодировку UTF-8. В настоящее время невозможно использовать произвольные двоичные данные, если они не закодированы в кодировке UTF-8. Обходной путь для использования двоичных данных — кодировать данные с помощью [Base64](https://ru.wikipedia.org/wiki/Base64) или других алгоритмов на стороне приложения перед сохранением и декодировать их на стороне приложения после извлечения.
 
-## Compound types
+## Составные типы
 
-AQL supports two compound types:
+AQL поддерживает два составных типа:
 
-- **array**: A composition of unnamed values, each accessible
-  by their positions. Sometimes called _list_.
-- **object**: A composition of named values, each accessible
-  by their names. A _document_ is an object at the top level.
+- **array**: Композиция безымянных значений, каждое из которых доступно по своей позиции. Иногда называется _списком_.
+- **object**: Композиция именованных значений, каждое из которых доступно по имени. _Документ_ — это объект верхнего уровня.
 
-### Arrays / Lists
+### Массивы / списки
 
-The first supported compound type is the array type. Arrays are effectively
-sequences of (unnamed / anonymous) values. Individual array elements can be
-accessed by their positions. The order of elements in an array is important.
+Первый поддерживаемый составной тип — это тип массива (array). Массивы фактически представляют собой последовательности (безымянных/анонимных) значений. Доступ к отдельным элементам массива можно получить по их позициям (индексам). Порядок элементов в массиве важен.
 
-An _array declaration_ starts with a left square bracket `[` and ends with
-a right square bracket `]`. The declaration contains zero, one or more
-*expression*s, separated from each other with the comma `,` symbol.
-Whitespace around elements is ignored in the declaration, thus line breaks,
-tab stops and blanks can be used for formatting.
+_Объявление массива_ начинается с левой квадратной скобки `[` и заканчивается правой квадратной скобкой `]`. Объявление содержит ноль, одно или несколько _выражений_, разделенных друг от друга запятой `,`. Пробелы вокруг элементов в объявлении игнорируются, поэтому для форматирования можно использовать разрывы строк, позиции табуляции и пробелы.
 
-In the easiest case, an array is empty and thus looks like:
+В самом простом случае массив пуст и выглядит так:
 
 ```json
 []
 ```
 
-Array elements can be any legal _expression_ values. Nesting of arrays is
-supported.
+Элементы массива могут быть любыми допустимыми значениями _выражений_. Поддерживается вложенность массивов.
 
 ```json
 [true][(1, 2, 3)][(-99, "yikes!", [false, ["no"], []], 1)][
@@ -148,104 +110,83 @@ supported.
 ]
 ```
 
-A trailing comma after the last element is allowed (introduced in v3.7.0):
+Запятая после последнего элемента разрешена (появилось в версии 3.7.0):
 
 ```aql
 [
   1,
   2,
-  3, // trailing comma
+  3, // завершающая запятая
 ]
 ```
 
-Individual array values can later be accessed by their positions using the `[]`
-accessor. The position of the accessed element must be a numeric
-value. Positions start at 0. It is also possible to use negative index values
-to access array values starting from the end of the array. This is convenient if
-the length of the array is unknown and access to elements at the end of the array
-is required.
+Позже к отдельным значениям массива можно получить доступ по их позициям с помощью аксессора `[]`. Положение элемента, к которому осуществляется доступ, должно быть числовым значением. Позиции начинаются с `0`. Также можно использовать отрицательные значения индекса для доступа к значениям массива, начиная с конца массива. Это удобно, если длина массива неизвестна и требуется доступ к элементам в конце массива.
 
 ```aql
-// access 1st array element (elements start at index 0)
+// доступ к 1-му элементу массива (элементы начинаются с индекса 0)
 u.friends[0]
 
-// access 3rd array element
+// получить доступ к третьему элементу массива
 u.friends[2]
 
-// access last array element
+// получить доступ к последнему элементу массива
 u.friends[-1]
 
-// access second to last array element
+// доступ к предпоследнему элементу массива
 u.friends[-2]
 ```
 
-### Objects / Documents
+### Объекты / Документы
 
-The other supported compound type is the object (or document) type. Objects are a
-composition of zero to many attributes. Each attribute is a name/value pair.
-Object attributes can be accessed individually by their names. This data type is
-also known as dictionary, map, associative array and other names.
+Другой поддерживаемый составной тип — это тип объекта (или документа). Объекты представляют собой композицию от нуля до многих атрибутов. Каждый атрибут представляет собой пару имя/значение. Доступ к атрибутам объекта можно получить индивидуально по их именам. Этот тип данных также известен как словарь, карта, ассоциативный массив и другие названия.
 
-Object declarations start with a left curly bracket `{` and end with a
-right curly bracket `}`. An object contains zero to many attribute declarations,
-separated from each other with the `,` symbol. Whitespace around elements is ignored
-in the declaration, thus line breaks, tab stops and blanks can be used for formatting.
+Объявления объектов начинаются с левой фигурной скобки `{` и заканчиваются правой фигурной скобкой `}`. Объект содержит от нуля до многих объявлений атрибутов, разделенных друг от друга символом `,`. Пробелы вокруг элементов в объявлении игнорируются, поэтому для форматирования можно использовать разрывы строк, позиции табуляции и пробелы.
 
-In the simplest case, an object is empty. Its declaration would then be:
+В простейшем случае объект пуст. Тогда его объявление будет таким:
 
 ```json
 {}
 ```
 
-Each attribute in an object is a name/value pair. Name and value of an
-attribute are separated using the colon `:` symbol. The name is always a string,
-whereas the value can be of any type including sub-objects.
+Каждый атрибут в объекте представляет собой пару имя/значение. Имя и значение атрибута разделяются двоеточием `:`. Имя всегда является строкой, тогда как значение может быть любого типа, включая подобъекты.
 
-The attribute name is mandatory - there can't be anonymous values in an object.
-It can be specified as a quoted or unquoted string:
+Имя атрибута обязательно — в объекте не может быть анонимных значений. Он может быть указан как строка в кавычках или без кавычек:
 
 ```aql
-{ name: … }    // unquoted
-{ 'name': … }  // quoted (apostrophe / "single quote mark")
-{ "name": … }  // quoted (quotation mark / "double quote mark")
+{ name: … }    // без кавычек
+{ 'name': … }  // в кавычках (апостроф / "одинарная кавычка")
+{ "name": … }  // в кавычках (кавычка / "двойная кавычка")
 ```
 
-It must be quoted if it contains whitespace, escape sequences or characters
-other than ASCII letters (`a`-`z`, `A`-`Z`), digits (`0`-`9`),
-underscores (`_`) and dollar signs (`$`). The first character has to be a
-letter, underscore or dollar sign.
+Он должен быть заключен в кавычки, если он содержит пробелы, escape-последовательности или символы, отличные от букв ASCII (`a-z`, `A-Z`), цифр (`0-9`), символов подчеркивания (`_`) и знаков доллара (`$`). Первым символом должна быть буква, знак подчеркивания или знак доллара.
 
-If a [keyword](fundamentals-syntax.html#keywords) is used as an attribute name
-then the attribute name must be quoted or escaped by ticks or backticks:
+Если в качестве имени атрибута используется [ключевое слово](syntax.md), то имя атрибута должно быть заключено в кавычки или экранировано галочками или обратными кавычками:
 
 ```aql
-{ return: … }    // error, return is a keyword!
-{ 'return': … }  // quoted
-{ "return": … }  // quoted
-{ `return`: … }  // escaped (backticks)
-{ ´return´: … }  // escaped (ticks)
+{ return: … }    // ошибка, return - это ключевое слово!
+{ 'return': … }  // в кавычках
+{ "return": … }  // в кавычках
+{ `return`: … }  // экранируется (backticks)
+{ ´return´: … }  // экранируется (ticks)
 ```
 
-A trailing comma after the last element is allowed (introduced in v3.7.0):
+Запятая после последнего элемента разрешена (появилось в версии 3.7.0):
 
 ```aql
 {
   "a": 1,
   "b": 2,
-  "c": 3, // trailing comma
+  "c": 3, // завершающая запятая
 }
 ```
 
-Attribute names can be computed using dynamic expressions, too.
-To disambiguate regular attribute names from attribute name expressions,
-computed attribute names must be enclosed in square brackets `[ … ]`:
+Имена атрибутов также могут быть вычислены с использованием динамических выражений. Чтобы отличить обычные имена атрибутов от выражений имен атрибутов, вычисляемые имена атрибутов должны быть заключены в квадратные скобки `[ … ]`:
 
 ```aql
 { [ CONCAT("test/", "bar") ] : "someValue" }
 ```
 
-There is also shorthand notation for attributes which is handy for
-returning existing variables easily:
+Существует также сокращенная запись для атрибутов, которая удобна для простого возврата существующих переменных:
 
 ```aql
 LET name = "Peter"
@@ -253,7 +194,7 @@ LET age = 42
 RETURN { name, age }
 ```
 
-The above is the shorthand equivalent for the generic form:
+Приведенное выше является сокращенным эквивалентом общей формы:
 
 ```aql
 LET name = "Peter"
@@ -261,8 +202,7 @@ LET age = 42
 RETURN { name: name, age: age }
 ```
 
-Any valid expression can be used as an attribute value. That also means nested
-objects can be used as attribute values:
+В качестве значения атрибута можно использовать любое допустимое выражение. Это также означает, что вложенные объекты могут использоваться в качестве значений атрибутов:
 
 ```aql
 { name : "Peter" }
@@ -270,22 +210,21 @@ objects can be used as attribute values:
 { "name" : "John", likes : [ "Swimming", "Skiing" ], "address" : { "street" : "Cucumber lane", "zip" : "94242" } }
 ```
 
-Individual object attributes can later be accessed by their names using the
-dot `.` accessor:
+Позже к отдельным атрибутам объекта можно получить доступ по их именам с помощью точки `.`:
 
 ```aql
 u.address.city.name
 u.friends[0].name.first
 ```
 
-Attributes can also be accessed using the square bracket `[]` accessor:
+Доступ к атрибутам также можно получить, используя квадратную скобку `[]`:
 
 ```aql
 u["address"]["city"]["name"]
 u["friends"][0]["name"]["first"]
 ```
 
-In contrast to the dot accessor, the square brackets allow for expressions:
+В отличие от метода доступа точка, квадратные скобки позволяют использовать выражения:
 
 ```aql
 LET attr1 = "friends"
@@ -293,7 +232,6 @@ LET attr2 = "name"
 u[attr1][0][attr2][ CONCAT("fir", "st") ]
 ```
 
-{% hint 'info' %}
-If a non-existing attribute is accessed in one or the other way,
-the result will be `null`, without error or warning.
-{% endhint %}
+!!! info ""
+
+    Если доступ к несуществующему атрибуту осуществляется тем или иным способом, результат будет `null` без ошибки или предупреждения.

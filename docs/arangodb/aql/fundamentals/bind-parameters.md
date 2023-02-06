@@ -1,42 +1,29 @@
-# Bind parameters
+# Связывание параметров
 
-AQL supports the usage of bind parameters, thus allowing to separate the query
-text from literal values used in the query. It is good practice to separate the
-query text from the literal values because this will prevent (malicious)
-injection of keywords and other collection names into an existing query. This
-injection would be dangerous because it may change the meaning of an existing
-query.
+AQL поддерживает использование параметров привязки, что позволяет отделить текст запроса от литеральных значений, используемых в запросе. Рекомендуется отделять текст запроса от литеральных значений, поскольку это предотвратит (злонамеренное) внедрение ключевых слов и других имен коллекций в существующий запрос. Эта инъекция была бы опасной, потому что она может изменить смысл существующего запроса.
 
-Using bind parameters, the meaning of an existing query cannot be changed. Bind
-parameters can be used everywhere in a query where literals can be used.
+Используя параметры связывания, нельзя изменить значение существующего запроса. Параметры привязки можно использовать везде в запросе, где можно использовать литералы.
 
-## Syntax
+## Синтаксис
 
-The general syntax for bind parameters is `@name` where `@` signifies that this
-is a value bind parameter and _name_ is the actual parameter name. It can be
-used to substitute values in a query.
+Общий синтаксис для параметров привязки: `@name`, где `@` означает, что это параметр привязки значения, а `name` — фактическое имя параметра. Его можно использовать для замены значений в запросе.
 
 ```aql
 RETURN @value
 ```
 
-For collections, there is a slightly different syntax `@@coll` where `@@`
-signifies that it is a collection bind parameter and _coll_ is the parameter
-name.
+Для коллекций используется несколько иной синтаксис `@@coll`, где `@@` означает, что это параметр привязки коллекции, а `coll` — это имя параметра.
 
 ```aql
 FOR doc IN @@coll
   RETURN doc
 ```
 
-Keywords and other language constructs cannot be replaced by bind values, such
-as `FOR`, `FILTER`, `IN`, `INBOUND` or function calls.
+Ключевые слова и другие языковые конструкции не могут быть заменены значениями привязки, например `FOR`, `FILTER`, `IN`, `INBOUND` или вызовами функций.
 
-Bind parameter names must start with any of the letters _a_ to _z_ (upper or
-lower case) or a digit (_0_ to _9_), and can be followed by any letter, digit
-or the underscore symbol.
+Имена параметров привязки должны начинаться с любой из букв от `a` до `z` (верхний или нижний регистр) или цифры (от `0` до `9`), за ними может следовать любая буква, цифра или символ подчеркивания.
 
-They must not be quoted in the query code:
+Их нельзя заключать в кавычки в коде запроса:
 
 ```aql
 FILTER u.name == "@name" // wrong
@@ -48,8 +35,7 @@ FOR doc IN "@@collection" // wrong
 FOR doc IN @@collection   // correct
 ```
 
-If you need to do string processing (concatenation, etc.) in the query, you
-need to use [string functions](functions-string.html) to do so:
+Если вам нужно выполнить обработку строк (конкатенацию и т. д.) в запросе, вам нужно использовать [строковые функции](string.md) для этого:
 
 ```aql
 FOR u IN users
@@ -57,15 +43,11 @@ FOR u IN users
   RETURN u
 ```
 
-## Usage
+## Использование
 
-### General
+### Простое использование
 
-The bind parameter values need to be passed along with the query when it is
-executed, but not as part of the query text itself. In the web interface,
-there is a pane next to the query editor where the bind parameters can be
-entered. For below query, two input fields will show up to enter values for
-the parameters `id` and `name`.
+Значения параметра связывания необходимо передавать вместе с запросом при его выполнении, но не как часть самого текста запроса. В веб-интерфейсе рядом с редактором запросов есть панель, где можно ввести параметры привязки. Для приведенного ниже запроса появятся два поля ввода для ввода значений параметров `id` и `name`.
 
 ```aql
 FOR u IN users
@@ -73,10 +55,7 @@ FOR u IN users
   RETURN u
 ```
 
-When using `db._query()` (in arangosh for instance), then an
-object of key-value pairs can be passed for the parameters. Such an object
-can also be passed to the HTTP API endpoint `_api/cursor`, as attribute
-value for the key `bindVars`:
+При использовании `db._query()` (например, в arangosh) в качестве параметров можно передать объект пар ключ-значение. Такой объект также можно передать в конечную точку HTTP API `_api/cursor` в качестве значения атрибута для ключа `bindVars`:
 
 ```json
 {
@@ -88,20 +67,11 @@ value for the key `bindVars`:
 }
 ```
 
-Bind parameters that are declared in the query must also be passed a parameter
-value, or the query will fail. Specifying parameters that are not declared in
-the query will result in an error too.
+Параметры привязки, объявленные в запросе, также должны иметь значение параметра, иначе запрос завершится ошибкой. Указание параметров, не объявленных в запросе, также приведет к ошибке.
 
-Specific information about parameters binding can also be found in:
+### Вложенные атрибуты
 
-- [AQL with Web Interface](invocation-with-web-interface.html)
-- [AQL with _arangosh_](invocation-with-arangosh.html)
-- [HTTP Interface for AQL Queries](../http/aql-query-cursor.html)
-
-### Nested attributes
-
-Bind parameters can be used for both, the dot notation as well as the square
-bracket notation for sub-attribute access. They can also be chained:
+Параметры привязки можно использовать как для записи через точку, так и для записи в квадратных скобках для доступа к податрибутам. Они также могут быть связаны:
 
 ```aql
 LET doc = { foo: { bar: "baz" } }
@@ -118,12 +88,9 @@ RETURN doc[@attr][@subattr]
 }
 ```
 
-Both variants in above example return `[ "baz" ]` as query result.
+Оба варианта в приведенном выше примере возвращают `[ "baz" ]` в качестве результата запроса.
 
-The whole attribute path, for highly nested data in particular, can also be
-specified using the dot notation and a single bind parameter, by passing an
-array of strings as parameter value. The elements of the array represent the
-attribute keys of the path:
+Полный путь к атрибуту, в частности, для сильно вложенных данных, также можно указать с помощью записи через точку и одного параметра привязки, передав массив строк в качестве значения параметра. Элементы массива представляют ключи атрибутов пути:
 
 ```aql
 LET doc = { a: { b: { c: 1 } } }
@@ -134,15 +101,11 @@ RETURN doc.@attr
 { "attr": ["a", "b", "c"] }
 ```
 
-The example query returns `[ 1 ]` as result. Note that `{ "attr": "a.b.c" }`
-would return the value of an attribute called `a.b.c`, not the value of
-attribute `c` with the parents `a` and `b` as `[ "a", "b", "c" ]` would.
+Пример запроса возвращает `[ 1 ]` в качестве результата. Обратите внимание, что `{ "attr": "a.b.c" }` вернет значение атрибута с именем `a.b.c`, а не значение атрибута `c` с родительскими элементами `a` и `b`, как `[ "a", "b", "c" ]`.
 
-### Collection bind parameters
+### Параметры привязки коллекции
 
-A special type of bind parameter exists for injecting collection names. This
-type of bind parameter has a name prefixed with an additional `@` symbol, so
-`@@name` in the query.
+Для внедрения имен коллекций существует специальный тип параметра привязки. Этот тип параметра связывания имеет имя с префиксом дополнительного символа `@`, поэтому `@@name` в запросе.
 
 ```aql
 FOR u IN @@collection
@@ -150,8 +113,7 @@ FOR u IN @@collection
   RETURN u
 ```
 
-The second `@` will be part of the bind parameter name, which is important to
-remember when specifying the `bindVars` (note the leading `@`):
+Второй `@` будет частью имени параметра привязки, что важно помнить при указании `bindVars` (обратите внимание на начальный `@`):
 
 ```json
 {
