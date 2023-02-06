@@ -1,5 +1,5 @@
 nav:
     - index.md
-    - mongodb
+#    - mongodb
     - arangodb
     - Boosty: https://boosty.to/bndby

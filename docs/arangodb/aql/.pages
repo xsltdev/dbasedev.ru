@@ -3,3 +3,9 @@ nav:
     - index.md
     - invocation.md
     - fundamentals
+    - operators.md
+    - data-queries.md
+    - operations
+    - functions
+    - graphs
+    - advanced

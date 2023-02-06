@@ -4,3 +4,9 @@ nav:
     - syntax.md
     - data-types.md
     - bind-parameters.md
+    - type-value-order.md
+    - document-data.md
+    - subqueries.md
+    - query-results.md
+    - query-errors.md
+    - limitations.md

@@ -1,0 +1,9 @@
+title: Graphs
+nav:
+    - index.md
+    - traversals-explained.md
+    - traversals.md
+    - shortest-path.md
+    - all-shortest-paths.md
+    - kshortest-paths.md
+    - k-paths.md

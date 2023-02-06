@@ -1,0 +1,18 @@
+title: High-level operations
+nav:
+    - index.md
+    - for.md
+    - return.md
+    - filter.md
+    - search.md
+    - sort.md
+    - limit.md
+    - let.md
+    - collect.md
+    - window.md
+    - remove.md
+    - update.md
+    - replace.md
+    - insert.md
+    - upsert.md
+    - with.md

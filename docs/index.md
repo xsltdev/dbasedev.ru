@@ -7,9 +7,11 @@ hide:
 
 # Базы данных
 
+<!--
 ![MongoDB](mongodb.svg){: style="height:48px;width:48px;vertical-align:middle;"}
 [MongoDB](/mongodb/)
 : Это мощная, гибкая и масштабируемая система управления базами данных (СУБД) общего назначения.
+-->
 
 ![ArangoDB](arangodb.svg){: style="height:48px;width:48px;vertical-align:middle;"}
 [ArangoDB](/arangodb/)

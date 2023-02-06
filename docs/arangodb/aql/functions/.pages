@@ -1,0 +1,14 @@
+title: Функции
+nav:
+    - index.md
+    - arangosearch.md
+    - array.md
+    - bit.md
+    - date.md
+    - document.md
+    - fulltext.md
+    - geo.md
+    - miscellaneous.md
+    - numeric.md
+    - string.md
+    - type-cast.md
