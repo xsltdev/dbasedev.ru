@@ -1,0 +1,6 @@
+title: Управление документами
+nav:
+    - index.md
+    - insert.md
+    - delete.md
+    - update.md
