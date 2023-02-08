@@ -2,48 +2,48 @@
 
 The following high-level operations are described here after:
 
-- [**FOR**](operations-for.html):
+- [**FOR**](for.md):
   Iterate over a collection or View, all elements of an array or traverse a graph
 
-- [**RETURN**](operations-return.html):
+- [**RETURN**](return.md):
   Produce the result of a query.
 
-- [**FILTER**](operations-filter.html):
+- [**FILTER**](filter.md):
   Restrict the results to elements that match arbitrary logical conditions.
 
-- [**SEARCH**](operations-search.html):
+- [**SEARCH**](search.md):
   Query an `arangosearch` or `search-alias` View.
 
-- [**SORT**](operations-sort.html):
+- [**SORT**](sort.md):
   Force a sort of the array of already produced intermediate results.
 
-- [**LIMIT**](operations-limit.html):
+- [**LIMIT**](limit.md):
   Reduce the number of elements in the result to at most the specified number,
   optionally skip elements (pagination).
 
-- [**LET**](operations-let.html):
+- [**LET**](let.md):
   Assign an arbitrary value to a variable.
 
-- [**COLLECT**](operations-collect.html):
+- [**COLLECT**](collect.md):
   Group an array by one or multiple group criteria. Can also count and aggregate.
 
-- [**WINDOW**](operations-window.html):
+- [**WINDOW**](window.md):
   Perform aggregations over related rows.
 
-- [**REMOVE**](operations-remove.html):
+- [**REMOVE**](remove.md):
   Remove documents from a collection.
 
-- [**UPDATE**](operations-update.html):
+- [**UPDATE**](update.md):
   Partially update documents in a collection.
 
-- [**REPLACE**](operations-replace.html):
+- [**REPLACE**](replace.md):
   Completely replace documents in a collection.
 
-- [**INSERT**](operations-insert.html):
+- [**INSERT**](insert.md):
   Insert new documents into a collection.
 
-- [**UPSERT**](operations-upsert.html):
+- [**UPSERT**](upsert.md):
   Update/replace an existing document, or create it in the case it does not exist.
 
-- [**WITH**](operations-with.html):
+- [**WITH**](with.md):
   Specify collections used in a query (at query begin only).

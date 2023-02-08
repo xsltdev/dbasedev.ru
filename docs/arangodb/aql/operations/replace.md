@@ -1,8 +1,5 @@
 # REPLACE
 
-{{ page.description }}
-{:class="lead"}
-
 Each `REPLACE` operation is restricted to a single collection, and the
 [collection name](../appendix-glossary.html#collection-name) must not be dynamic.
 Only a single `REPLACE` statement per collection is allowed per AQL query, and

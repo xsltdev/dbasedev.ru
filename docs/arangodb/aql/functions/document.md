@@ -1,16 +1,10 @@
----
-layout: default
-description: AQL provides below listed functions to operate on objects / document values
----
-Document functions
-==================
+# Функции документа
 
 AQL provides below listed functions to operate on objects / document values.
 Also see [object access](fundamentals-data-types.html#objects--documents) for
 additional language constructs.
 
-ATTRIBUTES()
-------------
+## ATTRIBUTES()
 
 `ATTRIBUTES(document, removeSystemAttrs, sort) → strArray`
 
@@ -18,10 +12,10 @@ Return the top-level attribute keys of the `document` as an array.
 Optionally omit system attributes and sort the array.
 
 - **document** (object): an arbitrary document / object
-- **removeSystemAttrs** (bool, *optional*): whether all system attributes
+- **removeSystemAttrs** (bool, _optional_): whether all system attributes
   (starting with an underscore, such as `_key` and `_id`) shall be omitted in
   the result. The default is `false`.
-- **sort** (bool, *optional*): optionally sort the resulting array alphabetically.
+- **sort** (bool, _optional_): optionally sort the resulting array alphabetically.
   The default is `false` and will return the attribute names in any order.
 - returns **strArray** (array): the attribute keys of the input `document` as an
   array of strings
@@ -75,13 +69,11 @@ FOR attributeArray IN attributesPerDocument
         RETURN {attr, count}
 ```
 
-COUNT()
--------
+## COUNT()
 
 This is an alias for [LENGTH()](#length).
 
-HAS()
------
+## HAS()
 
 `HAS(document, attributeName) → isPresent`
 
@@ -109,8 +101,8 @@ HAS( { }, "name" )            // false
 ```
 
 Note that `HAS()` can not utilize indexes. If it is not necessary to distinguish
-between explicit and implicit *null* values in your query, you may use an equality
-comparison to test for *null* and create a non-sparse index on the attribute you
+between explicit and implicit _null_ values in your query, you may use an equality
+comparison to test for _null_ and create a non-sparse index on the attribute you
 want to test against:
 
 ```aql
@@ -154,8 +146,7 @@ Falsy attribute values like `null` still count as the attribute being present:
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-IS_SAME_COLLECTION()
---------------------
+## IS_SAME_COLLECTION()
 
 `IS_SAME_COLLECTION(collectionName, documentHandle) → isSame`
 
@@ -190,8 +181,7 @@ with the collection name part of the specified document.
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-KEEP()
-------
+## KEEP()
 
 `KEEP(document, attributeName1, attributeName2, ... attributeNameN) → doc`
 
@@ -201,7 +191,7 @@ All other attributes will be removed from the result.
 To do the opposite, see [UNSET()](#unset).
 
 - **document** (object): a document / object
-- **attributeNames** (string, *repeatable*): an arbitrary number of attribute
+- **attributeNames** (string, _repeatable_): an arbitrary number of attribute
   names as multiple arguments
 - returns **doc** (object): a document with only the specified attributes at
   the top-level
@@ -281,8 +271,7 @@ attribute keys instead of individual arguments:
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-KEEP_RECURSIVE()
-----------------
+## KEEP_RECURSIVE()
 
 `KEEP_RECURSIVE(document, attributeName1, attributeName2, ... attributeNameN) → doc`
 
@@ -292,7 +281,7 @@ Recursively preserve the attributes `attributeName1` to `attributeNameN` from
 To do the opposite, use [UNSET_RECURSIVE()](#unset_recursive).
 
 - **document** (object): a document / object
-- **attributeNames** (string, *repeatable*): an arbitrary number of attribute
+- **attributeNames** (string, _repeatable_): an arbitrary number of attribute
   names as multiple arguments (at least 1)
 - returns **doc** (object): `document` with only the specified attributes at
   all levels (top-level as well as nested objects)
@@ -382,7 +371,7 @@ attributes of the example object:
 
 - **document** (object): a document / object
 - **attributeNameArray** (array): an array of attribute names as strings
-- returns **doc** (object): *document* with only the specified attributes at
+- returns **doc** (object): _document_ with only the specified attributes at
   all levels (top-level as well as nested objects)
 
 **Examples**
@@ -400,8 +389,7 @@ attribute keys instead of individual arguments:
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-LENGTH()
---------
+## LENGTH()
 
 `LENGTH(doc) → attrCount`
 
@@ -426,8 +414,7 @@ the [character length](functions-string.html#length) of a string.
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-MATCHES()
----------
+## MATCHES()
 
 `MATCHES(document, examples, returnIndex) → match`
 
@@ -457,6 +444,7 @@ to potentially benefit from existing indexes:
 FOR doc IN coll
   FILTER (cond1 AND cond2 AND cond3) OR (cond4 AND cond5) ...
 ```
+
 {% endhint %}
 
 - **document** (object): document to determine whether it matches any example
@@ -505,8 +493,7 @@ the matching example:
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-MERGE()
--------
+## MERGE()
 
 `MERGE(document1, document2, ... documentN) → mergedDocument`
 
@@ -517,7 +504,7 @@ of the documents contained later in the argument list.
 Note that merging will only be done for top-level attributes. If you wish to
 merge sub-attributes, use [MERGE_RECURSIVE()](#merge_recursive) instead.
 
-- **documents** (object, *repeatable*): an arbitrary number of documents as
+- **documents** (object, _repeatable_): an arbitrary number of documents as
   multiple arguments (at least 2)
 - returns **mergedDocument** (object): a combined document
 
@@ -579,8 +566,7 @@ attributes of multiple objects in an array into a single object.
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-MERGE_RECURSIVE()
------------------
+## MERGE_RECURSIVE()
 
 `MERGE_RECURSIVE(document1, document2, ... documentN) → mergedDocument`
 
@@ -588,7 +574,7 @@ Recursively merge the documents `document1` to `documentN` into a single documen
 If document attribute keys overlap, the merged result contains the values
 of the documents contained later in the argument list.
 
-- **documents** (object, *repeatable*): an arbitrary number of documents as
+- **documents** (object, _repeatable_): an arbitrary number of documents as
   multiple arguments (at least 1)
 - returns **mergedDocument** (object): a combined document
 
@@ -638,8 +624,7 @@ Merge a list of two documents with the same top-level attribute, combining the
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-PARSE_IDENTIFIER()
-------------------
+## PARSE_IDENTIFIER()
 
 `PARSE_IDENTIFIER(documentHandle) → parts`
 
@@ -652,7 +637,7 @@ This function can be used to easily determine the
 - **documentHandle** (string\|object): a document identifier string (e.g. `_users/1234`)
   or a regular document from a collection. Passing either a non-string or a non-document
   or a document without an `_id` attribute will result in an error.
-- returns **parts** (object): an object with the attributes *collection* and *key*
+- returns **parts** (object): an object with the attributes _collection_ and _key_
 
 **Examples**
 
@@ -678,8 +663,7 @@ Parse the document identifier string of a document (`_id` attribute):
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-TRANSLATE()
------------
+## TRANSLATE()
 
 `TRANSLATE(value, lookupDocument, defaultValue) → mappedValue`
 
@@ -690,7 +674,7 @@ if specified. If no `defaultValue` is specified, `value` will be returned unchan
 
 - **value** (string): the value to encode according to the mapping
 - **lookupDocument** (object): a key/value mapping as document
-- **defaultValue** (any, *optional*): a fallback value in case `value` is not found
+- **defaultValue** (any, _optional_): a fallback value in case `value` is not found
 - returns **mappedValue** (any): the encoded value, or the unaltered `value` or `defaultValue`
   (if supplied) in case it could not be mapped
 
@@ -742,8 +726,7 @@ lookup:
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-UNSET()
--------
+## UNSET()
 
 `UNSET(document, attributeName1, attributeName2, ... attributeNameN) → doc`
 
@@ -753,7 +736,7 @@ All other attributes will be preserved.
 To do the opposite, see [KEEP()](#keep).
 
 - **document** (object): a document / object
-- **attributeNames** (string, *repeatable*): an arbitrary number of attribute
+- **attributeNames** (string, _repeatable_): an arbitrary number of attribute
   names as multiple arguments (at least 1)
 - returns **doc** (object): `document` without the specified attributes at the
   top-level
@@ -816,7 +799,7 @@ object in this example:
 
 - **document** (object): a document / object
 - **attributeNameArray** (array): an array of attribute names as strings
-- returns **doc** (object): *document* without the specified attributes at the
+- returns **doc** (object): _document_ without the specified attributes at the
   top-level
 
 **Examples**
@@ -834,9 +817,7 @@ attribute keys instead of individual arguments:
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-
-UNSET_RECURSIVE()
------------------
+## UNSET_RECURSIVE()
 
 `UNSET_RECURSIVE(document, attributeName1, attributeName2, ... attributeNameN) → doc`
 
@@ -846,7 +827,7 @@ Recursively remove the attributes `attributeName1` to `attributeNameN` from
 To do the opposite, use [KEEP_RECURSIVE()](#keep_recursive).
 
 - **document** (object): a document / object
-- **attributeNames** (string, *repeatable*): an arbitrary number of attribute
+- **attributeNames** (string, _repeatable_): an arbitrary number of attribute
   names as multiple arguments (at least 1)
 - returns **doc** (object): `document` without the specified attributes at
   all levels (top-level as well as nested objects)
@@ -933,7 +914,7 @@ attributes of the example object:
 
 - **document** (object): a document / object
 - **attributeNameArray** (array): an array of attribute names as strings
-- returns **doc** (object): *document* without the specified attributes at
+- returns **doc** (object): _document_ without the specified attributes at
   all levels (top-level as well as nested objects)
 
 **Examples**
@@ -950,8 +931,7 @@ Recursively remove `baz` attributes, by passing an array with the attribute key:
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-VALUE()
--------
+## VALUE()
 
 `VALUE(document, path) → value`
 
@@ -990,8 +970,7 @@ attribute, like `obj.foo[1].bar` would:
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-VALUES()
---------
+## VALUES()
 
 `VALUES(document, removeSystemAttrs) → anyArray`
 
@@ -999,7 +978,7 @@ Return the attribute values of the `document` as an array. Optionally omit
 system attributes.
 
 - **document** (object): a document / object
-- **removeSystemAttrs** (bool, *optional*): if set to `true`, then all
+- **removeSystemAttrs** (bool, _optional_): if set to `true`, then all
   system attributes (starting with an underscore, such as `_id`, `_key` etc.)
   are removed from the result
 - returns **anyArray** (array): the values of `document` returned in any order
@@ -1028,8 +1007,7 @@ Get the attribute values of an object, omitting system attributes:
     {% endaqlexample %}
     {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-ZIP()
------
+## ZIP()
 
 `ZIP(keys, values) → doc`
 

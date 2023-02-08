@@ -1,15 +1,4 @@
----
-layout: default
-description: ArangoSearch offers various AQL functions for search queries to control the search context, for filtering and scoring
-title: ArangoSearch related AQL Functions
-page-toc:
-  max-headline-level: 3
----
-ArangoSearch Functions
-======================
-
-{{ page.description }}
-{:class="lead"}
+# Функции ArangoSearch
 
 You can form search expressions by composing ArangoSearch function calls,
 logical operators and comparison operators. This allows you to filter Views
@@ -34,8 +23,7 @@ You can use most functions also without an inverted index or a View and the
 See [Information Retrieval with ArangoSearch](../arangosearch.html) for an
 introduction.
 
-Context Functions
------------------
+## Context Functions
 
 ### ANALYZER()
 
@@ -131,7 +119,7 @@ FOR doc IN viewName
 In the following example `ANALYZER()` is used to set the Analyzer `text_en`,
 but in the second call to `PHRASE()` a different Analyzer is set (`identity`)
 which overrules `ANALYZER()`. Therefore, the `text_en` Analyzer is used to find
-the phrase *foo* and the `identity` Analyzer to find *bar*:
+the phrase _foo_ and the `identity` Analyzer to find _bar_:
 
 ```aql
 FOR doc IN viewName
@@ -208,8 +196,7 @@ Assuming a View with the following documents indexed and processed by the
 ]
 ```
 
-Filter Functions
-----------------
+## Filter Functions
 
 ### EXISTS()
 
@@ -486,7 +473,7 @@ FOR doc IN viewName
 `NGRAM_MATCH(path, target, threshold, analyzer) → fulfilled`
 
 Match documents whose attribute value has an
-[_n_-gram similarity](https://webdocs.cs.ualberta.ca/~kondrak/papers/spire05.pdf){:target="_blank"}
+[_n_-gram similarity](https://webdocs.cs.ualberta.ca/~kondrak/papers/spire05.pdf){:target="\_blank"}
 higher than the specified threshold compared to the target value.
 
 The similarity is calculated by counting how long the longest sequence of
@@ -577,7 +564,7 @@ which the tokens appear in the specified order. To search for tokens in any
 order use [`TOKENS()`](functions-string.html#tokens) instead.
 
 The phrase can be expressed as an arbitrary number of `phraseParts` separated by
-*skipTokens* number of tokens (wildcards), either as separate arguments or as
+_skipTokens_ number of tokens (wildcards), either as separate arguments or as
 array as second argument.
 
 - **path** (attribute path expression): the attribute to test in the document
@@ -606,7 +593,7 @@ enabled. The `PHRASE()` function will otherwise not find anything.
 <small>Introduced in v3.7.0</small>
 
 - `{IN_RANGE: [low, high, includeLow, includeHigh]}`:
-  see [IN_RANGE()](#in_range). *low* and *high* can only be strings.
+  see [IN_RANGE()](#in_range). _low_ and _high_ can only be strings.
 - `{LEVENSHTEIN_MATCH: [token, maxDistance, transpositions, maxTerms, prefix]}`:
   - `token` (string): a string to search
   - `maxDistance` (number): maximum Levenshtein / Damerau-Levenshtein distance
@@ -664,7 +651,7 @@ PHRASE(doc.text, "ipsum", 2, "amet", "text_en")
 ```
 
 The `skipTokens` value of `2` defines how many wildcard tokens have to appear
-between *ipsum* and *amet*. A `skipTokens` value of `0` means that the tokens
+between _ipsum_ and _amet_. A `skipTokens` value of `0` means that the tokens
 must be adjacent. Negative values are allowed, but not very useful. These three
 search expressions are equivalent:
 
@@ -844,18 +831,11 @@ RETURN TOKENS("IPS (in-plane switching)", "text_en")
 ```
 
 ```json
-[
-  [
-    "ip",
-    "in",
-    "plane",
-    "switch"
-  ]
-]
+[["ip", "in", "plane", "switch"]]
 ```
 
-The *s* is removed from *ips*, which leads to the prefix *ips* not matching
-the indexed token *ip*. You may either create a custom text Analyzer with
+The _s_ is removed from _ips_, which leads to the prefix _ips_ not matching
+the indexed token _ip_. You may either create a custom text Analyzer with
 stemming disabled to avoid this issue, or apply stemming to the prefixes:
 
 ```aql
@@ -906,7 +886,7 @@ contains one of the prefixes (`something`).
 
 `LEVENSHTEIN_MATCH(path, target, distance, transpositions, maxTerms, prefix) → fulfilled`
 
-Match documents with a [Damerau-Levenshtein distance](https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance){:target=_"blank"}
+Match documents with a [Damerau-Levenshtein distance](https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance){:target=\_"blank"}
 lower than or equal to `distance` between the stored attribute value and
 `target`. It can optionally match documents using a pure Levenshtein distance.
 
@@ -925,7 +905,7 @@ if you want to calculate the edit distance of two strings.
   most relevant terms. One can pass `0` to consider all matched terms, but it may
   impact performance negatively. The default value is `64`.
 - returns **fulfilled** (bool): `true` if the calculated distance is less than
-  or equal to *distance*, `false` otherwise
+  or equal to _distance_, `false` otherwise
 - **prefix** (string, _optional_): if defined, then a search for the exact
   prefix is carried out, using the matches as candidates. The Levenshtein /
   Damerau-Levenshtein distance is then computed for each candidate using
@@ -1014,6 +994,7 @@ using wildcard matching.
 {% hint 'info' %}
 Literal backlashes require different amounts of escaping depending on the
 context:
+
 - `\` in bind variables (_Table_ view mode) in the web interface (automatically
   escaped to `\\` unless the value is wrapped in double quotes and already
   escaped properly)
@@ -1021,8 +1002,8 @@ context:
 - `\\` in bind variables in arangosh
 - `\\\\` in queries in arangosh
 - Double the amount compared to arangosh in shells that use backslashes for
-escaping (`\\\\` in bind variables and `\\\\\\\\` in queries)
-{% endhint %}
+  escaping (`\\\\` in bind variables and `\\\\\\\\` in queries)
+  {% endhint %}
 
 Searching with the `LIKE()` function in the context of a `SEARCH` operation
 is backed by View indexes. The [String `LIKE()` function](functions-string.html#like)
@@ -1055,8 +1036,7 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-Geo functions
--------------
+## Geo functions
 
 The following functions can be accelerated by View indexes. There are
 corresponding [Geo Functions](functions-geo.html) for the regular geo index
@@ -1134,8 +1114,7 @@ intersects with `geoJsonB` (i.e. at least one point of B is in A or vice versa).
   (in longitude, latitude order)
 - returns **bool** (bool): `true` if A and B intersect, `false` otherwise
 
-Scoring Functions
------------------
+## Scoring Functions
 
 Scoring functions return a ranking value for the documents found by a
 [SEARCH operation](operations-search.html). The better the documents match
@@ -1173,7 +1152,7 @@ FOR a IN viewA
 `BM25(doc, k, b) → score`
 
 Sorts documents using the
-[**Best Matching 25** algorithm](https://en.wikipedia.org/wiki/Okapi_BM25){:target="_blank"}
+[**Best Matching 25** algorithm](https://en.wikipedia.org/wiki/Okapi_BM25){:target="\_blank"}
 (Okapi BM25).
 
 - **doc** (document): must be emitted by `FOR ... IN viewName`
@@ -1224,7 +1203,7 @@ FOR doc IN viewName
 `TFIDF(doc, normalize) → score`
 
 Sorts documents using the
-[**term frequency–inverse document frequency** algorithm](https://en.wikipedia.org/wiki/TF-IDF){:target="_blank"}
+[**term frequency–inverse document frequency** algorithm](https://en.wikipedia.org/wiki/TF-IDF){:target="\_blank"}
 (TF-IDF).
 
 - **doc** (document): must be emitted by `FOR ... IN viewName`
@@ -1273,8 +1252,7 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-Search Highlighting Functions
------------------------------
+## Search Highlighting Functions
 
 {% include hint-ee-arangograph.md feature="Search highlighting" %}
 
@@ -1293,6 +1271,7 @@ _n_-grams for search highlighting purposes.
   feature enabled.
 - returns **offsetInfo** (array): an array of objects, limited to a default of
   10 offsets per path. Each object has the following attributes:
+
   - **name** (array): the attribute and array element path as an array of
     strings and numbers. You can pass this name to the
     [`VALUE()` function](functions-document.html) to dynamically look up the value.
@@ -1325,7 +1304,8 @@ _n_-grams for search highlighting purposes.
       - **ngram** (number, _optional_): the total number of _n_-gram offsets to
         collect per path. Default: 2<sup>32</sup>.
 - returns **offsetInfo** (array): an array of objects, each with the following
-  attributes: 
+  attributes:
+
   - **name** (array): the attribute and array element path as an array of
     strings and numbers. You can pass this name to the
     [VALUE()](functions-document.html) to dynamically look up the value.

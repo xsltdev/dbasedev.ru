@@ -1,4 +1,4 @@
-# Errors
+# Ошибки
 
 Issuing an invalid query to the server will result in a parse error if the query
 is syntactically invalid. ArangoDB will detect such errors during query

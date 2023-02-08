@@ -1,16 +1,10 @@
----
-layout: default
-description: AQL offers functionality to work with dates as numeric timestamps and as ISO 8601 date time strings
-title: AQL Date Functions
----
-Date functions
-==============
+# Функции даты
 
 AQL offers functionality to work with dates, but it does not have a special data type
 for dates (neither does JSON, which is usually used as format to ship data into and
 out of ArangoDB). Instead, dates in AQL are represented by either numbers or strings.
 
-All date function operations are done in the *Unix time* system. Unix time counts
+All date function operations are done in the _Unix time_ system. Unix time counts
 all non leap seconds beginning with January 1st 1970 00:00:00.000 UTC, also know as
 the Unix epoch. A point in time is called timestamp. A timestamp has the same value
 at every point on earth. The date functions use millisecond precision for timestamps.
@@ -18,7 +12,7 @@ at every point on earth. The date functions use millisecond precision for timest
 Time unit definitions:
 
 - **millisecond**: 1/1000 of a second
-- **second**: one [SI second](https://www.bipm.org/en/publications/si-brochure/second.html){:target="_blank"}
+- **second**: one [SI second](https://www.bipm.org/en/publications/si-brochure/second.html){:target="\_blank"}
 - **minute**: one minute is defined as 60 seconds
 - **hour**: one hour is defined as 60 minutes
 - **day**: one day is defined as 24 hours
@@ -35,7 +29,8 @@ All functions that require dates as arguments accept the following input values:
 
   Valid range: `-62167219200000` .. `253402300799999` (inclusive)
 
-- **date time strings** in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601){:target="_blank"} format:
+- **date time strings** in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601){:target="\_blank"} format:
+
   - `YYYY-MM-DDTHH:MM:SS.MMM`
   - `YYYY-MM-DD HH:MM:SS.MMM`
   - `YYYY-MM-DD`
@@ -72,8 +67,7 @@ most certainly not be of any help for such dates, but you can still use language
 constructs like [SORT](operations-sort.html) (which also supports sorting of arrays)
 and [indexes](../indexing.html).
 
-Current date and time
----------------------
+## Current date and time
 
 ### DATE_NOW()
 
@@ -89,10 +83,9 @@ Note that this function is evaluated on every invocation and may return
 different values when invoked multiple times in the same query. Assign it
 to a variable to use the exact same timestamp multiple times.
 
-Conversion
-----------
+## Conversion
 
-*DATE_TIMESTAMP()* and *DATE_ISO8601()* can be used to convert ISO 8601 date time
+_DATE_TIMESTAMP()_ and _DATE_ISO8601()_ can be used to convert ISO 8601 date time
 strings to numeric timestamps and numeric timestamps to ISO 8601 date time strings.
 
 Both also support individual date components as separate function arguments,
@@ -106,12 +99,12 @@ in the following order:
 - second
 - millisecond
 
-All components following *day* are optional and can be omitted. Note that no
+All components following _day_ are optional and can be omitted. Note that no
 time offset can be specified when using separate date components, and UTC /
 Zulu time will be used.
 
-The following calls to *DATE_TIMESTAMP()* are equivalent and will all return
-*1399472349522*:
+The following calls to _DATE_TIMESTAMP()_ are equivalent and will all return
+_1399472349522_:
 
 ```aql
 DATE_TIMESTAMP("2014-05-07T14:19:09.522")
@@ -122,7 +115,7 @@ DATE_TIMESTAMP(2014, 5, 7, 14, 19, 9, 522)
 DATE_TIMESTAMP(1399472349522)
 ```
 
-The same is true for calls to *DATE_ISO8601()* that also accepts variable input
+The same is true for calls to _DATE_ISO8601()_ that also accepts variable input
 formats:
 
 ```aql
@@ -132,14 +125,14 @@ DATE_ISO8601(2014, 5, 7, 14, 19, 9, 522)
 DATE_ISO8601(1399472349522)
 ```
 
-The above functions are all equivalent and will return *"2014-05-07T14:19:09.522Z"*.
+The above functions are all equivalent and will return _"2014-05-07T14:19:09.522Z"_.
 
 ### DATE_ISO8601()
 
 `DATE_ISO8601(date) → dateString`
 
-Return an ISO 8601 date time string from *date*.
-The date time string will always use UTC / Zulu time, indicated by the *Z* at its end.
+Return an ISO 8601 date time string from _date_.
+The date time string will always use UTC / Zulu time, indicated by the _Z_ at its end.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
 - returns **dateString**: date and time expressed according to ISO 8601, in Zulu time
@@ -148,23 +141,23 @@ The date time string will always use UTC / Zulu time, indicated by the *Z* at it
 
 `DATE_ISO8601(year, month, day, hour, minute, second, millisecond) → dateString`
 
-Return a ISO 8601 date time string from *date*, but allows to specify the individual
-date components separately. All parameters after *day* are optional.
+Return a ISO 8601 date time string from _date_, but allows to specify the individual
+date components separately. All parameters after _day_ are optional.
 
-- **year** (number): typically in the range 0..9999, e.g. *2017*
+- **year** (number): typically in the range 0..9999, e.g. _2017_
 - **month** (number): 1..12 for January through December
 - **day** (number): 1..31 (upper bound depends on number of days in month)
-- **hour** (number, *optional*): 0..23
-- **minute** (number, *optional*): 0..59
-- **second** (number, *optional*): 0..59
-- **milliseconds** (number, *optional*): 0..999
+- **hour** (number, _optional_): 0..23
+- **minute** (number, _optional_): 0..59
+- **second** (number, _optional_): 0..59
+- **milliseconds** (number, _optional_): 0..999
 - returns **dateString**: date and time expressed according to ISO 8601, in Zulu time
 
 ### DATE_TIMESTAMP()
 
 `DATE_TIMESTAMP(date) → timestamp`
 
-Create a timestamp value from *date*. The return value has millisecond precision.
+Create a timestamp value from _date_. The return value has millisecond precision.
 To convert the return value to seconds, divide it by 1000.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
@@ -175,18 +168,18 @@ To convert the return value to seconds, divide it by 1000.
 `DATE_TIMESTAMP(year, month, day, hour, minute, second, millisecond) → timestamp`
 
 Create a timestamp value, but allows to specify the individual date components
-separately. All parameters after *day* are optional.
+separately. All parameters after _day_ are optional.
 
-- **year** (number): typically in the range 0..9999, e.g. *2017*
+- **year** (number): typically in the range 0..9999, e.g. _2017_
 - **month** (number): 1..12 for January through December
 - **day** (number): 1..31 (upper bound depends on number of days in month)
-- **hour** (number, *optional*): 0..23
-- **minute** (number, *optional*): 0..59
-- **second** (number, *optional*): 0..59
-- **milliseconds** (number, *optional*): 0..999
+- **hour** (number, _optional_): 0..23
+- **minute** (number, _optional_): 0..59
+- **second** (number, _optional_): 0..59
+- **milliseconds** (number, _optional_): 0..999
 - returns **timestamp** (number): numeric timestamp
 
-Negative values are not allowed, result in *null* and cause a warning.
+Negative values are not allowed, result in _null_ and cause a warning.
 Values greater than the upper range bound overflow to the larger components
 (e.g. an hour of 26 is automatically turned into an additional day and two hours):
 
@@ -203,20 +196,19 @@ DATE_TIMESTAMP(1970, 1, 1, 26) // returns 93600000, which is January 2nd, 1970, 
 Check if an arbitrary string is suitable for interpretation as date time string.
 
 - **value** (string): an arbitrary string
-- returns **bool** (bool): *true* if *value* is a string that can be used
-  in a date function. This includes partial dates such as *2015* or *2015-10* and
-  strings containing invalid dates such as *2015-02-31*. The function will return
-  *false* for all non-string values, even if some of them may be usable in date
+- returns **bool** (bool): _true_ if _value_ is a string that can be used
+  in a date function. This includes partial dates such as _2015_ or _2015-10_ and
+  strings containing invalid dates such as _2015-02-31_. The function will return
+  _false_ for all non-string values, even if some of them may be usable in date
   functions.
 
-Processing
-----------
+## Processing
 
 ### DATE_DAYOFWEEK()
 
 `DATE_DAYOFWEEK(date) → weekdayNumber`
 
-Return the weekday number of *date*.
+Return the weekday number of _date_.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
 - returns **weekdayNumber** (number): 0..6 as follows:
@@ -231,20 +223,20 @@ Return the weekday number of *date*.
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datedyofwk1
-  @EXAMPLE_AQL{datedyofwk1}
-    RETURN DATE_DAYOFWEEK("2020-08-29")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datedyofwk1
+@startDocuBlockInline datedyofwk1
+@EXAMPLE_AQL{datedyofwk1}
+RETURN DATE_DAYOFWEEK("2020-08-29")
+@END_EXAMPLE_AQL
+@endDocuBlock datedyofwk1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datedyofwk2
-  @EXAMPLE_AQL{datedyofwk2}
-    RETURN DATE_DAYOFWEEK(0)
-  @END_EXAMPLE_AQL
-  @endDocuBlock datedyofwk2
+@startDocuBlockInline datedyofwk2
+@EXAMPLE_AQL{datedyofwk2}
+RETURN DATE_DAYOFWEEK(0)
+@END_EXAMPLE_AQL
+@endDocuBlock datedyofwk2
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -252,28 +244,28 @@ Return the weekday number of *date*.
 
 `DATE_YEAR(date) → year`
 
-Return the year of *date*.
+Return the year of _date_.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- returns **year** (number): the year part of *date* as a number
+- returns **year** (number): the year part of _date_ as a number
 
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline dateyr1
-  @EXAMPLE_AQL{dateyr1}
-    RETURN DATE_YEAR("2020-08-29")
-  @END_EXAMPLE_AQL
-  @endDocuBlock dateyr1
+@startDocuBlockInline dateyr1
+@EXAMPLE_AQL{dateyr1}
+RETURN DATE_YEAR("2020-08-29")
+@END_EXAMPLE_AQL
+@endDocuBlock dateyr1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline dateyr2
-  @EXAMPLE_AQL{dateyr2}
-    RETURN DATE_YEAR(0)
-  @END_EXAMPLE_AQL
-  @endDocuBlock dateyr2
+@startDocuBlockInline dateyr2
+@EXAMPLE_AQL{dateyr2}
+RETURN DATE_YEAR(0)
+@END_EXAMPLE_AQL
+@endDocuBlock dateyr2
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -281,28 +273,28 @@ Return the year of *date*.
 
 `DATE_MONTH(date) → month`
 
-Return the month of *date*.
+Return the month of _date_.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- returns **month** (number): the month part of *date* as a number
+- returns **month** (number): the month part of _date_ as a number
 
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datemn1
-  @EXAMPLE_AQL{datemn1}
-    RETURN DATE_MONTH("2020-08-29")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datemn1
+@startDocuBlockInline datemn1
+@EXAMPLE_AQL{datemn1}
+RETURN DATE_MONTH("2020-08-29")
+@END_EXAMPLE_AQL
+@endDocuBlock datemn1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datemn2
-  @EXAMPLE_AQL{datemn2}
-    RETURN DATE_MONTH(0)
-  @END_EXAMPLE_AQL
-  @endDocuBlock datemn2
+@startDocuBlockInline datemn2
+@EXAMPLE_AQL{datemn2}
+RETURN DATE_MONTH(0)
+@END_EXAMPLE_AQL
+@endDocuBlock datemn2
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -310,48 +302,48 @@ Return the month of *date*.
 
 `DATE_DAY(date) → day`
 
-Return the day of *date*.
+Return the day of _date_.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- returns **day** (number): the day part of *date* as a number
+- returns **day** (number): the day part of _date_ as a number
 
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datedy1
-  @EXAMPLE_AQL{datedy1}
-    RETURN DATE_DAY("2020-08-29")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datedy1
+@startDocuBlockInline datedy1
+@EXAMPLE_AQL{datedy1}
+RETURN DATE_DAY("2020-08-29")
+@END_EXAMPLE_AQL
+@endDocuBlock datedy1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datedy2
-  @EXAMPLE_AQL{datedy2}
-    RETURN DATE_DAY(0)
-  @END_EXAMPLE_AQL
-  @endDocuBlock datedy2
+@startDocuBlockInline datedy2
+@EXAMPLE_AQL{datedy2}
+RETURN DATE_DAY(0)
+@END_EXAMPLE_AQL
+@endDocuBlock datedy2
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 ### DATE_HOUR()
 
-Return the hour of *date*.
+Return the hour of _date_.
 
 `DATE_HOUR(date) → hour`
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- returns **hour** (number): the hour part of *date* as a number
+- returns **hour** (number): the hour part of _date_ as a number
 
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datehr1
-  @EXAMPLE_AQL{datehr1}
-    RETURN DATE_HOUR("2020-08-29T16:30:05.123")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datehr1
+@startDocuBlockInline datehr1
+@EXAMPLE_AQL{datehr1}
+RETURN DATE_HOUR("2020-08-29T16:30:05.123")
+@END_EXAMPLE_AQL
+@endDocuBlock datehr1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -359,19 +351,19 @@ Return the hour of *date*.
 
 `DATE_MINUTE(date) → minute`
 
-Return the minute of *date*.
+Return the minute of _date_.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- returns **minute** (number): the minute part of *date* as a number
+- returns **minute** (number): the minute part of _date_ as a number
 
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datemin1
-  @EXAMPLE_AQL{datemin1}
-    RETURN DATE_MINUTE("2020-08-29T16:30:05.123")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datemin1
+@startDocuBlockInline datemin1
+@EXAMPLE_AQL{datemin1}
+RETURN DATE_MINUTE("2020-08-29T16:30:05.123")
+@END_EXAMPLE_AQL
+@endDocuBlock datemin1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -379,19 +371,19 @@ Return the minute of *date*.
 
 `DATE_SECOND(date) → second`
 
-Return the second of *date*.
+Return the second of _date_.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- returns **second** (number): the seconds part of *date* as a number
+- returns **second** (number): the seconds part of _date_ as a number
 
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datesec1
-  @EXAMPLE_AQL{datesec1}
-    RETURN DATE_SECOND("2020-08-29T16:30:05.123")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datesec1
+@startDocuBlockInline datesec1
+@EXAMPLE_AQL{datesec1}
+RETURN DATE_SECOND("2020-08-29T16:30:05.123")
+@END_EXAMPLE_AQL
+@endDocuBlock datesec1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -400,16 +392,16 @@ Return the second of *date*.
 `DATE_MILLISECOND(date) → millisecond`
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- returns **millisecond** (number): the milliseconds part of *date* as a number
+- returns **millisecond** (number): the milliseconds part of _date_ as a number
 
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datemilsec1
-  @EXAMPLE_AQL{datemilsec1}
-    RETURN DATE_MILLISECOND("2020-08-29T16:30:05.123")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datemilsec1
+@startDocuBlockInline datemilsec1
+@EXAMPLE_AQL{datemilsec1}
+RETURN DATE_MILLISECOND("2020-08-29T16:30:05.123")
+@END_EXAMPLE_AQL
+@endDocuBlock datemilsec1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -417,20 +409,20 @@ Return the second of *date*.
 
 `DATE_DAYOFYEAR(date) → dayOfYear`
 
-Return the day of year of *date*.
+Return the day of year of _date_.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- returns **dayOfYear** (number): the day of year number of *date*.
+- returns **dayOfYear** (number): the day of year number of _date_.
   The return values range from 1 to 365, or 366 in a leap year respectively.
 
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datedyofyr1
-  @EXAMPLE_AQL{datedyofyr1}
-    RETURN DATE_DAYOFYEAR("2020-08-29")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datedyofyr1
+@startDocuBlockInline datedyofyr1
+@EXAMPLE_AQL{datedyofyr1}
+RETURN DATE_DAYOFYEAR("2020-08-29")
+@END_EXAMPLE_AQL
+@endDocuBlock datedyofyr1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -438,10 +430,10 @@ Return the day of year of *date*.
 
 `DATE_ISOWEEK(date) → weekDate`
 
-Return the week date of *date* according to ISO 8601.
+Return the week date of _date_ according to ISO 8601.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- returns **weekDate** (number): the ISO week date of *date*. The return values
+- returns **weekDate** (number): the ISO week date of _date_. The return values
   range from 1 to 53. Monday is considered the first day of the week. There are no
   fractional weeks, thus the last days in December may belong to the first week of
   the next year, and the first days in January may be part of the previous year's
@@ -450,11 +442,11 @@ Return the week date of *date* according to ISO 8601.
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline dateisofwk1
-  @EXAMPLE_AQL{dateisofwk1}
-    RETURN DATE_ISOWEEK("2020-08-29")
-  @END_EXAMPLE_AQL
-  @endDocuBlock dateisofwk1
+@startDocuBlockInline dateisofwk1
+@EXAMPLE_AQL{dateisofwk1}
+RETURN DATE_ISOWEEK("2020-08-29")
+@END_EXAMPLE_AQL
+@endDocuBlock dateisofwk1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -462,28 +454,28 @@ Return the week date of *date* according to ISO 8601.
 
 `DATE_LEAPYEAR(date) → leapYear`
 
-Return whether *date* is in a leap year.
+Return whether _date_ is in a leap year.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- returns **leapYear** (bool): *true* if *date* is in a leap year, *false* otherwise
+- returns **leapYear** (bool): _true_ if _date_ is in a leap year, _false_ otherwise
 
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datelpyr1
-  @EXAMPLE_AQL{datelpyr1}
-    RETURN DATE_LEAPYEAR("2020-01-01")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datelpyr1
+@startDocuBlockInline datelpyr1
+@EXAMPLE_AQL{datelpyr1}
+RETURN DATE_LEAPYEAR("2020-01-01")
+@END_EXAMPLE_AQL
+@endDocuBlock datelpyr1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datelpyr2
-  @EXAMPLE_AQL{datelpyr2}
-    RETURN DATE_LEAPYEAR("2021-01-01")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datelpyr2
+@startDocuBlockInline datelpyr2
+@EXAMPLE_AQL{datelpyr2}
+RETURN DATE_LEAPYEAR("2021-01-01")
+@END_EXAMPLE_AQL
+@endDocuBlock datelpyr2
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -491,7 +483,7 @@ Return whether *date* is in a leap year.
 
 `DATE_QUARTER(date) → quarter`
 
-Return which quarter *date* belongs to.
+Return which quarter _date_ belongs to.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
 - returns **quarter** (number): the quarter of the given date (1-based):
@@ -503,58 +495,58 @@ Return which quarter *date* belongs to.
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline dateqtr1
-  @EXAMPLE_AQL{dateqtr1}
-    RETURN DATE_QUARTER("2020-08-29")
-  @END_EXAMPLE_AQL
-  @endDocuBlock dateqtr1
+@startDocuBlockInline dateqtr1
+@EXAMPLE_AQL{dateqtr1}
+RETURN DATE_QUARTER("2020-08-29")
+@END_EXAMPLE_AQL
+@endDocuBlock dateqtr1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 ### DATE_DAYS_IN_MONTH()
 
-Return the number of days in the month of *date*.
+Return the number of days in the month of _date_.
 
 `DATE_DAYS_IN_MONTH(date) → daysInMonth`
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- returns **daysInMonth** (number): the number of days in *date*'s month (28..31)
+- returns **daysInMonth** (number): the number of days in _date_'s month (28..31)
 
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datedysmn1
-  @EXAMPLE_AQL{datedysmn1}
-    RETURN DATE_DAYS_IN_MONTH("2020-08-01")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datedysmn1
-{% endaqlexample %}
-{% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}  
-
-{% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datedysmn2
-  @EXAMPLE_AQL{datedysmn2}
-    RETURN DATE_DAYS_IN_MONTH("2020-09-01")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datedysmn2
+@startDocuBlockInline datedysmn1
+@EXAMPLE_AQL{datedysmn1}
+RETURN DATE_DAYS_IN_MONTH("2020-08-01")
+@END_EXAMPLE_AQL
+@endDocuBlock datedysmn1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datedysmn3
-  @EXAMPLE_AQL{datedysmn3}
-    RETURN DATE_DAYS_IN_MONTH("2020-02-01")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datedysmn3
+@startDocuBlockInline datedysmn2
+@EXAMPLE_AQL{datedysmn2}
+RETURN DATE_DAYS_IN_MONTH("2020-09-01")
+@END_EXAMPLE_AQL
+@endDocuBlock datedysmn2
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline datedysmn4
-  @EXAMPLE_AQL{datedysmn4}
-    RETURN DATE_DAYS_IN_MONTH("2021-02-01")
-  @END_EXAMPLE_AQL
-  @endDocuBlock datedysmn4
+@startDocuBlockInline datedysmn3
+@EXAMPLE_AQL{datedysmn3}
+RETURN DATE_DAYS_IN_MONTH("2020-02-01")
+@END_EXAMPLE_AQL
+@endDocuBlock datedysmn3
+{% endaqlexample %}
+{% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
+
+{% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
+@startDocuBlockInline datedysmn4
+@EXAMPLE_AQL{datedysmn4}
+RETURN DATE_DAYS_IN_MONTH("2021-02-01")
+@END_EXAMPLE_AQL
+@endDocuBlock datedysmn4
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -562,7 +554,7 @@ Return the number of days in the month of *date*.
 
 `DATE_TRUNC(date, unit) → isoDate`
 
-Truncates the given date after *unit* and returns the modified date.
+Truncates the given date after _unit_ and returns the modified date.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
 - **unit** (string): either of the following to specify the time unit (case-insensitive):
@@ -581,24 +573,24 @@ DATE_TRUNC('2017-02-03 04:05:06', 'hours') // 2017-02-03 04:00:00.000Z
 ```
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline dateTruncGroup
-    @EXAMPLE_AQL{dateTruncGroup}
-    RETURN MERGE(
-      FOR doc IN @data
-        COLLECT q = DATE_TRUNC(doc.date, "year") INTO bucket
-        RETURN { [DATE_YEAR(q)]: bucket[*].doc.value }
-    )
-    @BV {
-    "data": [
-      { "date": "2018-03-05", "value": "Spring" },
-      { "date": "2018-07-11", "value": "Summer" },
-      { "date": "2018-10-26", "value": "Autumn" },
-      { "date": "2019-01-09", "value": "Winter" },
-      { "date": "2019-04-02", "value": "Spring" }
-    ]
-    }
-    @END_EXAMPLE_AQL
-    @endDocuBlock dateTruncGroup
+@startDocuBlockInline dateTruncGroup
+@EXAMPLE_AQL{dateTruncGroup}
+RETURN MERGE(
+FOR doc IN @data
+COLLECT q = DATE_TRUNC(doc.date, "year") INTO bucket
+RETURN { [DATE_YEAR(q)]: bucket[*].doc.value }
+)
+@BV {
+"data": [
+{ "date": "2018-03-05", "value": "Spring" },
+{ "date": "2018-07-11", "value": "Summer" },
+{ "date": "2018-10-26", "value": "Autumn" },
+{ "date": "2019-01-09", "value": "Winter" },
+{ "date": "2019-04-02", "value": "Spring" }
+]
+}
+@END_EXAMPLE_AQL
+@endDocuBlock dateTruncGroup
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -625,29 +617,29 @@ DATE_ROUND('2000-04-10T11:39:29Z', 15, 'minutes') // 2000-04-10T11:30:00.000Z
 ```
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline dateRoundAggregate
-    @EXAMPLE_AQL{dateRoundAggregate}
-    FOR doc IN @sensorData
-      COLLECT
-        date = DATE_ROUND(doc.timestamp, 5, "minutes")
-      AGGREGATE
-        count = COUNT(1),
-        avg = AVG(doc.temp),
-        min = MIN(doc.temp),
-        max = MAX(doc.temp)
-      RETURN { date, count, avg, min, max }
-    @BV {
-    "sensorData": [
-      { "timestamp": "2019-12-04T21:17:52.583Z", "temp": 20.6 },
-      { "timestamp": "2019-12-04T21:19:53.516Z", "temp": 20.2 },
-      { "timestamp": "2019-12-04T21:21:53.610Z", "temp": 19.9 },
-      { "timestamp": "2019-12-04T21:23:52.522Z", "temp": 19.8 },
-      { "timestamp": "2019-12-04T21:25:52.988Z", "temp": 19.8 },
-      { "timestamp": "2019-12-04T21:27:54.005Z", "temp": 19.7 }
-    ]
-    }
-    @END_EXAMPLE_AQL
-    @endDocuBlock dateRoundAggregate
+@startDocuBlockInline dateRoundAggregate
+@EXAMPLE_AQL{dateRoundAggregate}
+FOR doc IN @sensorData
+COLLECT
+date = DATE_ROUND(doc.timestamp, 5, "minutes")
+AGGREGATE
+count = COUNT(1),
+avg = AVG(doc.temp),
+min = MIN(doc.temp),
+max = MAX(doc.temp)
+RETURN { date, count, avg, min, max }
+@BV {
+"sensorData": [
+{ "timestamp": "2019-12-04T21:17:52.583Z", "temp": 20.6 },
+{ "timestamp": "2019-12-04T21:19:53.516Z", "temp": 20.2 },
+{ "timestamp": "2019-12-04T21:21:53.610Z", "temp": 19.9 },
+{ "timestamp": "2019-12-04T21:23:52.522Z", "temp": 19.8 },
+{ "timestamp": "2019-12-04T21:25:52.988Z", "temp": 19.8 },
+{ "timestamp": "2019-12-04T21:27:54.005Z", "temp": 19.7 }
+]
+}
+@END_EXAMPLE_AQL
+@endDocuBlock dateRoundAggregate
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -661,7 +653,7 @@ Format a date according to the given format string.
 - **format** (string): a format string, see below
 - returns **str** (string): a formatted date string
 
-*format* supports the following placeholders (case-insensitive):
+_format_ supports the following placeholders (case-insensitive):
 
 - %t – timestamp, in milliseconds since midnight 1970-01-01
 - %z – ISO date (0000-00-00T00:00:00.000Z)
@@ -706,7 +698,7 @@ ambiguities like in `%mmonth` (unpadded month number + the string "month")
 between `%mm` + "onth" and `%m` + "month", use the escape sequence `%&`:
 `%m%&month`.
 
-Note that *DATE_FORMAT()* is a rather costly operation and may not be suitable for large
+Note that _DATE_FORMAT()_ is a rather costly operation and may not be suitable for large
 datasets (like over 1 million dates). If possible, avoid formatting dates on
 server-side and leave it up to the client to do so. This function should only
 be used for special date comparisons or to store the formatted dates in the
@@ -723,14 +715,13 @@ DATE_FORMAT("2016", "%%l = %l") // "%l = 1" (2016 is a leap year)
 DATE_FORMAT("2016-03-01", "%xxx%") // "063", trailing % ignored
 ```
 
-Comparison and calculation
---------------------------
+## Comparison and calculation
 
 ### DATE_ADD()
 
 `DATE_ADD(date, amount, unit) → isoDate`
 
-Add *amount* given in *unit* to *date* and return the calculated date.
+Add _amount_ given in _unit_ to _date_ and return the calculated date.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
 - **amount** (number\|string): number of *unit*s to add (positive value) or
@@ -761,15 +752,16 @@ DATE_ADD(DATE_ADD("2016-02", "month", 1), -1, "day") // last day of February (29
 
 `DATE_ADD(date, isoDuration) → isoDate`
 
-You may also pass an ISO duration string as *amount* and leave out *unit*.
+You may also pass an ISO duration string as _amount_ and leave out _unit_.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- **isoDuration** (string): an ISO 8601 duration string to add to *date*, see below
-- returns **isoDate** (string):  the calculated ISO 8601 date time string
+- **isoDuration** (string): an ISO 8601 duration string to add to _date_, see below
+- returns **isoDate** (string): the calculated ISO 8601 date time string
 
 The format is `P_Y_M_W_DT_H_M_._S`, where underscores stand for digits and
 letters for time intervals - except for the separators `P` (period) and `T` (time).
 The meaning of the other letters are:
+
 - Y – years
 - M – months (if before T)
 - W – weeks
@@ -795,11 +787,11 @@ DATE_ADD("2000-01-01", "P1Y2M3W4DT5H6M7.89S" // add a bit of everything
 
 `DATE_SUBTRACT(date, amount, unit) → isoDate`
 
-Subtract *amount* given in *unit* from *date* and return the calculated date.
+Subtract _amount_ given in _unit_ from _date_ and return the calculated date.
 
 It works the same as [DATE_ADD()](#date_add), except that it subtracts. It is
-equivalent to calling *DATE_ADD()* with a negative amount, except that
-*DATE_SUBTRACT()* can also subtract ISO durations. Note that negative ISO
+equivalent to calling _DATE_ADD()_ with a negative amount, except that
+_DATE_SUBTRACT()_ can also subtract ISO durations. Note that negative ISO
 durations are not supported (i.e. starting with `-P`, like `-P1Y`).
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
@@ -822,16 +814,17 @@ durations are not supported (i.e. starting with `-P`, like `-P1Y`).
 
 `DATE_SUBTRACT(date, isoDuration) → isoDate`
 
-You may also pass an ISO duration string as *amount* and leave out *unit*.
+You may also pass an ISO duration string as _amount_ and leave out _unit_.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
-- **isoDuration** (string): an ISO 8601 duration string to subtract from *date*,
+- **isoDuration** (string): an ISO 8601 duration string to subtract from _date_,
   see below
 - returns **isoDate** (string): the calculated ISO 8601 date time string
 
 The format is `P_Y_M_W_DT_H_M_._S`, where underscores stand for digits and
 letters for time intervals - except for the separators `P` (period) and `T` (time).
 The meaning of the other letters are:
+
 - Y – years
 - M – months (if before T)
 - W – weeks
@@ -856,7 +849,7 @@ DATE_SUBTRACT(DATE_NOW(), "PT1H3M") // 1 hour and 30 minutes ago
 
 `DATE_DIFF(date1, date2, unit, asFloat) → diff`
 
-Calculate the difference between two dates in given time *unit*, optionally
+Calculate the difference between two dates in given time _unit_, optionally
 with decimal places.
 
 - **date1** (number\|string): numeric timestamp or ISO 8601 date time string
@@ -871,10 +864,10 @@ with decimal places.
   - i, minute, minutes
   - s, second, seconds
   - f, millisecond, milliseconds
-- **asFloat** (boolean, *optional*): if set to *true*, decimal places will be
-  preserved in the result. The default is *false* and an integer is returned.
-- returns **diff** (number): the calculated difference as number in *unit*.
-  The value will be negative if *date2* is before *date1*.
+- **asFloat** (boolean, _optional_): if set to _true_, decimal places will be
+  preserved in the result. The default is _false_ and an integer is returned.
+- returns **diff** (number): the calculated difference as number in _unit_.
+  The value will be negative if _date2_ is before _date1_.
 
 ### DATE_COMPARE()
 
@@ -885,15 +878,15 @@ Check if two partial dates match.
 - **date1** (number\|string): numeric timestamp or ISO 8601 date time string
 - **date2** (number\|string): numeric timestamp or ISO 8601 date time string
 - **unitRangeStart** (string): unit to start from, see below
-- **unitRangeEnd** (string, *optional*):  unit to end with, leave out to only
-  compare the component as specified by *unitRangeStart*. An error is raised if
-  *unitRangeEnd* is a unit before *unitRangeStart*.
-- returns **bool** (bool): *true* if the dates match, *false* otherwise
+- **unitRangeEnd** (string, _optional_): unit to end with, leave out to only
+  compare the component as specified by _unitRangeStart_. An error is raised if
+  _unitRangeEnd_ is a unit before _unitRangeStart_.
+- returns **bool** (bool): _true_ if the dates match, _false_ otherwise
 
 The parts to compare are defined by a range of time units. The full range is:
 years, months, days, hours, minutes, seconds, milliseconds (in this order).
 
-All components of *date1* and *date2* as specified by the range will be compared.
+All components of _date1_ and _date2_ as specified by the range will be compared.
 You can refer to the units as:
 
 - y, year, years
@@ -935,7 +928,7 @@ comparison (e.g. `2015-05-15T11:30:00.000Z`). Dates before `2015-05-15` are smal
 and therefore filtered out by the first condition. Every date past `2015-05-15` is
 greater than this date in a string comparison, and therefore filtered out by the
 second condition. The result is that the time components in the dates you compare
-with are "ignored". The query will return every document with *date* ranging from
+with are "ignored". The query will return every document with _date_ ranging from
 `2015-05-15T00:00:00.000Z` to `2015-05-15T23:99:99.999Z`. It would also include
 `2015-05-15T24:00:00.000Z`, but that date is actually `2015-05-16T00:00:00.000Z`
 and can only occur if inserted manually (you may want to pass dates through
@@ -967,7 +960,7 @@ FOR user IN users
 
 <small>Introduced in: v3.8.0</small>
 
-Converts *date* assumed in Zulu time (UTC) to local *timezone*.
+Converts _date_ assumed in Zulu time (UTC) to local _timezone_.
 
 It takes historic daylight saving times into account.
 
@@ -975,12 +968,12 @@ It takes historic daylight saving times into account.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
 - **timezone** (string):
-  [IANA timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones){:target="_blank"},
+  [IANA timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones){:target="\_blank"},
   e.g. `"America/New_York"`, `"Europe/Berlin"` or `"UTC"`.
   Use `"America/Los_Angeles"` for Pacific time (PST/PDT).
   Will throw an error if the timezone is not known to ArangoDB
-- **zoneinfo** (boolean, *optional*): if set to *true*, an object with timezone
-  information is returned. The default is *false* and a date string is returned
+- **zoneinfo** (boolean, _optional_): if set to _true_, an object with timezone
+  information is returned. The default is _false_ and a date string is returned
 - returns **date** (string\|object): an ISO 8601 date time string in
   unqualified local time, or an object with the following attributes:
   - **local** (string): ISO 8601 date time string in unqualified local time
@@ -989,51 +982,51 @@ It takes historic daylight saving times into account.
     - **name** (string): timezone abbreviation (GMT, PST, CET, ...)
     - **begin** (string\|null): begin of the timezone effect as UTC date time string
     - **end** (string\|null): end of the timezone effect as UTC date time string
-    - **dst** (boolean): *true* when daylight saving time (DST) is active,
-      *false* otherwise
+    - **dst** (boolean): _true_ when daylight saving time (DST) is active,
+      _false_ otherwise
     - **offset** (number): offset to UTC in seconds
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline aqlDateTimeToLocal_1
-    @EXAMPLE_AQL{aqlDateTimeToLocal_1}
-    RETURN [
-      DATE_UTCTOLOCAL("2020-03-15T00:00:00.000", "Europe/Berlin"),
-      DATE_UTCTOLOCAL("2020-03-15T00:00:00.000", "America/New_York"),
-      DATE_UTCTOLOCAL("2020-03-15T00:00:00.000", "UTC")
-    ]
-    @END_EXAMPLE_AQL
-    @endDocuBlock aqlDateTimeToLocal_1
-    {% endaqlexample %}
+@startDocuBlockInline aqlDateTimeToLocal_1
+@EXAMPLE_AQL{aqlDateTimeToLocal_1}
+RETURN [
+DATE_UTCTOLOCAL("2020-03-15T00:00:00.000", "Europe/Berlin"),
+DATE_UTCTOLOCAL("2020-03-15T00:00:00.000", "America/New_York"),
+DATE_UTCTOLOCAL("2020-03-15T00:00:00.000", "UTC")
+]
+@END_EXAMPLE_AQL
+@endDocuBlock aqlDateTimeToLocal_1
+{% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline aqlDateTimeToLocal_2
-    @EXAMPLE_AQL{aqlDateTimeToLocal_2}
-    RETURN [
-      DATE_UTCTOLOCAL("2020-03-15T00:00:00.000", "Asia/Shanghai"),
-      DATE_UTCTOLOCAL("2020-03-15T00:00:00.000Z", "Asia/Shanghai"),
-      DATE_UTCTOLOCAL("2020-03-15T00:00:00.000-02:00", "Asia/Shanghai"),
-      DATE_UTCTOLOCAL(1584230400000, "Asia/Shanghai")
-    ]
-    @END_EXAMPLE_AQL
-    @endDocuBlock aqlDateTimeToLocal_2
-    {% endaqlexample %}
+@startDocuBlockInline aqlDateTimeToLocal_2
+@EXAMPLE_AQL{aqlDateTimeToLocal_2}
+RETURN [
+DATE_UTCTOLOCAL("2020-03-15T00:00:00.000", "Asia/Shanghai"),
+DATE_UTCTOLOCAL("2020-03-15T00:00:00.000Z", "Asia/Shanghai"),
+DATE_UTCTOLOCAL("2020-03-15T00:00:00.000-02:00", "Asia/Shanghai"),
+DATE_UTCTOLOCAL(1584230400000, "Asia/Shanghai")
+]
+@END_EXAMPLE_AQL
+@endDocuBlock aqlDateTimeToLocal_2
+{% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline aqlDateTimeToLocal_3
-    @EXAMPLE_AQL{aqlDateTimeToLocal_3}
-    RETURN DATE_UTCTOLOCAL(DATE_NOW(), "Africa/Lagos", true)
-    @END_EXAMPLE_AQL
-    @endDocuBlock aqlDateTimeToLocal_3
-    {% endaqlexample %}
+@startDocuBlockInline aqlDateTimeToLocal_3
+@EXAMPLE_AQL{aqlDateTimeToLocal_3}
+RETURN DATE_UTCTOLOCAL(DATE_NOW(), "Africa/Lagos", true)
+@END_EXAMPLE_AQL
+@endDocuBlock aqlDateTimeToLocal_3
+{% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 ### DATE_LOCALTOUTC()
 
 <small>Introduced in: v3.8.0</small>
 
-Converts *date* assumed in local *timezone* to Zulu time (UTC).
+Converts _date_ assumed in local _timezone_ to Zulu time (UTC).
 
 It takes historic daylight saving times into account.
 
@@ -1041,12 +1034,12 @@ It takes historic daylight saving times into account.
 
 - **date** (number\|string): numeric timestamp or ISO 8601 date time string
 - **timezone** (string):
-  [IANA timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones){:target="_blank"},
+  [IANA timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones){:target="\_blank"},
   e.g. `"America/New_York"`, `"Europe/Berlin"` or `"UTC"`.
   Use `"America/Los_Angeles"` for Pacific time (PST/PDT).
   Will throw an error if the timezone is not known to ArangoDB
-- **zoneinfo** (boolean, *optional*): if set to *true*, an object with timezone
-  information is returned. The default is *false* and a date string is returned
+- **zoneinfo** (boolean, _optional_): if set to _true_, an object with timezone
+  information is returned. The default is _false_ and a date string is returned
 - returns **date** (string\|object): an ISO 8601 date time string in
   Zulu time (UTC), or an object with the following attributes:
   - **utc** (string): ISO 8601 date time string in Zulu time (UTC)
@@ -1055,44 +1048,44 @@ It takes historic daylight saving times into account.
     - **name** (string): timezone abbreviation (GMT, PST, CET, ...)
     - **begin** (string\|null): begin of the timezone effect as UTC date time string
     - **end** (string\|null): end of the timezone effect as UTC date time string
-    - **dst** (boolean): *true* when daylight saving time (DST) is active,
-      *false* otherwise
+    - **dst** (boolean): _true_ when daylight saving time (DST) is active,
+      _false_ otherwise
     - **offset** (number): offset to UTC in seconds
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline aqlDateTimeToUTC_1
-    @EXAMPLE_AQL{aqlDateTimeToUTC_1}
-    RETURN [
-      DATE_LOCALTOUTC("2020-03-15T00:00:00.000", "Europe/Berlin"),
-      DATE_LOCALTOUTC("2020-03-15T00:00:00.000", "America/New_York"),
-      DATE_LOCALTOUTC("2020-03-15T00:00:00.000", "UTC")
-    ]
-    @END_EXAMPLE_AQL
-    @endDocuBlock aqlDateTimeToUTC_1
-    {% endaqlexample %}
+@startDocuBlockInline aqlDateTimeToUTC_1
+@EXAMPLE_AQL{aqlDateTimeToUTC_1}
+RETURN [
+DATE_LOCALTOUTC("2020-03-15T00:00:00.000", "Europe/Berlin"),
+DATE_LOCALTOUTC("2020-03-15T00:00:00.000", "America/New_York"),
+DATE_LOCALTOUTC("2020-03-15T00:00:00.000", "UTC")
+]
+@END_EXAMPLE_AQL
+@endDocuBlock aqlDateTimeToUTC_1
+{% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline aqlDateTimeToUTC_2
-    @EXAMPLE_AQL{aqlDateTimeToUTC_2}
-    RETURN [
-      DATE_LOCALTOUTC("2020-03-15T00:00:00.000", "Asia/Shanghai"),
-      DATE_LOCALTOUTC("2020-03-15T00:00:00.000Z", "Asia/Shanghai"),
-      DATE_LOCALTOUTC("2020-03-15T00:00:00.000-02:00", "Asia/Shanghai"),
-      DATE_LOCALTOUTC(1584230400000, "Asia/Shanghai")
-    ]
-    @END_EXAMPLE_AQL
-    @endDocuBlock aqlDateTimeToUTC_2
-    {% endaqlexample %}
+@startDocuBlockInline aqlDateTimeToUTC_2
+@EXAMPLE_AQL{aqlDateTimeToUTC_2}
+RETURN [
+DATE_LOCALTOUTC("2020-03-15T00:00:00.000", "Asia/Shanghai"),
+DATE_LOCALTOUTC("2020-03-15T00:00:00.000Z", "Asia/Shanghai"),
+DATE_LOCALTOUTC("2020-03-15T00:00:00.000-02:00", "Asia/Shanghai"),
+DATE_LOCALTOUTC(1584230400000, "Asia/Shanghai")
+]
+@END_EXAMPLE_AQL
+@endDocuBlock aqlDateTimeToUTC_2
+{% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline aqlDateTimeToUTC_3
-    @EXAMPLE_AQL{aqlDateTimeToUTC_3}
-    RETURN DATE_LOCALTOUTC("2021-03-16T12:00:00.000", "Africa/Lagos", true)
-    @END_EXAMPLE_AQL
-    @endDocuBlock aqlDateTimeToUTC_3
-    {% endaqlexample %}
+@startDocuBlockInline aqlDateTimeToUTC_3
+@EXAMPLE_AQL{aqlDateTimeToUTC_3}
+RETURN DATE_LOCALTOUTC("2021-03-16T12:00:00.000", "Africa/Lagos", true)
+@END_EXAMPLE_AQL
+@endDocuBlock aqlDateTimeToUTC_3
+{% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 ### DATE_TIMEZONE()
@@ -1106,7 +1099,7 @@ For cloud servers this will most likely be "Etc/UTC".
 `DATE_TIMEZONE() → timezone`
 
 - returns **timezone** (string):
-  [IANA timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones){:target="_blank"}
+  [IANA timezone name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones){:target="\_blank"}
   of the server timezone.
 
 ### DATE_TIMEZONES()
@@ -1118,14 +1111,14 @@ Returns all valid timezone names.
 `DATE_TIMEZONES() → timezones`
 
 - returns **timezones** (array): an array of
-  [IANA timezone names](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones){:target="_blank"}
+  [IANA timezone names](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones){:target="\_blank"}
 
-Working with dates and indexes
-------------------------------
+## Working with dates and indexes
 
 There are two recommended ways to store timestamps in ArangoDB:
-  - string: UTC timestamp with [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601){:target="_blank"}
-  - number: [unix timestamp](https://en.wikipedia.org/wiki/Unix_time){:target="_blank"} with millisecond precision
+
+- string: UTC timestamp with [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601){:target="\_blank"}
+- number: [unix timestamp](https://en.wikipedia.org/wiki/Unix_time){:target="\_blank"} with millisecond precision
 
 The sort order of both is identical due to the sort properties of ISO date strings.
 You can't mix both types, numbers and strings, in a single attribute however.
@@ -1136,26 +1129,25 @@ greater than etc.) to express time ranges in your queries while still utilizing
 persistent indexes:
 
 {% arangoshexample examplevar="examplevar" script="script" result="result" %}
-    @startDocuBlockInline working_with_date_time
-    @EXAMPLE_ARANGOSH_OUTPUT{working_with_date_time}
-    db._create("exampleTime");
-    var timestamps = ["2014-05-07T14:19:09.522","2014-05-07T21:19:09.522","2014-05-08T04:19:09.522","2014-05-08T11:19:09.522","2014-05-08T18:19:09.522"];
-    for (i = 0; i < 5; i++) db.exampleTime.save({value:i, ts: timestamps[i]})
-    db._query("FOR d IN exampleTime FILTER d.ts > '2014-05-07T14:19:09.522' and d.ts < '2014-05-08T18:19:09.522' RETURN d").toArray()
-    ~addIgnoreCollection("example")
-    ~db._drop("exampleTime")
-    @END_EXAMPLE_ARANGOSH_OUTPUT
-    @endDocuBlock working_with_date_time
+@startDocuBlockInline working_with_date_time
+@EXAMPLE_ARANGOSH_OUTPUT{working_with_date_time}
+db.\_create("exampleTime");
+var timestamps = ["2014-05-07T14:19:09.522","2014-05-07T21:19:09.522","2014-05-08T04:19:09.522","2014-05-08T11:19:09.522","2014-05-08T18:19:09.522"];
+for (i = 0; i < 5; i++) db.exampleTime.save({value:i, ts: timestamps[i]})
+db.\_query("FOR d IN exampleTime FILTER d.ts > '2014-05-07T14:19:09.522' and d.ts < '2014-05-08T18:19:09.522' RETURN d").toArray()
+~addIgnoreCollection("example")
+~db.\_drop("exampleTime")
+@END_EXAMPLE_ARANGOSH_OUTPUT
+@endDocuBlock working_with_date_time
 {% endarangoshexample %}
 {% include arangoshexample.html id=examplevar script=script result=result %}
 
 The first and the last timestamp in the array are excluded from the result by the `FILTER`.
 
-Limitations
------------
+## Limitations
 
 Note that dates before the year 1583 aren't allowed by the
-[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601){:target="_blank"} standard by default, because
+[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601){:target="\_blank"} standard by default, because
 they lie before the official introduction of the Gregorian calendar and may thus
 be incorrect or invalid. All AQL date functions apply the same rules to every
 date according to the Gregorian calendar system, even if inappropriate. That
@@ -1169,4 +1161,4 @@ Sorting of negative dates does not result in a meaningful order, with years long
 ago last, but months, days and the time components in otherwise correct order.
 
 Leap seconds are ignored, just as they are in JavaScript as per
-[ECMAScript Language Specifications](http://www.ecma-international.org/ecma-262/5.1/#sec-15.9.1.1){:target="_blank"}.
+[ECMAScript Language Specifications](http://www.ecma-international.org/ecma-262/5.1/#sec-15.9.1.1){:target="\_blank"}.

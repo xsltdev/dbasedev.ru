@@ -1,15 +1,9 @@
----
-layout: default
-description: This type of query finds the first k paths in order of length (or weight) between two given documents, a start and a target vertex in your graph
----
-k Shortest Paths in AQL
-=======================
+# k кратчайшие пути в AQL
 
-General query idea
-------------------
+## General query idea
 
-This type of query finds the first *k* paths in order of length
-(or weight) between two given documents, *startVertex* and *targetVertex* in
+This type of query finds the first _k_ paths in order of length
+(or weight) between two given documents, _startVertex_ and _targetVertex_ in
 your graph.
 
 Every such path will be returned as a JSON object with three components:
@@ -37,7 +31,7 @@ as edge weights.
 
 Let us assume that we want to go from **Aberdeen** to **London** by train.
 
-We expect to see the following vertices on *the* shortest path, in this order:
+We expect to see the following vertices on _the_ shortest path, in this order:
 
 1. Aberdeen
 2. Leuchars
@@ -74,8 +68,7 @@ however, it is quicker if we compare the edge weights:
 
 The path weight is lower: 1.5 + 1.5 + 1.0 + 1.0 + 2.0 + 1.5 = **8.5**.
 
-Syntax
-------
+## Syntax
 
 The syntax for k Shortest Paths queries is similar to the one for
 [Shortest Path](graphs-shortest-path.html) and there are also two options to
@@ -100,8 +93,8 @@ FOR path
   [LIMIT offset, count]
 ```
 
-- `FOR`: emits the variable **path** which contains one path as an object containing 
-   `vertices`, `edges`, and the `weight` of the path.
+- `FOR`: emits the variable **path** which contains one path as an object containing
+  `vertices`, `edges`, and the `weight` of the path.
 - `IN` `OUTBOUND|INBOUND|ANY`: defines in which direction
   edges are followed (outgoing, incoming, or both)
 - `K_SHORTEST_PATHS`: the keyword to compute k Shortest Paths
@@ -112,15 +105,15 @@ FOR path
   documents does not exist, the result is empty as well and there is no warning.
 - `GRAPH` **graphName** (string): the name identifying the named graph. Its vertex and
   edge collections will be looked up.
-- `OPTIONS` **options** (object, *optional*): used to modify the execution of the
+- `OPTIONS` **options** (object, _optional_): used to modify the execution of the
   traversal. Only the following attributes have an effect, all others are ignored:
   - **weightAttribute** (string): a top-level edge attribute that should be used
-  to read the edge weight. If the attribute does not exist or is not numeric, the
-  *defaultWeight* will be used instead. The attribute value must not be negative.
+    to read the edge weight. If the attribute does not exist or is not numeric, the
+    _defaultWeight_ will be used instead. The attribute value must not be negative.
   - **defaultWeight** (number): this value will be used as fallback if there is
-  no *weightAttribute* in the edge document, or if it's not a number. The value
-  must not be negative. The default is `1`.
-- `LIMIT` (see [LIMIT operation](operations-limit.html), *optional*):
+    no _weightAttribute_ in the edge document, or if it's not a number. The value
+    must not be negative. The default is `1`.
+- `LIMIT` (see [LIMIT operation](operations-limit.html), _optional_):
   the maximal number of paths to return. It is highly recommended to use
   a `LIMIT` for `K_SHORTEST_PATHS`.
 
@@ -144,16 +137,16 @@ FOR path
 
 Instead of `GRAPH graphName` you can specify a list of edge collections.
 The involved vertex collections are determined by the edges of the given
-edge collections. 
+edge collections.
 
 ### Traversing in mixed directions
 
 For k shortest paths with a list of edge collections you can optionally specify the
 direction for some of the edge collections. Say for example you have three edge
-collections *edges1*, *edges2* and *edges3*, where in *edges2* the direction
-has no relevance, but in *edges1* and *edges3* the direction should be taken into
+collections _edges1_, _edges2_ and _edges3_, where in _edges2_ the direction
+has no relevance, but in _edges1_ and _edges3_ the direction should be taken into
 account. In this case you can use `OUTBOUND` as general search direction and `ANY`
-specifically for *edges2* as follows:
+specifically for _edges2_ as follows:
 
 ```aql
 FOR vertex IN OUTBOUND K_SHORTEST_PATHS
@@ -165,8 +158,7 @@ All collections in the list that do not specify their own direction will use the
 direction defined after `IN` (here: `OUTBOUND`). This allows to use a different
 direction for each collection in your path search.
 
-Examples
---------
+## Examples
 
 We load an example graph to get a named graph that reflects some possible
 train connections in Europe and North America.
@@ -174,16 +166,16 @@ train connections in Europe and North America.
 ![Train Connection Map](../images/train_map.png)
 
 {% arangoshexample examplevar="examplevar" script="script" result="result" %}
-    @startDocuBlockInline GRAPHKSP_01_create_graph
-    @EXAMPLE_ARANGOSH_OUTPUT{GRAPHKSP_01_create_graph}
-    ~addIgnoreCollection("places");
-    ~addIgnoreCollection("connections");
-    var examples = require("@arangodb/graph-examples/example-graph.js");
-    var graph = examples.loadGraph("kShortestPathsGraph");
-    db.places.toArray();
-    db.connections.toArray();
-    @END_EXAMPLE_ARANGOSH_OUTPUT
-    @endDocuBlock GRAPHKSP_01_create_graph
+@startDocuBlockInline GRAPHKSP_01_create_graph
+@EXAMPLE_ARANGOSH_OUTPUT{GRAPHKSP_01_create_graph}
+~addIgnoreCollection("places");
+~addIgnoreCollection("connections");
+var examples = require("@arangodb/graph-examples/example-graph.js");
+var graph = examples.loadGraph("kShortestPathsGraph");
+db.places.toArray();
+db.connections.toArray();
+@END_EXAMPLE_ARANGOSH_OUTPUT
+@endDocuBlock GRAPHKSP_01_create_graph
 {% endarangoshexample %}
 {% include arangoshexample.html id=examplevar script=script result=result %}
 
@@ -196,48 +188,48 @@ not need to return the same path.
 Using `SHORTEST_PATH`:
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline GRAPHKSP_01_Aberdeen_to_London
-    @EXAMPLE_AQL{GRAPHKSP_01_Aberdeen_to_London}
-    @DATASET{kShortestPathsGraph}
-    FOR v, e IN OUTBOUND SHORTEST_PATH 'places/Aberdeen' TO 'places/London'
-    GRAPH 'kShortestPathsGraph'
-        RETURN { place: v.label, travelTime: e.travelTime }
-    @END_EXAMPLE_AQL
-    @endDocuBlock GRAPHKSP_01_Aberdeen_to_London
+@startDocuBlockInline GRAPHKSP_01_Aberdeen_to_London
+@EXAMPLE_AQL{GRAPHKSP_01_Aberdeen_to_London}
+@DATASET{kShortestPathsGraph}
+FOR v, e IN OUTBOUND SHORTEST_PATH 'places/Aberdeen' TO 'places/London'
+GRAPH 'kShortestPathsGraph'
+RETURN { place: v.label, travelTime: e.travelTime }
+@END_EXAMPLE_AQL
+@endDocuBlock GRAPHKSP_01_Aberdeen_to_London
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 Using `K_SHORTEST_PATHS`:
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline GRAPHKSP_02_Aberdeen_to_London
-    @EXAMPLE_AQL{GRAPHKSP_02_Aberdeen_to_London}
-    @DATASET{kShortestPathsGraph}
-    FOR p IN OUTBOUND K_SHORTEST_PATHS 'places/Aberdeen' TO 'places/London'
-    GRAPH 'kShortestPathsGraph'
-        LIMIT 1
-        RETURN { places: p.vertices[*].label, travelTimes: p.edges[*].travelTime }
-    @END_EXAMPLE_AQL
-    @endDocuBlock GRAPHKSP_02_Aberdeen_to_London
+@startDocuBlockInline GRAPHKSP_02_Aberdeen_to_London
+@EXAMPLE_AQL{GRAPHKSP_02_Aberdeen_to_London}
+@DATASET{kShortestPathsGraph}
+FOR p IN OUTBOUND K_SHORTEST_PATHS 'places/Aberdeen' TO 'places/London'
+GRAPH 'kShortestPathsGraph'
+LIMIT 1
+RETURN { places: p.vertices[*].label, travelTimes: p.edges[*].travelTime }
+@END_EXAMPLE_AQL
+@endDocuBlock GRAPHKSP_02_Aberdeen_to_London
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 With `K_SHORTEST_PATHS` we can ask for more than one option for a route:
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline GRAPHKSP_03_Aberdeen_to_London
-    @EXAMPLE_AQL{GRAPHKSP_03_Aberdeen_to_London}
-    @DATASET{kShortestPathsGraph}
-    FOR p IN OUTBOUND K_SHORTEST_PATHS 'places/Aberdeen' TO 'places/London'
-    GRAPH 'kShortestPathsGraph'
-        LIMIT 3
-        RETURN {
-            places: p.vertices[*].label,
-            travelTimes: p.edges[*].travelTime,
-            travelTimeTotal: SUM(p.edges[*].travelTime)
-        }
-    @END_EXAMPLE_AQL
-    @endDocuBlock GRAPHKSP_03_Aberdeen_to_London
+@startDocuBlockInline GRAPHKSP_03_Aberdeen_to_London
+@EXAMPLE_AQL{GRAPHKSP_03_Aberdeen_to_London}
+@DATASET{kShortestPathsGraph}
+FOR p IN OUTBOUND K_SHORTEST_PATHS 'places/Aberdeen' TO 'places/London'
+GRAPH 'kShortestPathsGraph'
+LIMIT 3
+RETURN {
+places: p.vertices[*].label,
+travelTimes: p.edges[*].travelTime,
+travelTimeTotal: SUM(p.edges[*].travelTime)
+}
+@END_EXAMPLE_AQL
+@endDocuBlock GRAPHKSP_03_Aberdeen_to_London
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -245,60 +237,60 @@ If we ask for routes that don't exist we get an empty result
 (from **Aberdeen** to **Toronto**):
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline GRAPHKSP_04_Aberdeen_to_Toronto
-    @EXAMPLE_AQL{GRAPHKSP_04_Aberdeen_to_Toronto}
-    @DATASET{kShortestPathsGraph}
-    FOR p IN OUTBOUND K_SHORTEST_PATHS 'places/Aberdeen' TO 'places/Toronto'
-    GRAPH 'kShortestPathsGraph'
-        LIMIT 3
-        RETURN {
-            places: p.vertices[*].label,
-            travelTimes: p.edges[*].travelTime,
-            travelTimeTotal: SUM(p.edges[*].travelTime)
-        }
-    @END_EXAMPLE_AQL
-    @endDocuBlock GRAPHKSP_04_Aberdeen_to_Toronto
+@startDocuBlockInline GRAPHKSP_04_Aberdeen_to_Toronto
+@EXAMPLE_AQL{GRAPHKSP_04_Aberdeen_to_Toronto}
+@DATASET{kShortestPathsGraph}
+FOR p IN OUTBOUND K_SHORTEST_PATHS 'places/Aberdeen' TO 'places/Toronto'
+GRAPH 'kShortestPathsGraph'
+LIMIT 3
+RETURN {
+places: p.vertices[*].label,
+travelTimes: p.edges[*].travelTime,
+travelTimeTotal: SUM(p.edges[*].travelTime)
+}
+@END_EXAMPLE_AQL
+@endDocuBlock GRAPHKSP_04_Aberdeen_to_Toronto
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-We can use the attribute *travelTime* that connections have as edge weights to
+We can use the attribute _travelTime_ that connections have as edge weights to
 take into account which connections are quicker. A high default weight is set,
-to be used if an edge has no *travelTime* attribute (not the case with the
+to be used if an edge has no _travelTime_ attribute (not the case with the
 example graph). This returns the top three routes with the fewest changes
 and favoring the least travel time for the connection **Saint Andrews**
 to **Cologne**:
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline GRAPHKSP_05_StAndrews_to_Cologne
-    @EXAMPLE_AQL{GRAPHKSP_05_StAndrews_to_Cologne}
-    @DATASET{kShortestPathsGraph}
-    FOR p IN OUTBOUND K_SHORTEST_PATHS 'places/StAndrews' TO 'places/Cologne'
-    GRAPH 'kShortestPathsGraph'
-    OPTIONS {
-        weightAttribute: 'travelTime',
-        defaultWeight: 15
-    }
-        LIMIT 3
-        RETURN {
-            places: p.vertices[*].label,
-            travelTimes: p.edges[*].travelTime,
-            travelTimeTotal: SUM(p.edges[*].travelTime)
-        }
-    @END_EXAMPLE_AQL
-    @endDocuBlock GRAPHKSP_05_StAndrews_to_Cologne
+@startDocuBlockInline GRAPHKSP_05_StAndrews_to_Cologne
+@EXAMPLE_AQL{GRAPHKSP_05_StAndrews_to_Cologne}
+@DATASET{kShortestPathsGraph}
+FOR p IN OUTBOUND K_SHORTEST_PATHS 'places/StAndrews' TO 'places/Cologne'
+GRAPH 'kShortestPathsGraph'
+OPTIONS {
+weightAttribute: 'travelTime',
+defaultWeight: 15
+}
+LIMIT 3
+RETURN {
+places: p.vertices[*].label,
+travelTimes: p.edges[*].travelTime,
+travelTimeTotal: SUM(p.edges[*].travelTime)
+}
+@END_EXAMPLE_AQL
+@endDocuBlock GRAPHKSP_05_StAndrews_to_Cologne
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 And finally clean up by removing the named graph:
 
 {% arangoshexample examplevar="examplevar" script="script" result="result" %}
-    @startDocuBlockInline GRAPHKSP_99_drop_graph
-    @EXAMPLE_ARANGOSH_OUTPUT{GRAPHKSP_99_drop_graph}
-    var examples = require("@arangodb/graph-examples/example-graph.js");
-    examples.dropGraph("kShortestPathsGraph");
-    ~removeIgnoreCollection("places");
-    ~removeIgnoreCollection("connections");
-    @END_EXAMPLE_ARANGOSH_OUTPUT
-    @endDocuBlock GRAPHKSP_99_drop_graph
+@startDocuBlockInline GRAPHKSP_99_drop_graph
+@EXAMPLE_ARANGOSH_OUTPUT{GRAPHKSP_99_drop_graph}
+var examples = require("@arangodb/graph-examples/example-graph.js");
+examples.dropGraph("kShortestPathsGraph");
+~removeIgnoreCollection("places");
+~removeIgnoreCollection("connections");
+@END_EXAMPLE_ARANGOSH_OUTPUT
+@endDocuBlock GRAPHKSP_99_drop_graph
 {% endarangoshexample %}
 {% include arangoshexample.html id=examplevar script=script result=result %}

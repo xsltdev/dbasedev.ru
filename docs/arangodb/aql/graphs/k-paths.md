@@ -1,15 +1,9 @@
----
-layout: default
-description: This type of query finds all paths between two given documents, a start and a target vertex in your graph
----
-k Paths in AQL
-==============
+# k пути в AQL
 
-General query idea
-------------------
+## General query idea
 
 This type of query finds all paths between two given documents,
-*startVertex* and *targetVertex* in your graph. The paths are restricted
+_startVertex_ and _targetVertex_ in your graph. The paths are restricted
 by minimum and maximum length of the paths.
 
 Every such path will be returned as a JSON object with two components:
@@ -36,41 +30,41 @@ Here we have a couple of alternatives:
 
 a) Straight way
 
-   1. Aberdeen
-   2. Leuchars
-   3. Edinburgh
-   4. York
-   5. London
+1.  Aberdeen
+2.  Leuchars
+3.  Edinburgh
+4.  York
+5.  London
 
 b) Detour at York
 
-   1. Aberdeen
-   2. Leuchars
-   3. Edinburgh
-   4. York
-   5. **Carlisle**
-   6. **Birmingham**
-   7. London
+1.  Aberdeen
+2.  Leuchars
+3.  Edinburgh
+4.  York
+5.  **Carlisle**
+6.  **Birmingham**
+7.  London
 
 c) Detour at Edinburgh
 
-   1. Aberdeen
-   2. Leuchars
-   3. Edinburgh
-   4. **Glasgow**
-   5. **Carlisle**
-   6. **Birmingham**
-   7. London
+1.  Aberdeen
+2.  Leuchars
+3.  Edinburgh
+4.  **Glasgow**
+5.  **Carlisle**
+6.  **Birmingham**
+7.  London
 
 d) Detour at Edinburgh to York
 
-   1. Aberdeen
-   2. Leuchars
-   3. Edinburgh
-   4. **Glasgow**
-   5. **Carlisle**
-   6. York
-   7. London
+1.  Aberdeen
+2.  Leuchars
+3.  Edinburgh
+4.  **Glasgow**
+5.  **Carlisle**
+6.  York
+7.  London
 
 Note that we only consider paths as valid that do not contain the same vertex
 twice. The following alternative would visit Aberdeen twice and will not be returned by k Paths:
@@ -83,8 +77,7 @@ twice. The following alternative would visit Aberdeen twice and will not be retu
 6. York
 7. London
 
-Example Use Cases
------------------
+## Example Use Cases
 
 The use-cases for k Paths are about the same as for unweighted k Shortest Paths.
 The main difference is that k Shortest Paths will enumerate all paths with
@@ -94,12 +87,11 @@ path length, and are thereby upper-bounded.
 
 The k Paths traversal can be used as foundation for several other algorithms:
 
-* **Transportation** of any kind (e.g. road traffic, network package routing)
-* **Flow problems**: We need to transfer items from A to B, which alternatives
+- **Transportation** of any kind (e.g. road traffic, network package routing)
+- **Flow problems**: We need to transfer items from A to B, which alternatives
   do we have? What is their capacity?
 
-Syntax
-------
+## Syntax
 
 The syntax for k Paths queries is similar to the one for
 [K Shortest Path](graphs-kshortest-paths.html) with the addition to define the
@@ -124,13 +116,13 @@ FOR path
 - `FOR`: emits the variable **path** which contains one path as an object
   containing `vertices` and `edges` of the path.
 - `IN` `MIN..MAX`: the minimal and maximal depth for the traversal:
-  - **min** (number, *optional*): paths returned by this query will
-    have at least a length of *min* many edges.
+  - **min** (number, _optional_): paths returned by this query will
+    have at least a length of _min_ many edges.
     If not specified, it defaults to 1. The minimal possible value is 0.
-  - **max** (number, *optional*): paths returned by this query will
-    have at most a length of *max* many edges.
-    If omitted, *max* defaults to *min*. Thus only the vertices and edges in
-    the range of *min* are returned. *max* can not be specified without *min*.
+  - **max** (number, _optional_): paths returned by this query will
+    have at most a length of _max_ many edges.
+    If omitted, _max_ defaults to _min_. Thus only the vertices and edges in
+    the range of _min_ are returned. _max_ can not be specified without _min_.
 - `OUTBOUND|INBOUND|ANY`: defines in which direction
   edges are followed (outgoing, incoming, or both)
 - `K_PATHS`: the keyword to compute all Paths
@@ -141,7 +133,7 @@ FOR path
   also the case if one of the specified documents does not exist.
 - `GRAPH` **graphName** (string): the name identifying the named graph.
   Its vertex and edge collections will be looked up.
-- `OPTIONS` **options** (object, *optional*): used to modify the execution of
+- `OPTIONS` **options** (object, _optional_): used to modify the execution of
   the search. Right now there are no options that trigger an effect.
   However, this may change in the future.
 
@@ -163,10 +155,10 @@ edge collections.
 
 For k paths with a list of edge collections you can optionally specify the
 direction for some of the edge collections. Say for example you have three edge
-collections *edges1*, *edges2* and *edges3*, where in *edges2* the direction
-has no relevance, but in *edges1* and *edges3* the direction should be taken
+collections _edges1_, _edges2_ and _edges3_, where in _edges2_ the direction
+has no relevance, but in _edges1_ and _edges3_ the direction should be taken
 into account. In this case you can use `OUTBOUND` as general search direction
-and `ANY` specifically for *edges2* as follows:
+and `ANY` specifically for _edges2_ as follows:
 
 ```aql
 FOR vertex IN OUTBOUND K_PATHS
@@ -178,8 +170,7 @@ All collections in the list that do not specify their own direction will use the
 direction defined after `IN` (here: `OUTBOUND`). This allows to use a different
 direction for each collection in your path search.
 
-Examples
---------
+## Examples
 
 We load an example graph to get a named graph that reflects some possible
 train connections in Europe and North America.
@@ -187,30 +178,30 @@ train connections in Europe and North America.
 ![Train Connection Map](../images/train_map.png)
 
 {% arangoshexample examplevar="examplevar" script="script" result="result" %}
-    @startDocuBlockInline GRAPHKP_01_create_graph
-    @EXAMPLE_ARANGOSH_OUTPUT{GRAPHKP_01_create_graph}
-    ~addIgnoreCollection("places");
-    ~addIgnoreCollection("connections");
-    var examples = require("@arangodb/graph-examples/example-graph.js");
-    var graph = examples.loadGraph("kShortestPathsGraph");
-    db.places.toArray();
-    db.connections.toArray();
-    @END_EXAMPLE_ARANGOSH_OUTPUT
-    @endDocuBlock GRAPHKP_01_create_graph
+@startDocuBlockInline GRAPHKP_01_create_graph
+@EXAMPLE_ARANGOSH_OUTPUT{GRAPHKP_01_create_graph}
+~addIgnoreCollection("places");
+~addIgnoreCollection("connections");
+var examples = require("@arangodb/graph-examples/example-graph.js");
+var graph = examples.loadGraph("kShortestPathsGraph");
+db.places.toArray();
+db.connections.toArray();
+@END_EXAMPLE_ARANGOSH_OUTPUT
+@endDocuBlock GRAPHKP_01_create_graph
 {% endarangoshexample %}
 {% include arangoshexample.html id=examplevar script=script result=result %}
 
 Suppose we want to query all routes from **Aberdeen** to **London**.
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline GRAPHKP_01_Aberdeen_to_London
-    @EXAMPLE_AQL{GRAPHKP_01_Aberdeen_to_London}
-    @DATASET{kShortestPathsGraph}
-    FOR p IN 1..10 OUTBOUND K_PATHS 'places/Aberdeen' TO 'places/London'
-    GRAPH 'kShortestPathsGraph'
-        RETURN { places: p.vertices[*].label, travelTimes: p.edges[*].travelTime }
-    @END_EXAMPLE_AQL
-    @endDocuBlock GRAPHKP_01_Aberdeen_to_London
+@startDocuBlockInline GRAPHKP_01_Aberdeen_to_London
+@EXAMPLE_AQL{GRAPHKP_01_Aberdeen_to_London}
+@DATASET{kShortestPathsGraph}
+FOR p IN 1..10 OUTBOUND K_PATHS 'places/Aberdeen' TO 'places/London'
+GRAPH 'kShortestPathsGraph'
+RETURN { places: p.vertices[*].label, travelTimes: p.edges[*].travelTime }
+@END_EXAMPLE_AQL
+@endDocuBlock GRAPHKP_01_Aberdeen_to_London
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -218,27 +209,27 @@ If we ask for routes that don't exist we get an empty result
 (from **Aberdeen** to **Toronto**):
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline GRAPHKP_02_Aberdeen_to_Toronto
-    @EXAMPLE_AQL{GRAPHKP_02_Aberdeen_to_Toronto}
-    @DATASET{kShortestPathsGraph}
-    FOR p IN 1..10 OUTBOUND K_PATHS 'places/Aberdeen' TO 'places/Toronto'
-    GRAPH 'kShortestPathsGraph'
-        RETURN { places: p.vertices[*].label, travelTimes: p.edges[*].travelTime }
-    @END_EXAMPLE_AQL
-    @endDocuBlock GRAPHKP_02_Aberdeen_to_Toronto
+@startDocuBlockInline GRAPHKP_02_Aberdeen_to_Toronto
+@EXAMPLE_AQL{GRAPHKP_02_Aberdeen_to_Toronto}
+@DATASET{kShortestPathsGraph}
+FOR p IN 1..10 OUTBOUND K_PATHS 'places/Aberdeen' TO 'places/Toronto'
+GRAPH 'kShortestPathsGraph'
+RETURN { places: p.vertices[*].label, travelTimes: p.edges[*].travelTime }
+@END_EXAMPLE_AQL
+@endDocuBlock GRAPHKP_02_Aberdeen_to_Toronto
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 And finally clean up by removing the named graph:
 
 {% arangoshexample examplevar="examplevar" script="script" result="result" %}
-    @startDocuBlockInline GRAPHKP_99_drop_graph
-    @EXAMPLE_ARANGOSH_OUTPUT{GRAPHKP_99_drop_graph}
-    var examples = require("@arangodb/graph-examples/example-graph.js");
-    examples.dropGraph("kShortestPathsGraph");
-    ~removeIgnoreCollection("places");
-    ~removeIgnoreCollection("connections");
-    @END_EXAMPLE_ARANGOSH_OUTPUT
-    @endDocuBlock GRAPHKP_99_drop_graph
+@startDocuBlockInline GRAPHKP_99_drop_graph
+@EXAMPLE_ARANGOSH_OUTPUT{GRAPHKP_99_drop_graph}
+var examples = require("@arangodb/graph-examples/example-graph.js");
+examples.dropGraph("kShortestPathsGraph");
+~removeIgnoreCollection("places");
+~removeIgnoreCollection("connections");
+@END_EXAMPLE_ARANGOSH_OUTPUT
+@endDocuBlock GRAPHKP_99_drop_graph
 {% endarangoshexample %}
 {% include arangoshexample.html id=examplevar script=script result=result %}

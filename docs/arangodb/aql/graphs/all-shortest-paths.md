@@ -1,17 +1,9 @@
----
-layout: default
-description: >-
-  Find all paths of shortest length between a start and target vertex
----
-# All Shortest Paths in AQL
-
-{{ page.description }}
-{:class="lead"}
+# Все кратчайшие пути в AQL
 
 ## General query idea
 
 This type of query finds all paths of shortest length between two given
-documents (*startVertex* and *targetVertex*) in your graph.
+documents (_startVertex_ and _targetVertex_) in your graph.
 
 Every returned path is a JSON object with two attributes:
 
@@ -82,16 +74,16 @@ FOR path
 
 Instead of `GRAPH graphName` you can specify a list of edge collections.
 The involved vertex collections are determined by the edges of the given
-edge collections. 
+edge collections.
 
 ### Traversing in mixed directions
 
 For All Shortest Paths with a list of edge collections, you can optionally specify the
 direction for some of the edge collections. Say, for example, you have three edge
-collections *edges1*, *edges2* and *edges3*, where in *edges2* the direction
-has no relevance, but in *edges1* and *edges3* the direction should be taken into
+collections _edges1_, _edges2_ and _edges3_, where in _edges2_ the direction
+has no relevance, but in _edges1_ and _edges3_ the direction should be taken into
 account. In this case you can use `OUTBOUND` as a general search direction and `ANY`
-specifically for *edges2* as follows:
+specifically for _edges2_ as follows:
 
 ```aql
 FOR path IN OUTBOUND ALL_SHORTEST_PATHS
@@ -111,16 +103,16 @@ train connections in Europe and North America:
 ![Train Connection Map](../images/train_map.png)
 
 {% arangoshexample examplevar="examplevar" script="script" result="result" %}
-    @startDocuBlockInline GRAPHASP_01_create_graph
-    @EXAMPLE_ARANGOSH_OUTPUT{GRAPHASP_01_create_graph}
-    ~addIgnoreCollection("places");
-    ~addIgnoreCollection("connections");
-    var examples = require("@arangodb/graph-examples/example-graph.js");
-    var graph = examples.loadGraph("kShortestPathsGraph");
-    db.places.toArray();
-    db.connections.toArray();
-    @END_EXAMPLE_ARANGOSH_OUTPUT
-    @endDocuBlock GRAPHASP_01_create_graph
+@startDocuBlockInline GRAPHASP_01_create_graph
+@EXAMPLE_ARANGOSH_OUTPUT{GRAPHASP_01_create_graph}
+~addIgnoreCollection("places");
+~addIgnoreCollection("connections");
+var examples = require("@arangodb/graph-examples/example-graph.js");
+var graph = examples.loadGraph("kShortestPathsGraph");
+db.places.toArray();
+db.connections.toArray();
+@END_EXAMPLE_ARANGOSH_OUTPUT
+@endDocuBlock GRAPHASP_01_create_graph
 {% endarangoshexample %}
 {% include arangoshexample.html id=examplevar script=script result=result %}
 
@@ -134,28 +126,28 @@ or reaches the defined limit (the number of paths).
 Using `SHORTEST_PATH` to get one shortest path:
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline GRAPHASP_01_Carlisle_to_London
-    @EXAMPLE_AQL{GRAPHASP_01_Carlisle_to_London}
-    @DATASET{kShortestPathsGraph}
-    FOR v, e IN OUTBOUND SHORTEST_PATH 'places/Carlisle' TO 'places/London'
-    GRAPH 'kShortestPathsGraph'
-      RETURN { place: v.label }
-    @END_EXAMPLE_AQL
-    @endDocuBlock GRAPHASP_01_Carlisle_to_London
+@startDocuBlockInline GRAPHASP_01_Carlisle_to_London
+@EXAMPLE_AQL{GRAPHASP_01_Carlisle_to_London}
+@DATASET{kShortestPathsGraph}
+FOR v, e IN OUTBOUND SHORTEST_PATH 'places/Carlisle' TO 'places/London'
+GRAPH 'kShortestPathsGraph'
+RETURN { place: v.label }
+@END_EXAMPLE_AQL
+@endDocuBlock GRAPHASP_01_Carlisle_to_London
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 Using `ALL_SHORTEST_PATHS` to get both shortest paths:
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline GRAPHASP_02_Carlisle_to_London
-    @EXAMPLE_AQL{GRAPHASP_02_Carlisle_to_London}
-    @DATASET{kShortestPathsGraph}
-    FOR p IN OUTBOUND ALL_SHORTEST_PATHS 'places/Carlisle' TO 'places/London'
-    GRAPH 'kShortestPathsGraph'
-      RETURN { places: p.vertices[*].label }
-    @END_EXAMPLE_AQL
-    @endDocuBlock GRAPHASP_02_Carlisle_to_London
+@startDocuBlockInline GRAPHASP_02_Carlisle_to_London
+@EXAMPLE_AQL{GRAPHASP_02_Carlisle_to_London}
+@DATASET{kShortestPathsGraph}
+FOR p IN OUTBOUND ALL_SHORTEST_PATHS 'places/Carlisle' TO 'places/London'
+GRAPH 'kShortestPathsGraph'
+RETURN { places: p.vertices[*].label }
+@END_EXAMPLE_AQL
+@endDocuBlock GRAPHASP_02_Carlisle_to_London
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -163,14 +155,14 @@ Using `K_SHORTEST_PATHS` without a limit to get all paths in order of
 increasing length:
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline GRAPHASP_03_Carlisle_to_London
-    @EXAMPLE_AQL{GRAPHASP_03_Carlisle_to_London}
-    @DATASET{kShortestPathsGraph}
-    FOR p IN OUTBOUND K_SHORTEST_PATHS 'places/Carlisle' TO 'places/London'
-    GRAPH 'kShortestPathsGraph'
-      RETURN { places: p.vertices[*].label }
-    @END_EXAMPLE_AQL
-    @endDocuBlock GRAPHASP_03_Carlisle_to_London
+@startDocuBlockInline GRAPHASP_03_Carlisle_to_London
+@EXAMPLE_AQL{GRAPHASP_03_Carlisle_to_London}
+@DATASET{kShortestPathsGraph}
+FOR p IN OUTBOUND K_SHORTEST_PATHS 'places/Carlisle' TO 'places/London'
+GRAPH 'kShortestPathsGraph'
+RETURN { places: p.vertices[*].label }
+@END_EXAMPLE_AQL
+@endDocuBlock GRAPHASP_03_Carlisle_to_London
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -178,29 +170,29 @@ If you ask for routes that don't exist, you get an empty result
 (from **Carlisle** to **Toronto**):
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline GRAPHASP_04_Carlisle_to_Toronto
-    @EXAMPLE_AQL{GRAPHASP_04_Carlisle_to_Toronto}
-    @DATASET{kShortestPathsGraph}
-    FOR p IN OUTBOUND ALL_SHORTEST_PATHS 'places/Carlisle' TO 'places/Toronto'
-    GRAPH 'kShortestPathsGraph'
-      RETURN {
-        places: p.vertices[*].label
-      }
-    @END_EXAMPLE_AQL
-    @endDocuBlock GRAPHASP_04_Carlisle_to_Toronto
+@startDocuBlockInline GRAPHASP_04_Carlisle_to_Toronto
+@EXAMPLE_AQL{GRAPHASP_04_Carlisle_to_Toronto}
+@DATASET{kShortestPathsGraph}
+FOR p IN OUTBOUND ALL_SHORTEST_PATHS 'places/Carlisle' TO 'places/Toronto'
+GRAPH 'kShortestPathsGraph'
+RETURN {
+places: p.vertices[*].label
+}
+@END_EXAMPLE_AQL
+@endDocuBlock GRAPHASP_04_Carlisle_to_Toronto
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 And finally clean up by removing the named graph:
 
 {% arangoshexample examplevar="examplevar" script="script" result="result" %}
-    @startDocuBlockInline GRAPHASP_99_drop_graph
-    @EXAMPLE_ARANGOSH_OUTPUT{GRAPHASP_99_drop_graph}
-    var examples = require("@arangodb/graph-examples/example-graph.js");
-    examples.dropGraph("kShortestPathsGraph");
-    ~removeIgnoreCollection("places");
-    ~removeIgnoreCollection("connections");
-    @END_EXAMPLE_ARANGOSH_OUTPUT
-    @endDocuBlock GRAPHASP_99_drop_graph
+@startDocuBlockInline GRAPHASP_99_drop_graph
+@EXAMPLE_ARANGOSH_OUTPUT{GRAPHASP_99_drop_graph}
+var examples = require("@arangodb/graph-examples/example-graph.js");
+examples.dropGraph("kShortestPathsGraph");
+~removeIgnoreCollection("places");
+~removeIgnoreCollection("connections");
+@END_EXAMPLE_ARANGOSH_OUTPUT
+@endDocuBlock GRAPHASP_99_drop_graph
 {% endarangoshexample %}
 {% include arangoshexample.html id=examplevar script=script result=result %}

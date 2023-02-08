@@ -1,9 +1,8 @@
-# Operators
+# Операторы
 
-AQL supports a number of operators that can be used in expressions. There are
-comparison, logical, arithmetic, and the ternary operator.
+AQL поддерживает ряд операторов, которые можно использовать в выражениях. Есть сравнение, логический, арифметический и тернарный оператор.
 
-## Comparison operators
+## Операторы сравнения
 
 Comparison (or relational) operators compare two operands. They can be used with
 any input data types, and return a boolean result value.

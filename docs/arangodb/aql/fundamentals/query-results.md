@@ -1,4 +1,4 @@
-# Query results
+# Результаты запроса
 
 ## Result sets
 

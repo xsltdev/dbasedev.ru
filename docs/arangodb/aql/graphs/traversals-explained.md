@@ -1,33 +1,26 @@
----
-layout: default
-description: A traversal starts at one specific document (startVertex) and follows alledges connected to this document
----
-Traversals explained
-====================
+# Объяснение обходов
 
-General query idea
-------------------
+## General query idea
 
-A traversal starts at one specific document (*startVertex*) and follows all
-edges connected to this document. For all documents (*vertices*) that are
+A traversal starts at one specific document (_startVertex_) and follows all
+edges connected to this document. For all documents (_vertices_) that are
 targeted by these edges it will again follow all edges connected to them and
 so on. It is possible to define how many of these follow iterations should be
-executed at least (*min* depth) and at most (*max* depth).
+executed at least (_min_ depth) and at most (_max_ depth).
 
 For all vertices that were visited during this process in the range between
-*min* depth and *max* depth iterations you will get a result in form of a
+_min_ depth and _max_ depth iterations you will get a result in form of a
 set with three items:
 
 1. The visited vertex.
 2. The edge pointing to it.
 3. The complete path from startVertex to the visited vertex as object with an
-  attribute *edges* and an attribute *vertices*, each a list of the coresponding
-  elements. These lists are sorted, which means the first element in *vertices*
-  is the *startVertex* and the last is the visited vertex, and the n-th element
-  in *edges* connects the n-th element with the (n+1)-th element in *vertices*.
+   attribute _edges_ and an attribute _vertices_, each a list of the coresponding
+   elements. These lists are sorted, which means the first element in _vertices_
+   is the _startVertex_ and the last is the visited vertex, and the n-th element
+   in _edges_ connects the n-th element with the (n+1)-th element in _vertices_.
 
-Example execution
------------------
+## Example execution
 
 Let's take a look at a simple example to explain how it works.
 This is the graph that we are going to traverse:
@@ -37,8 +30,8 @@ This is the graph that we are going to traverse:
 We use the following parameters for our query:
 
 1. We start at the vertex **A**.
-2. We use a *min* depth of 1.
-3. We use a *max* depth of 2.
+2. We use a _min_ depth of 1.
+3. We use a _max_ depth of 2.
 4. We follow only in `OUTBOUND` direction of edges
 
 ![traversal graph step 1](../images/traversal_graph1.png)
@@ -54,8 +47,8 @@ in cycles. Now again it will visit one of the direct neighbors of **B**, say **E
 
 ![traversal graph step 3](../images/traversal_graph3.png)
 
-We have limited the query with a *max* depth of *2*, so it will not pick any
-neighbor of **E**, as the path from **A** to **E** already requires *2* steps.
+We have limited the query with a _max_ depth of _2_, so it will not pick any
+neighbor of **E**, as the path from **A** to **E** already requires _2_ steps.
 Instead, we will go back one level to **B** and continue with any other direct
 neighbor there:
 
