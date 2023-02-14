@@ -1,41 +1,31 @@
-# Operators
+# Операторы
 
-AQL supports a number of operators that can be used in expressions. There are
-comparison, logical, arithmetic, and the ternary operator.
+AQL поддерживает ряд операторов, которые можно использовать в выражениях. Есть сравнение, логический, арифметический и тернарный оператор.
 
-## Comparison operators
+## Операторы сравнения
 
-Comparison (or relational) operators compare two operands. They can be used with
-any input data types, and return a boolean result value.
+Операторы сравнения (или отношения) сравнивают два операнда. Их можно использовать с любыми типами входных данных и возвращать логическое значение результата.
 
-The following comparison operators are supported:
+Поддерживаются следующие операторы сравнения:
 
-| Operator   | Description                                                 |
-| :--------- | :---------------------------------------------------------- |
-| `==`       | equality                                                    |
-| `!=`       | inequality                                                  |
-| `<`        | less than                                                   |
-| `<=`       | less or equal                                               |
-| `>`        | greater than                                                |
-| `>=`       | greater or equal                                            |
-| `IN`       | test if a value is contained in an array                    |
-| `NOT IN`   | test if a value is not contained in an array                |
-| `LIKE`     | tests if a string value matches a pattern                   |
-| `NOT LIKE` | tests if a string value does not match a pattern            |
-| `=~`       | tests if a string value matches a regular expression        |
-| `!~`       | tests if a string value does not match a regular expression |
+| Оператор   | Описание                                                                |
+| :--------- | :---------------------------------------------------------------------- |
+| `==`       | равенство                                                               |
+| `!=`       | неравенство                                                             |
+| `<`        | меньше чем                                                              |
+| `<=`       | меньше или равно                                                        |
+| `>`        | больше чем                                                              |
+| `>=`       | больше или равно                                                        |
+| `IN`       | проверить, содержится ли значение в массиве                             |
+| `NOT IN`   | проверить, не содержится ли значение в массиве                          |
+| `LIKE`     | проверяет, соответствует ли строковое значение шаблону                  |
+| `NOT LIKE` | проверяет, не соответствует ли строковое значение шаблону               |
+| `=~`       | проверяет, соответствует ли строковое значение регулярному выражению    |
+| `!~`       | проверяет, не соответствует ли строковое значение регулярному выражению |
 
-Each of the comparison operators returns a boolean value if the comparison can
-be evaluated and returns _true_ if the comparison evaluates to true, and _false_
-otherwise.
+Каждый из операторов сравнения возвращает логическое значение, если сравнение может быть оценено, и возвращает `true`, если сравнение оценивается как `true`, и `false` в противном случае.
 
-The comparison operators accept any data types for the first and second
-operands. However, `IN` and `NOT IN` only return a meaningful result if
-their right-hand operand is an array. `LIKE` and `NOT LIKE` only execute
-if both operands are string values. All four operators do not perform
-implicit type casts if the compared operands have different types, i.e.
-they test for strict equality or inequality (`0` is different to `"0"`,
-`[0]`, `false` and `null` for example).
+Операторы сравнения принимают любые типы данных для первого и второго операндов. Однако операторы `IN` и `NOT IN` возвращают осмысленный результат только в том случае, если их правый операнд является массивом. `LIKE` и `NOT LIKE` выполняются, только если оба операнда являются строковыми значениями. Все четыре оператора не выполняют неявное приведение типов, если сравниваемые операнды имеют разные типы, т. е. они проверяют строгое равенство или неравенство (например, `0` отличается от `"0"`, `[0]`, `false` и `null`).
 
 ```aql
      0  ==  null            // false
@@ -56,14 +46,7 @@ they test for strict equality or inequality (`0` is different to `"0"`,
  "foo"  !~  "[a-z]+bar$"    // true
 ```
 
-The `LIKE` operator checks whether its left operand matches the pattern specified
-in its right operand. The pattern can consist of regular characters and wildcards.
-The supported wildcards are `_` to match a single arbitrary character, and `%` to
-match any number of arbitrary characters. Literal `%` and `_` need to be escaped
-with a backslash. Backslashes need to be escaped themselves, which effectively
-means that two reverse solidus characters need to precede a literal percent sign
-or underscore. In arangosh, additional escaping is required, making it four
-backslashes in total preceding the to-be-escaped character.
+Оператор `LIKE` проверяет, соответствует ли его левый операнд шаблону, указанному в его правом операнде. Шаблон может состоять из обычных символов и подстановочных знаков. Поддерживаемые подстановочные знаки: `_` для соответствия одному произвольному символу и `%` для соответствия любому количеству произвольных символов. Буквенные `%` и `_` должны быть экранированы обратной косой чертой. Обратная косая черта должна быть экранирована, что фактически означает, что два символа обратной косой черты должны предшествовать буквальному знаку процента или подчеркиванию. В арангоше требуется дополнительное экранирование, в результате чего всего четыре обратной косой черты предшествуют символу, который нужно экранировать.
 
 ```aql
     "abc" LIKE "a%"          // true
@@ -71,39 +54,24 @@ backslashes in total preceding the to-be-escaped character.
 "a_b_foo" LIKE "a\\_b\\_foo" // true
 ```
 
-The pattern matching performed by the `LIKE` operator is case-sensitive.
+Сопоставление с образцом, выполняемое оператором `LIKE`, чувствительно к регистру.
 
-The `NOT LIKE` operator has the same characteristics as the `LIKE` operator
-but with the result negated. It is thus identical to `NOT (… LIKE …)`. Note
-the parentheses, which are necessary for certain expressions:
+Оператор `NOT LIKE` имеет те же характеристики, что и оператор `LIKE`, но с отрицательным результатом. Таким образом, оно идентично `NOT (… LIKE …)`. Обратите внимание на круглые скобки, необходимые для некоторых выражений:
 
 ```aql
 FOR doc IN coll
   RETURN NOT doc.attr LIKE "…"
 ```
 
-The return expression gets transformed into `LIKE(!doc.attr, "…")`, leading
-to unexpected results. `NOT(doc.attr LIKE "…")` gets transformed into the
-more reasonable `! LIKE(doc.attr, "…")`.
+Возвращаемое выражение преобразуется в `LIKE(!doc.attr, "…")`, что приводит к неожиданным результатам. `NOT(doc.attr LIKE "…")` превращается в более разумный `! LIKE(doc.attr, "…")`.
 
-The regular expression operators `=~` and `!~` expect their left-hand operands to
-be strings, and their right-hand operands to be strings containing valid regular
-expressions as specified in the documentation for the AQL function
-[REGEX_TEST()](functions-string.html#regex_test).
+Операторы регулярных выражений `=~` и `!~` ожидают, что их левые операнды будут строками, а их правые операнды будут строками, содержащими допустимые регулярные выражения, как указано в документации для функции AQL [REGEX_TEST()](functions/string.md#regex_test).
 
-## Array comparison operators
+## Операторы сравнения массивов
 
-Most comparison operators also exist as an _array variant_. In the array variant,
-a `==`, `!=`, `>`, `>=`, `<`, `<=`, `IN`, or `NOT IN` operator is prefixed with
-an `ALL`, `ANY`, or `NONE` keyword. This changes the operator's behavior to
-compare the individual array elements of the left-hand argument to the right-hand
-argument. Depending on the quantifying keyword, all, any, or none of these
-comparisons need to be satisfied to evaluate to `true` overall.
+Большинство операторов сравнения также существуют в виде _варианта массива_. В варианте с массивом оператор `==`, `!=`, `>`, `>=`, `<`, `<=`, `IN` или `NOT IN` имеет префикс с ключевым словом `ALL`, `ANY` или `NONE`. Это изменяет поведение оператора для сравнения отдельных элементов массива левого аргумента с правым аргументом. В зависимости от ключевого слова, определяющего количественную оценку, все, любые или ни одно из этих сравнений должны быть удовлетворены, чтобы в целом оценка была истинной.
 
-You can also combine one of the supported comparison operators with the special
-`AT LEAST (<expression>)` operator to require an arbitrary number of elements
-to satisfy the condition to evaluate to `true`. You can use a static number or
-calculate it dynamically using an expression.
+Вы также можете комбинировать один из поддерживаемых операторов сравнения со специальным оператором `AT LEAST (<выражение>)`, чтобы потребовать, чтобы произвольное количество элементов удовлетворяло условию, чтобы оценка была `true`. Вы можете использовать статическое число или вычислить его динамически с помощью выражения.
 
 ```aql
 [ 1, 2, 3 ]  ALL IN  [ 2, 3, 4 ]  // false
@@ -129,33 +97,27 @@ calculate it dynamically using an expression.
 ["foo", "bar"]  AT LEAST (1+1) ==  "foo"   // false
 ```
 
-Note that these operators do not utilize indexes in regular queries.
-The operators are also supported in [SEARCH expressions](operations-search.html),
-where ArangoSearch's indexes can be utilized. The semantics differ however, see
-[AQL `SEARCH` operation](operations-search.html#array-comparison-operators).
+Обратите внимание, что эти операторы не используют индексы в обычных запросах. Операторы также поддерживаются в выражениях [SEARCH](operations/search.md), где можно использовать индексы ArangoSearch. Однако семантика различается, см. операцию AQL [SEARCH](operations/search.html#array-comparison-operators).
 
-## Logical operators
+## Логические операторы
 
-The following logical operators are supported in AQL:
+В AQL поддерживаются следующие логические операторы:
 
-- `&&` logical and operator
-- `||` logical or operator
-- `!` logical not/negation operator
+- `&&` логический оператор И
+- `||` логический оператор ИЛИ
+- `!` логический оператор НЕ
 
-AQL also supports the following alternative forms for the logical operators:
+AQL также поддерживает следующие альтернативные формы логических операторов:
 
-- `AND` logical and operator
-- `OR` logical or operator
-- `NOT` logical not/negation operator
+- `AND` логический оператор И
+- `OR` логический оператор ИЛИ
+- `NOT` логический оператор НЕ
 
-The alternative forms are aliases and functionally equivalent to the regular
-operators.
+Альтернативные формы являются псевдонимами и функционально эквивалентны обычным операторам.
 
-The two-operand logical operators in AQL are executed with short-circuit
-evaluation (except if one of the operands is or includes a subquery. In this
-case the subquery is pulled out an evaluated before the logical operator).
+Логические операторы с двумя операндами в AQL выполняются с кратким вычислением (за исключением случаев, когда один из операндов является подзапросом или включает его. В этом случае подзапрос извлекается и оценивается перед логическим оператором).
 
-The result of the logical operators in AQL is defined as follows:
+Результат логических операторов в AQL определяется следующим образом:
 
 - `lhs && rhs` returns `lhs` if it is `false` or would be `false` when converted
   to a boolean. If `lhs` is `true` or would be `true` when converted to a boolean,

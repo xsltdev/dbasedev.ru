@@ -1,10 +1,4 @@
----
-layout: default
-description: AQL offers some bit manipulation and interpretation functions for bitwise arithmetic
-title: AQL Bit Functions
----
-Bit functions
-=============
+# Битовые функции
 
 <small>Introduced in: v3.7.7</small>
 
@@ -21,12 +15,11 @@ precision loss or rounding errors should occur when the input/output values of
 bit functions are passed around or sent over the wire to client applications
 with unknown precision number types.
 
-BIT_AND()
----------
+## BIT_AND()
 
 `BIT_AND(numbersArray) → result`
 
-And-combines the numeric values in *numbersArray* into a single numeric result
+And-combines the numeric values in _numbersArray_ into a single numeric result
 value.
 
 - **numbersArray** (array): array with numeric input values
@@ -58,8 +51,7 @@ BIT_AND(127, 255) // 127
 BIT_AND("foo") // null
 ```
 
-BIT_CONSTRUCT()
----------------
+## BIT_CONSTRUCT()
 
 `BIT_CONSTRUCT(positionsArray) → result`
 
@@ -79,8 +71,7 @@ BIT_CONSTRUCT([0, 4, 8]) // 273
 BIT_CONSTRUCT([0, 1, 10, 31]) // 2147484675
 ```
 
-BIT_DECONSTRUCT()
------------------
+## BIT_DECONSTRUCT()
 
 `BIT_DECONSTRUCT(number) → positionsArray`
 
@@ -100,8 +91,7 @@ BIT_DECONSTRUCT(273) // [0, 4, 8]
 BIT_DECONSTRUCT(2147484675) // [0, 1, 10, 31]
 ```
 
-BIT_FROM_STRING()
------------------
+## BIT_FROM_STRING()
 
 `BIT_FROM_STRING(bitstring) → number`
 
@@ -125,8 +115,7 @@ BIT_FROM_STRING("11010111011101") // 13789
 BIT_FROM_STRING("100000000000000000000") // 1048756
 ```
 
-BIT_NEGATE()
-------------
+## BIT_NEGATE()
 
 `BIT_NEGATE(number, bits) → result`
 
@@ -149,12 +138,11 @@ BIT_NEGATE(3, 4) // 12
 BIT_NEGATE(446359921, 32) // 3848607374
 ```
 
-BIT_OR()
---------
+## BIT_OR()
 
 `BIT_OR(numbersArray) → result`
 
-Or-combines the numeric values in *numbersArray* into a single numeric result
+Or-combines the numeric values in _numbersArray_ into a single numeric result
 value.
 
 - **numbersArray** (array): array with numeric input values
@@ -186,8 +174,7 @@ BIT_OR(255, 127) // 255
 BIT_OR("foo") // null
 ```
 
-BIT_POPCOUNT()
---------------
+## BIT_POPCOUNT()
 
 `BIT_POPCOUNT(number) → result`
 
@@ -206,8 +193,7 @@ BIT_POPCOUNT(69399252) // 12
 BIT_POPCOUNT("foo") // null
 ```
 
-BIT_SHIFT_LEFT()
-----------------
+## BIT_SHIFT_LEFT()
 
 `BIT_SHIFT_LEFT(number, shift, bits) → result`
 
@@ -231,8 +217,7 @@ BIT_SHIFT_LEFT(2, 10, 16) // 2048
 BIT_SHIFT_LEFT(878836, 16, 32) // 1760821248
 ```
 
-BIT_SHIFT_RIGHT()
------------------
+## BIT_SHIFT_RIGHT()
 
 `BIT_SHIFT_RIGHT(number, shift, bits) → result`
 
@@ -256,12 +241,11 @@ BIT_SHIFT_RIGHT(65536, 13, 16) // 8
 BIT_SHIFT_RIGHT(878836, 4, 32) // 54927
 ```
 
-BIT_TEST()
-----------
+## BIT_TEST()
 
 `BIT_TEST(number, index) → result`
 
-Tests if the at position *index* is set in **number**.
+Tests if the at position _index_ is set in **number**.
 
 - **number** (number): the number to test
 - **index** (number): index of the bit to test (0 to 31)
@@ -278,8 +262,7 @@ BIT_TEST(7, 2) // true
 BIT_TEST(255, 8) // false
 ```
 
-BIT_TO_STRING()
----------------
+## BIT_TO_STRING()
 
 `BIT_TO_STRING(number) → bitstring`
 
@@ -300,12 +283,11 @@ BIT_TO_STRING(60, 8) // "00011110"
 BIT_TO_STRING(1048576, 32) // "00000000000100000000000000000000"
 ```
 
-BIT_XOR()
----------
+## BIT_XOR()
 
 `BIT_XOR(numbersArray) → result`
 
-Exclusive-or-combines the numeric values in *numbersArray* into a single
+Exclusive-or-combines the numeric values in _numbersArray_ into a single
 numeric result value.
 
 - **numbersArray** (array): array with numeric input values

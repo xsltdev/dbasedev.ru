@@ -1,4 +1,4 @@
-# Combining queries with subqueries
+# Объединение запросов с подзапросами
 
 ## How to use subqueries
 

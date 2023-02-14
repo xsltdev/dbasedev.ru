@@ -1,19 +1,13 @@
----
-layout: default
-description: AQL offers some numeric functions for calculations
----
-Numeric functions
-=================
+# Числовые функции
 
 AQL offers some numeric functions for calculations. The following functions are
 supported:
 
-ABS()
------
+## ABS()
 
 `ABS(value) → unsignedValue`
 
-Return the absolute part of *value*.
+Return the absolute part of _value_.
 
 - **value** (number): any number, positive or negative
 - returns **unsignedValue** (number): the number without + or - sign
@@ -24,15 +18,14 @@ ABS(+5) // 5
 ABS(3.5) // 3.5
 ```
 
-ACOS()
-------
+## ACOS()
 
 `ACOS(value) → num`
 
-Return the arccosine of *value*.
+Return the arccosine of _value_.
 
 - **value** (number): the input value
-- returns **num** (number\|null): the arccosine of *value*, or *null* if *value* is
+- returns **num** (number\|null): the arccosine of _value_, or _null_ if _value_ is
   outside the valid range -1 and 1 (inclusive)
 
 ```aql
@@ -42,15 +35,14 @@ ACOS(1) // 0
 ACOS(2) // null
 ```
 
-ASIN()
-------
+## ASIN()
 
 `ASIN(value) → num`
 
-Return the arcsine of *value*.
+Return the arcsine of _value_.
 
 - **value** (number): the input value
-- returns **num** (number\|null): the arcsine of *value*, or *null* if *value* is
+- returns **num** (number\|null): the arcsine of _value_, or _null_ if _value_ is
   outside the valid range -1 and 1 (inclusive)
 
 ```aql
@@ -60,15 +52,14 @@ ASIN(-1) // -1.5707963267948966
 ASIN(2) // null
 ```
 
-ATAN()
-------
+## ATAN()
 
 `ATAN(value) → num`
 
-Return the arctangent of *value*.
+Return the arctangent of _value_.
 
 - **value** (number): the input value
-- returns **num** (number): the arctangent of *value*
+- returns **num** (number): the arctangent of _value_
 
 ```aql
 ATAN(-1) // -0.7853981633974483
@@ -76,12 +67,11 @@ ATAN(0) // 0
 ATAN(10) // 1.4711276743037347
 ```
 
-ATAN2()
--------
+## ATAN2()
 
 `ATAN2(y, x) → num`
 
-Return the arctangent of the quotient of *y* and *x*.
+Return the arctangent of the quotient of _y_ and _x_.
 
 ```aql
 ATAN2(0, 0) // 0
@@ -90,16 +80,15 @@ ATAN2(1, 1) // 0.7853981633974483
 ATAN2(-10, 20) // -0.4636476090008061
 ```
 
-AVERAGE()
----------
+## AVERAGE()
 
 `AVERAGE(numArray) → mean`
 
-Return the average (arithmetic mean) of the values in *array*.
+Return the average (arithmetic mean) of the values in _array_.
 
-- **numArray** (array): an array of numbers, *null* values are ignored
-- returns **mean** (number\|null): the average value of *numArray*. If the array is
-  empty or contains *null* values only, *null* will be returned.
+- **numArray** (array): an array of numbers, _null_ values are ignored
+- returns **mean** (number\|null): the average value of _numArray_. If the array is
+  empty or contains _null_ values only, _null_ will be returned.
 
 ```aql
 AVERAGE( [5, 2, 9, 2] ) // 4.5
@@ -111,12 +100,11 @@ AVERAGE( [ 999, 80, 4, 4, 4, 3, 3, 3 ] ) // 137.5
 
 This is an alias for [AVERAGE()](#average).
 
-CEIL()
-------
+## CEIL()
 
 `CEIL(value) → roundedValue`
 
-Return the integer closest but not less than *value*.
+Return the integer closest but not less than _value_.
 
 To round downward, see [FLOOR()](#floor).<br>
 To round to the nearest integer value, see [ROUND()](#round).
@@ -131,32 +119,30 @@ CEIL(-2.50) // -2
 CEIL(-2.51) // -2
 ```
 
-COS()
------
+## COS()
 
 `COS(value) → num`
 
-Return the cosine of *value*.
+Return the cosine of _value_.
 
 - **value** (number): the input value
-- returns **num** (number): the cosine of *value*
+- returns **num** (number): the cosine of _value_
 
 ```aql
-COS(1) // 0.5403023058681398 
+COS(1) // 0.5403023058681398
 COS(0) // 1
 COS(-3.141592653589783) // -1
 COS(RADIANS(45)) // 0.7071067811865476
 ```
 
-COSINE_SIMILARITY()
--------------------
+## COSINE_SIMILARITY()
 
 <small>Introduced in: v3.9.0</small>
 
 `COSINE_SIMILARITY(x, y) → num`
 
-Return the [cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity){:target="_blank"}
-between *x* and *y*.
+Return the [cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity){:target="\_blank"}
+between _x_ and _y_.
 
 To calculate the distance, see [L1_DISTANCE()](#l1_distance) and
 [L2_DISTANCE()](#l2_distance).
@@ -176,8 +162,7 @@ COSINE_SIMILARITY([[0,1,0,1],[1,0,0,1],[1,1,1,0],[0,0,0,1]], [1,1,1,1]) // [0.70
 COSINE_SIMILARITY([-1,0], [1,0]) // -1
 ```
 
-DECAY_GAUSS()
--------------
+## DECAY_GAUSS()
 
 <small>Introduced in: v3.9.0</small>
 
@@ -203,8 +188,7 @@ DECAY_GAUSS([20, 41], 40, 5, 5, 0.5) // [0.0019531250000000017, 1.0]
 DECAY_GAUSS(49.9889, 49.987, 0.001, 0.001, 0.2) // 0.2715403018822964
 ```
 
-DECAY_EXP()
------------
+## DECAY_EXP()
 
 <small>Introduced in: v3.9.0</small>
 
@@ -230,8 +214,7 @@ DECAY_EXP(2, 0, 10, 0, 0.2)  // 0.7247796636776955
 DECAY_EXP(49.9889, 50, 0.001, 0.001, 0.2) // 8.717720806626885e-08
 ```
 
-DECAY_LINEAR()
---------------
+## DECAY_LINEAR()
 
 <small>Introduced in: v3.9.0</small>
 
@@ -257,8 +240,7 @@ DECAY_LINEAR(9.8, 0, 10, 0, 0.2)  // 0.21599999999999994
 DECAY_LINEAR(5..7, 0, 10, 0, 0.2) // [0.6, 0.52, 0.44]
 ```
 
-DEGREES()
----------
+## DEGREES()
 
 `DEGREES(rad) → num`
 
@@ -273,15 +255,14 @@ DEGREES(0) // 0
 DEGREES(3.141592653589793) // 180
 ```
 
-EXP()
------
+## EXP()
 
 `EXP(value) → num`
 
-Return Euler's constant (2.71828...) raised to the power of *value*.
+Return Euler's constant (2.71828...) raised to the power of _value_.
 
 - **value** (number): the input value
-- returns **num** (number): Euler's constant raised to the power of *value*
+- returns **num** (number): Euler's constant raised to the power of _value_
 
 ```aql
 EXP(1) // 2.718281828459045
@@ -289,15 +270,14 @@ EXP(10) // 22026.46579480671
 EXP(0) // 1
 ```
 
-EXP2()
-------
+## EXP2()
 
 `EXP2(value) → num`
 
-Return 2 raised to the power of *value*.
+Return 2 raised to the power of _value_.
 
 - **value** (number): the input value
-- returns **num** (number): 2 raised to the power of *value*
+- returns **num** (number): 2 raised to the power of _value_
 
 ```aql
 EXP2(16) // 65536
@@ -305,12 +285,11 @@ EXP2(1) // 2
 EXP2(0) // 1
 ```
 
-FLOOR()
--------
+## FLOOR()
 
 `FLOOR(value) → roundedValue`
 
-Return the integer closest but not greater than *value*.
+Return the integer closest but not greater than _value_.
 
 To round upward, see [CEIL()](#ceil).<br>
 To round to the nearest integer value, see [ROUND()](#round).
@@ -325,16 +304,15 @@ FLOOR(-2.50) // -3
 FLOOR(-2.51) // -3
 ```
 
-LOG()
------
+## LOG()
 
 `LOG(value) → num`
 
-Return the natural logarithm of *value*. The base is Euler's
+Return the natural logarithm of _value_. The base is Euler's
 constant (2.71828...).
 
 - **value** (number): the input value
-- returns **num** (number\|null): the natural logarithm of *value*, or *null* if *value* is
+- returns **num** (number\|null): the natural logarithm of _value_, or _null_ if _value_ is
   equal or less than 0
 
 ```aql
@@ -343,15 +321,14 @@ LOG(10) // 2.302585092994046
 LOG(0) // null
 ```
 
-LOG2()
-------
+## LOG2()
 
 `LOG2(value) → num`
 
-Return the base 2 logarithm of *value*.
+Return the base 2 logarithm of _value_.
 
 - **value** (number): the input value
-- returns **num** (number\|null): the base 2 logarithm of *value*, or *null* if *value* is
+- returns **num** (number\|null): the base 2 logarithm of _value_, or _null_ if _value_ is
   equal or less than 0
 
 ```aql
@@ -360,15 +337,14 @@ LOG2(8) // 3
 LOG2(0) // null
 ```
 
-LOG10()
--------
+## LOG10()
 
 `LOG10(value) → num`
 
-Return the base 10 logarithm of *value*.
+Return the base 10 logarithm of _value_.
 
 - **value** (number): the input value
-- returns **num** (number): the base 10 logarithm of *value*, or *null* if *value* is
+- returns **num** (number): the base 10 logarithm of _value_, or _null_ if _value_ is
   equal or less than 0
 
 ```aql
@@ -377,15 +353,14 @@ LOG10(10) // 1
 LOG10(0) // null
 ```
 
-L1_DISTANCE()
--------------
+## L1_DISTANCE()
 
 <small>Introduced in: v3.9.0</small>
 
 `L1_DISTANCE(x, y) → num`
 
-Return the [Manhattan distance](https://en.wikipedia.org/wiki/Taxicab_geometry){:target="_blank"}
-between *x* and *y*.
+Return the [Manhattan distance](https://en.wikipedia.org/wiki/Taxicab_geometry){:target="\_blank"}
+between _x_ and _y_.
 
 To calculate the similarity, see [COSINE_SIMILARITY()](#cosine_similarity).
 
@@ -404,15 +379,14 @@ L1_DISTANCE([[1,2,3],[-1,-2,-3],[3,4,5],[-5,2,1]], [1,1,1]) // [3,9,9,7]
 L1_DISTANCE([1.5], [3]) // 1.5
 ```
 
-L2_DISTANCE()
--------------
+## L2_DISTANCE()
 
 <small>Introduced in: v3.9.0</small>
 
 `L2_DISTANCE(x,y) → num`
 
-Return the [Euclidean distance](https://en.wikipedia.org/wiki/Euclidean_distance){:target="_blank"}
-between *x* and *y*.
+Return the [Euclidean distance](https://en.wikipedia.org/wiki/Euclidean_distance){:target="\_blank"}
+between _x_ and _y_.
 
 To calculate the similarity, see [COSINE_SIMILARITY()](#cosine_similarity).
 
@@ -431,37 +405,35 @@ L2_DISTANCE([[1,2,3], [4,5,6], [7,8,9]], [3,2,1]) // [2.8284271247461903, 5.9160
 L2_DISTANCE([0,1], [1,0]) // 1.4142135623730951
 ```
 
-MAX()
------
+## MAX()
 
 `MAX(anyArray) → max`
 
-Return the greatest element of *anyArray*. The array is not limited to numbers.
+Return the greatest element of _anyArray_. The array is not limited to numbers.
 Also see [type and value order](fundamentals-type-value-order.html).
 
-- **anyArray** (array): an array of numbers, *null* values are ignored
+- **anyArray** (array): an array of numbers, _null_ values are ignored
 - returns **max** (any\|null): the element with the greatest value. If the array is
-  empty or contains *null* values only, the function will return *null*.
+  empty or contains _null_ values only, the function will return _null_.
 
 ```aql
 MAX( [5, 9, -2, null, 1] ) // 9
 MAX( [ null, null ] ) // null
 ```
 
-MEDIAN()
---------
+## MEDIAN()
 
 `MEDIAN(numArray) → median`
 
-Return the median value of the values in *array*.
+Return the median value of the values in _array_.
 
 The array is sorted and the element in the middle is returned. If the array has an
 even length of elements, the two center-most elements are interpolated by calculating
 the average value (arithmetic mean).
 
-- **numArray** (array): an array of numbers, *null* values are ignored
-- returns **median** (number\|null): the median of *numArray*. If the array is
-  empty or contains *null* values only, the function will return *null*.
+- **numArray** (array): an array of numbers, _null_ values are ignored
+- returns **median** (number\|null): the median of _numArray_. If the array is
+  empty or contains _null_ values only, the function will return _null_.
 
 ```aql
 MEDIAN( [ 1, 2, 3] ) // 2
@@ -470,35 +442,33 @@ MEDIAN( [ 4, 2, 3, 1 ] ) // 2.5
 MEDIAN( [ 999, 80, 4, 4, 4, 3, 3, 3 ] ) // 4
 ```
 
-MIN()
------
+## MIN()
 
 `MIN(anyArray) → min`
 
-Return the smallest element of *anyArray*. The array is not limited to numbers.
+Return the smallest element of _anyArray_. The array is not limited to numbers.
 Also see [type and value order](fundamentals-type-value-order.html).
 
-- **anyArray** (array): an array of numbers, *null* values are ignored
+- **anyArray** (array): an array of numbers, _null_ values are ignored
 - returns **min** (any\|null): the element with the smallest value. If the array is
-  empty or contains *null* values only, the function will return *null*.
+  empty or contains _null_ values only, the function will return _null_.
 
 ```aql
 MIN( [5, 9, -2, null, 1] ) // -2
 MIN( [ null, null ] ) // null
 ```
 
-PERCENTILE()
-------------
+## PERCENTILE()
 
 `PERCENTILE(numArray, n, method) → percentile`
 
-Return the *n*th percentile of the values in *numArray*.
+Return the *n*th percentile of the values in _numArray_.
 
-- **numArray** (array): an array of numbers, *null* values are ignored
+- **numArray** (array): an array of numbers, _null_ values are ignored
 - **n** (number): must be between 0 (excluded) and 100 (included)
-- **method** (string, *optional*): "rank" (default) or "interpolation"
-- returns **percentile** (number\|null): the *n*th percentile, or *null* if the
-  array is empty or only *null* values are contained in it or the percentile
+- **method** (string, _optional_): "rank" (default) or "interpolation"
+- returns **percentile** (number\|null): the *n*th percentile, or _null_ if the
+  array is empty or only _null_ values are contained in it or the percentile
   cannot be calculated
 
 ```aql
@@ -507,8 +477,7 @@ PERCENTILE( [1, 2, 3, 4], 50, "rank" ) // 2
 PERCENTILE( [1, 2, 3, 4], 50, "interpolation" ) // 2.5
 ```
 
-PI()
-----
+## PI()
 
 `PI() → pi`
 
@@ -520,12 +489,11 @@ Return pi.
 PI() // 3.141592653589793
 ```
 
-POW()
------
+## POW()
 
 `POW(base, exp) → num`
 
-Return the *base* to the exponent *exp*.
+Return the _base_ to the exponent _exp_.
 
 - **base** (number): the base value
 - **exp** (number): the exponent value
@@ -537,18 +505,17 @@ POW( 5, -1 ) // 0.2
 POW( 5, 0 ) // 1
 ```
 
-PRODUCT()
----------
+## PRODUCT()
 
 <small>Introduced in: v3.7.2</small>
 
 `PRODUCT(numArray) → product`
 
-Return the product of the values in *array*.
+Return the product of the values in _array_.
 
-- **numArray** (array): an array of numbers, *null* values are ignored
-- returns **product** (number): the product of all values in *numArray*. If the array
-  is empty or only *null* values are contained in the array, *1* will be returned.
+- **numArray** (array): an array of numbers, _null_ values are ignored
+- returns **product** (number): the product of all values in _numArray_. If the array
+  is empty or only _null_ values are contained in the array, _1_ will be returned.
 
 ```aql
 PRODUCT( [1, 2, 3, 4] ) // 24
@@ -556,8 +523,7 @@ PRODUCT( [null, -5, 6] ) // -30
 PRODUCT( [ ] ) // 1
 ```
 
-RADIANS()
----------
+## RADIANS()
 
 `RADIANS(deg) → num`
 
@@ -572,8 +538,7 @@ RADIANS(90) // 1.5707963267948966
 RADIANS(0) // 0
 ```
 
-RAND()
-------
+## RAND()
 
 `RAND() → randomNumber`
 
@@ -611,22 +576,21 @@ Result:
 ]
 ```
 
-RANGE()
--------
+## RANGE()
 
 `RANGE(start, stop, step) → numArray`
 
 Return an array of numbers in the specified range, optionally with increments
-other than 1. The *start* and *stop* arguments are truncated to integers
-unless a *step* argument is provided.
+other than 1. The _start_ and _stop_ arguments are truncated to integers
+unless a _step_ argument is provided.
 
 Also see the [range operator](operators.html#range-operator) for ranges
 with integer bounds and a step size of 1.
 
 - **start** (number): the value to start the range at (inclusive)
 - **stop** (number): the value to end the range with (inclusive)
-- **step** (number, *optional*): how much to increment in every step,
-  the default is *1.0*
+- **step** (number, _optional_): how much to increment in every step,
+  the default is _1.0_
 - returns **numArray** (array): all numbers in the range as array
 
 ```aql
@@ -639,12 +603,11 @@ RANGE(1.5, 2.5, 0.5) // [ 1.5, 2, 2.5 ]
 RANGE(-0.75, 1.1, 0.5) // [ -0.75, -0.25, 0.25, 0.75 ]
 ```
 
-ROUND()
--------
+## ROUND()
 
 `ROUND(value) → roundedValue`
 
-Return the integer closest to *value*.
+Return the integer closest to _value_.
 
 - **value** (number): any number
 - returns **roundedValue** (number): the value rounded to the closest integer
@@ -656,7 +619,7 @@ ROUND(-2.50) // -2
 ROUND(-2.51) // -3
 ```
 
-Rounding towards zero, also known as *trunc()* in C/C++, can be achieved with
+Rounding towards zero, also known as _trunc()_ in C/C++, can be achieved with
 a combination of the [ternary operator](operators.html#ternary-operator),
 [CEIL()](#ceil)
 and [FLOOR()](#floor):
@@ -665,15 +628,14 @@ and [FLOOR()](#floor):
 value >= 0 ? FLOOR(value) : CEIL(value)
 ```
 
-SIN()
------
+## SIN()
 
 `SIN(value) → num`
 
-Return the sine of *value*.
+Return the sine of _value_.
 
 - **value** (number): the input value
-- returns **num** (number): the sine of *value*
+- returns **num** (number): the sine of _value_
 
 ```aql
 SIN(3.141592653589783 / 2) // 1
@@ -682,15 +644,14 @@ SIN(-3.141592653589783 / 2) // -1
 SIN(RADIANS(270)) // -1
 ```
 
-SQRT()
-------
+## SQRT()
 
 `SQRT(value) → squareRoot`
 
-Return the square root of *value*.
+Return the square root of _value_.
 
 - **value** (number): a number
-- returns **squareRoot** (number): the square root of *value*
+- returns **squareRoot** (number): the square root of _value_
 
 ```aql
 SQRT(9) // 3
@@ -710,33 +671,31 @@ POW(27, 1/3) // 3
 POW(9, 1/2) // 3
 ```
 
-STDDEV_POPULATION()
--------------------
+## STDDEV_POPULATION()
 
 `STDDEV_POPULATION(numArray) → num`
 
-Return the population standard deviation of the values in *array*.
+Return the population standard deviation of the values in _array_.
 
-- **numArray** (array): an array of numbers, *null* values are ignored
-- returns **num** (number\|null): the population standard deviation of *numArray*.
-  If the array is empty or only *null* values are contained in the array, 
-  *null* will be returned.
+- **numArray** (array): an array of numbers, _null_ values are ignored
+- returns **num** (number\|null): the population standard deviation of _numArray_.
+  If the array is empty or only _null_ values are contained in the array,
+  _null_ will be returned.
 
 ```aql
 STDDEV_POPULATION( [ 1, 3, 6, 5, 2 ] ) // 1.854723699099141
 ```
 
-STDDEV_SAMPLE()
----------------
+## STDDEV_SAMPLE()
 
 `STDDEV_SAMPLE(numArray) → num`
 
-Return the sample standard deviation of the values in *array*.
+Return the sample standard deviation of the values in _array_.
 
-- **numArray** (array): an array of numbers, *null* values are ignored
-- returns **num** (number\|null): the sample standard deviation of *numArray*.
-  If the array is empty or only *null* values are contained in the array, 
-  *null* will be returned.
+- **numArray** (array): an array of numbers, _null_ values are ignored
+- returns **num** (number\|null): the sample standard deviation of _numArray_.
+  If the array is empty or only _null_ values are contained in the array,
+  _null_ will be returned.
 
 ```aql
 STDDEV_SAMPLE( [ 1, 3, 6, 5, 2 ] ) // 2.0736441353327724
@@ -746,16 +705,15 @@ STDDEV_SAMPLE( [ 1, 3, 6, 5, 2 ] ) // 2.0736441353327724
 
 This is an alias for [STDDEV_POPULATION()](#stddev_population).
 
-SUM()
------
+## SUM()
 
 `SUM(numArray) → sum`
 
-Return the sum of the values in *array*.
+Return the sum of the values in _array_.
 
-- **numArray** (array): an array of numbers, *null* values are ignored
-- returns **sum** (number): the total of all values in *numArray*. If the array
-  is empty or only *null* values are contained in the array, *0* will be returned.
+- **numArray** (array): an array of numbers, _null_ values are ignored
+- returns **sum** (number): the total of all values in _numArray_. If the array
+  is empty or only _null_ values are contained in the array, _0_ will be returned.
 
 ```aql
 SUM( [1, 2, 3, 4] ) // 10
@@ -763,15 +721,14 @@ SUM( [null, -5, 6] ) // 1
 SUM( [ ] ) // 0
 ```
 
-TAN()
------
+## TAN()
 
 `TAN(value) → num`
 
-Return the tangent of *value*.
+Return the tangent of _value_.
 
 - **value** (number): the input value
-- returns **num** (number): the tangent of *value*
+- returns **num** (number): the tangent of _value_
 
 ```aql
 TAN(10) // 0.6483608274590866
@@ -779,33 +736,31 @@ TAN(5) // -3.380515006246586
 TAN(0) // 0
 ```
 
-VARIANCE_POPULATION()
----------------------
+## VARIANCE_POPULATION()
 
 `VARIANCE_POPULATION(numArray) → num`
 
-Return the population variance of the values in *array*.
+Return the population variance of the values in _array_.
 
-- **numArray** (array): an array of numbers, *null* values are ignored
-- returns **num** (number\|null): the population variance of *numArray*.
-  If the array is empty or only *null* values are contained in the array, 
-  *null* will be returned.
+- **numArray** (array): an array of numbers, _null_ values are ignored
+- returns **num** (number\|null): the population variance of _numArray_.
+  If the array is empty or only _null_ values are contained in the array,
+  _null_ will be returned.
 
 ```aql
 VARIANCE_POPULATION( [ 1, 3, 6, 5, 2 ] ) // 3.4400000000000004
 ```
 
-VARIANCE_SAMPLE()
------------------
+## VARIANCE_SAMPLE()
 
 `VARIANCE_SAMPLE(array) → num`
 
-Return the sample variance of the values in *array*.
+Return the sample variance of the values in _array_.
 
-- **numArray** (array): an array of numbers, *null* values are ignored
-- returns **num** (number\|null): the sample variance of *numArray*.
-  If the array is empty or only *null* values are contained in the array, 
-  *null* will be returned.
+- **numArray** (array): an array of numbers, _null_ values are ignored
+- returns **num** (number\|null): the sample variance of _numArray_.
+  If the array is empty or only _null_ values are contained in the array,
+  _null_ will be returned.
 
 ```aql
 VARIANCE_SAMPLE( [ 1, 3, 6, 5, 2 ] ) // 4.300000000000001

@@ -30,8 +30,13 @@ theme:
         - navigation.tabs
         - navigation.tracking
         - navigation.instant
+        - navigation.top
+        - content.action.edit
     favicon: db.svg
     logo: db.svg
+    icon:
+        edit: material/pencil
+        view: material/eye
 
 extra:
     generator: false
@@ -92,4 +97,4 @@ plugins:
     - social
 
 extra_css:
-    - '/assets/stylesheets/styles.css?2'
+    - '/assets/stylesheets/styles.css?4'

@@ -1,31 +1,25 @@
----
-layout: default
-description: Miscellaneous functions
----
-Miscellaneous functions
-=======================
+# Разные функции
 
-Control flow functions
-----------------------
+## Control flow functions
 
 ### FIRST_DOCUMENT()
 
 `FIRST_DOCUMENT(alternative, ...) → doc`
 
-Return the first alternative that is a document, and *null* if none of the
+Return the first alternative that is a document, and _null_ if none of the
 alternatives is a document.
 
-- **alternative** (any, *repeatable*): input of arbitrary type
+- **alternative** (any, _repeatable_): input of arbitrary type
 - returns **doc** (object\|null): document / object or null
 
 ### FIRST_LIST()
 
 `FIRST_LIST(alternative, ...) → list`
 
-Return the first alternative that is an array, and *null* if none of the
+Return the first alternative that is an array, and _null_ if none of the
 alternatives is an array.
 
-- **alternative** (any, *repeatable*): input of arbitrary type
+- **alternative** (any, _repeatable_): input of arbitrary type
 - returns **list** (array\|null): array / list or null
 
 ### MIN_MATCH()
@@ -69,27 +63,26 @@ An equivalent filter expression without `MIN_MATCH()` would be more cumbersome:
 
 `NOT_NULL(alternative, ...) → value`
 
-Return the first element that is not *null*, and *null* if all alternatives
-are *null* themselves. It is also known as `COALESCE()` in SQL.
+Return the first element that is not _null_, and _null_ if all alternatives
+are _null_ themselves. It is also known as `COALESCE()` in SQL.
 
-- **alternative** (any, *repeatable*): input of arbitrary type
-- returns **value** (any): first non-null parameter, or *null* if all arguments
-  are *null*
+- **alternative** (any, _repeatable_): input of arbitrary type
+- returns **value** (any): first non-null parameter, or _null_ if all arguments
+  are _null_
 
 ### Ternary operator
 
 For conditional evaluation, check out the
 [ternary operator](operators.html#ternary-operator).
 
-Database functions
-------------------
+## Database functions
 
 ### CHECK_DOCUMENT()
 
 `CHECK_DOCUMENT(document) → checkResult`
 
-Returns *true* if *document* is a valid document object, i.e. a document
-without any duplicate attribute names. Will return *false* for any
+Returns _true_ if _document_ is a valid document object, i.e. a document
+without any duplicate attribute names. Will return _false_ for any
 non-objects/non-documents or documents with duplicate attribute names.
 
 {% hint 'warning' %}
@@ -111,15 +104,15 @@ attribute names and export them. This output can be used for subsequent
 cleanup operations.
 
 {% hint 'info' %}
-When using object literals in AQL, there will be an automatic 
+When using object literals in AQL, there will be an automatic
 removal/cleanup of duplicate attribute names, so the function will be effective
 only for **already stored** database documents. Therefore,
 `RETURN CHECK_DOCUMENT( { a: 1, a: 2 } )` is expected to return `true`.
 {% endhint %}
 
 - **document** (object): an arbitrary document / object
-- returns **checkResult** (bool): *true* for any valid objects/documents without
-  duplicate attribute names, and *false* for any non-objects/non-documents or 
+- returns **checkResult** (bool): _true_ for any valid objects/documents without
+  duplicate attribute names, and _false_ for any non-objects/non-documents or
   objects/documents with duplicate attribute names
 
 ### COLLECTION_COUNT()
@@ -136,7 +129,7 @@ is preferred.
 Return an array of collections.
 
 - returns **docArray** (array): each collection as a document with attributes
-  *name* and *_id* in an array
+  _name_ and _\_id_ in an array
 
 ### COUNT()
 
@@ -148,7 +141,7 @@ This is an alias for [LENGTH()](#length).
 
 Returns the name of the current database.
 
-The current database is the database name that was specified in the URL path of the request (or defaults to _system database).
+The current database is the database name that was specified in the URL path of the request (or defaults to \_system database).
 
 - returns **databaseName** (string): the current database name
 
@@ -159,11 +152,11 @@ The current database is the database name that was specified in the URL path of 
 Return the name of the current user.
 
 The current user is the user account name that was specified in the
-*Authorization* HTTP header of the request. It will only be populated if
+_Authorization_ HTTP header of the request. It will only be populated if
 authentication on the server is turned on, and if the query was executed inside
-a request context. Otherwise, the return value of this function will be *null*.
+a request context. Otherwise, the return value of this function will be _null_.
 
-- returns **userName** (string\|null): the current user name, or *null* if
+- returns **userName** (string\|null): the current user name, or _null_ if
   authentication is disabled
 
 ### DECODE_REV()
@@ -177,18 +170,18 @@ of a database document as argument.
 
 - **revision** (string): revision ID string
 - returns **details** (object\|null): object with two attributes
-  *date* (string in ISO 8601 format) and *count* (integer number),
-  or *null*
+  _date_ (string in ISO 8601 format) and _count_ (integer number),
+  or _null_
 
 If the input revision ID is not a string or cannot be processed, the function
-issues a warning and returns *null*.
+issues a warning and returns _null_.
 
 Please note that the result structure may change in future versions of
-ArangoDB in case the internal format of revision strings is modified. Please 
-also note that the *date* value in the current result provides the date and
+ArangoDB in case the internal format of revision strings is modified. Please
+also note that the _date_ value in the current result provides the date and
 time of when the document record was put together on the server, but not
 necessarily the time of insertion into the underlying storage engine. Therefore
-in case of concurrent document operations the exact document storage order 
+in case of concurrent document operations the exact document storage order
 cannot be derived unambiguously from the revision value. It should thus be
 treated as a rough estimate of when a document was created or last updated.
 
@@ -242,70 +235,70 @@ also not raise warnings.
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline FUNCTION_DOCUMENT_1
-  @EXAMPLE_AQL{FUNCTION_DOCUMENT_1}
-  @DATASET{knows_graph}
-    RETURN DOCUMENT( persons, "persons/alice" )
-  @END_EXAMPLE_AQL
-  @endDocuBlock FUNCTION_DOCUMENT_1
+@startDocuBlockInline FUNCTION_DOCUMENT_1
+@EXAMPLE_AQL{FUNCTION_DOCUMENT_1}
+@DATASET{knows_graph}
+RETURN DOCUMENT( persons, "persons/alice" )
+@END_EXAMPLE_AQL
+@endDocuBlock FUNCTION_DOCUMENT_1
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline FUNCTION_DOCUMENT_2
-  @EXAMPLE_AQL{FUNCTION_DOCUMENT_2}
-  @DATASET{knows_graph}
-    RETURN DOCUMENT( persons, "alice" )
-  @END_EXAMPLE_AQL
-  @endDocuBlock FUNCTION_DOCUMENT_2
+@startDocuBlockInline FUNCTION_DOCUMENT_2
+@EXAMPLE_AQL{FUNCTION_DOCUMENT_2}
+@DATASET{knows_graph}
+RETURN DOCUMENT( persons, "alice" )
+@END_EXAMPLE_AQL
+@endDocuBlock FUNCTION_DOCUMENT_2
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline FUNCTION_DOCUMENT_3
-  @EXAMPLE_AQL{FUNCTION_DOCUMENT_3}
-  @DATASET{knows_graph}
-    RETURN DOCUMENT( persons, [ "persons/alice", "persons/bob" ] )
-  @END_EXAMPLE_AQL
-  @endDocuBlock FUNCTION_DOCUMENT_3
-{% endaqlexample %}
-{% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}  
-
-{% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline FUNCTION_DOCUMENT_4
-  @EXAMPLE_AQL{FUNCTION_DOCUMENT_4}
-  @DATASET{knows_graph}
-    RETURN DOCUMENT( persons, [ "alice", "bob" ] )
-  @END_EXAMPLE_AQL
-  @endDocuBlock FUNCTION_DOCUMENT_4
+@startDocuBlockInline FUNCTION_DOCUMENT_3
+@EXAMPLE_AQL{FUNCTION_DOCUMENT_3}
+@DATASET{knows_graph}
+RETURN DOCUMENT( persons, [ "persons/alice", "persons/bob" ] )
+@END_EXAMPLE_AQL
+@endDocuBlock FUNCTION_DOCUMENT_3
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline FUNCTION_DOCUMENT_5
-  @EXAMPLE_AQL{FUNCTION_DOCUMENT_5}
-  @DATASET{knows_graph}
-    RETURN DOCUMENT( @@coll, @key ) 
-  @BV {
-    "@coll": "persons",
-    "key": "alice"
-  }
-  @END_EXAMPLE_AQL
-  @endDocuBlock FUNCTION_DOCUMENT_5
+@startDocuBlockInline FUNCTION_DOCUMENT_4
+@EXAMPLE_AQL{FUNCTION_DOCUMENT_4}
+@DATASET{knows_graph}
+RETURN DOCUMENT( persons, [ "alice", "bob" ] )
+@END_EXAMPLE_AQL
+@endDocuBlock FUNCTION_DOCUMENT_4
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline FUNCTION_DOCUMENT_6
-  @EXAMPLE_AQL{FUNCTION_DOCUMENT_6}
-  @DATASET{knows_graph}
-    RETURN DOCUMENT( @@coll, @keys )
-  @BV {
-    "@coll": "persons",
-    "keys": ["alice", "bob"]
-  }
-  @END_EXAMPLE_AQL
-  @endDocuBlock FUNCTION_DOCUMENT_6
+@startDocuBlockInline FUNCTION_DOCUMENT_5
+@EXAMPLE_AQL{FUNCTION_DOCUMENT_5}
+@DATASET{knows_graph}
+RETURN DOCUMENT( @@coll, @key )
+@BV {
+"@coll": "persons",
+"key": "alice"
+}
+@END_EXAMPLE_AQL
+@endDocuBlock FUNCTION_DOCUMENT_5
+{% endaqlexample %}
+{% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
+
+{% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
+@startDocuBlockInline FUNCTION_DOCUMENT_6
+@EXAMPLE_AQL{FUNCTION_DOCUMENT_6}
+@DATASET{knows_graph}
+RETURN DOCUMENT( @@coll, @keys )
+@BV {
+"@coll": "persons",
+"keys": ["alice", "bob"]
+}
+@END_EXAMPLE_AQL
+@endDocuBlock FUNCTION_DOCUMENT_6
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -322,61 +315,61 @@ The function can also be used with a single `id` parameter as follows:
 **Examples**
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline FUNCTION_DOCUMENT_7
-  @EXAMPLE_AQL{FUNCTION_DOCUMENT_7}
-  @DATASET{knows_graph}
-    RETURN DOCUMENT("persons/alice")
-  @END_EXAMPLE_AQL
-  @endDocuBlock FUNCTION_DOCUMENT_7
+@startDocuBlockInline FUNCTION_DOCUMENT_7
+@EXAMPLE_AQL{FUNCTION_DOCUMENT_7}
+@DATASET{knows_graph}
+RETURN DOCUMENT("persons/alice")
+@END_EXAMPLE_AQL
+@endDocuBlock FUNCTION_DOCUMENT_7
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}  
-  @startDocuBlockInline FUNCTION_DOCUMENT_8
-  @EXAMPLE_AQL{FUNCTION_DOCUMENT_8}
-  @DATASET{knows_graph}
-    RETURN DOCUMENT( [ "persons/alice", "persons/bob" ] )
-  @END_EXAMPLE_AQL
-  @endDocuBlock FUNCTION_DOCUMENT_8
+ @startDocuBlockInline FUNCTION_DOCUMENT_8
+@EXAMPLE_AQL{FUNCTION_DOCUMENT_8}
+@DATASET{knows_graph}
+RETURN DOCUMENT( [ "persons/alice", "persons/bob" ] )
+@END_EXAMPLE_AQL
+@endDocuBlock FUNCTION_DOCUMENT_8
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline FUNCTION_DOCUMENT_9
-  @EXAMPLE_AQL{FUNCTION_DOCUMENT_9}
-  @DATASET{knows_graph}
-    RETURN DOCUMENT( @key )
-  @BV {
-    "key": "persons/alice"
-  }
-  @END_EXAMPLE_AQL
-  @endDocuBlock FUNCTION_DOCUMENT_9
+@startDocuBlockInline FUNCTION_DOCUMENT_9
+@EXAMPLE_AQL{FUNCTION_DOCUMENT_9}
+@DATASET{knows_graph}
+RETURN DOCUMENT( @key )
+@BV {
+"key": "persons/alice"
+}
+@END_EXAMPLE_AQL
+@endDocuBlock FUNCTION_DOCUMENT_9
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline FUNCTION_DOCUMENT_10
-  @EXAMPLE_AQL{FUNCTION_DOCUMENT_10}
-  @DATASET{knows_graph}
-    RETURN DOCUMENT( @keys )
-  @BV {
-    "keys": ["persons/alice", "persons/bob"]
-  }
-  @END_EXAMPLE_AQL
-  @endDocuBlock FUNCTION_DOCUMENT_10
+@startDocuBlockInline FUNCTION_DOCUMENT_10
+@EXAMPLE_AQL{FUNCTION_DOCUMENT_10}
+@DATASET{knows_graph}
+RETURN DOCUMENT( @keys )
+@BV {
+"keys": ["persons/alice", "persons/bob"]
+}
+@END_EXAMPLE_AQL
+@endDocuBlock FUNCTION_DOCUMENT_10
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline FUNCTION_DOCUMENT_11
-  @EXAMPLE_AQL{FUNCTION_DOCUMENT_11}
-  @DATASET{knows_graph}
-    RETURN DOCUMENT( CONCAT("persons/", @key) )
-  @BV {
-    "key": "bob"
-  }
-  @END_EXAMPLE_AQL
-  @endDocuBlock FUNCTION_DOCUMENT_11
+@startDocuBlockInline FUNCTION_DOCUMENT_11
+@EXAMPLE_AQL{FUNCTION_DOCUMENT_11}
+@DATASET{knows_graph}
+RETURN DOCUMENT( CONCAT("persons/", @key) )
+@BV {
+"key": "bob"
+}
+@END_EXAMPLE_AQL
+@endDocuBlock FUNCTION_DOCUMENT_11
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
@@ -389,9 +382,9 @@ Determine the amount of documents in a collection.
 It calls [COLLECTION_COUNT()](#collection_count) internally.
 
 - **coll** (collection): a collection (not string)
-- returns **documentCount** (number): the total amount of documents in *coll*
+- returns **documentCount** (number): the total amount of documents in _coll_
 
-*LENGTH()* can also determine the [number of elements](functions-array.html#length) in an array,
+_LENGTH()_ can also determine the [number of elements](functions-array.html#length) in an array,
 the [number of attribute keys](functions-document.html#length) of an object / document and
 the [character length](functions-string.html#length) of a string.
 
@@ -409,30 +402,29 @@ Return the shard in a collection that contains the specified shard keys.
   the collection name itself is returned.
 
 {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-  @startDocuBlockInline shard_id1_cluster
-  @EXAMPLE_AQL{shard_id1_cluster}
-  @DATASET{observationsSampleDataset}
-    RETURN SHARD_ID("observations", { "time": "2021-05-25 07:15:00", "subject": "xh458", "val": 10 })
-  @END_EXAMPLE_AQL
-  @endDocuBlock shard_id1_cluster
+@startDocuBlockInline shard_id1_cluster
+@EXAMPLE_AQL{shard_id1_cluster}
+@DATASET{observationsSampleDataset}
+RETURN SHARD_ID("observations", { "time": "2021-05-25 07:15:00", "subject": "xh458", "val": 10 })
+@END_EXAMPLE_AQL
+@endDocuBlock shard_id1_cluster
 {% endaqlexample %}
 {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
 
-Hash functions
---------------
+## Hash functions
 
 ### HASH()
 
 `HASH(value) → hashNumber`
 
-Calculate a hash value for *value*.
+Calculate a hash value for _value_.
 
 - **value** (any): an element of arbitrary type
-- returns **hashNumber** (number): a hash value of *value*
+- returns **hashNumber** (number): a hash value of _value_
 
-*value* is not required to be a string, but can have any data type. The calculated
-hash value will take the data type of *value* into account, so for example the
-number *1* and the string *"1"* will have different hash values. For arrays the
+_value_ is not required to be a string, but can have any data type. The calculated
+hash value will take the data type of _value_ into account, so for example the
+number _1_ and the string _"1"_ will have different hash values. For arrays the
 hash values will be equal if the arrays contain exactly the same values
 (including value types) in the same order. For objects the same hash values will
 be created if the objects have exactly the same attribute names and values
@@ -448,7 +440,7 @@ documents are the same, or for grouping values in queries.
 
 `MINHASH(values, numHashes) → hashes`
 
-Calculate MinHash signatures for the *values* using locality-sensitive hashing.
+Calculate MinHash signatures for the _values_ using locality-sensitive hashing.
 The result can be used to approximate the Jaccard similarity of sets.
 
 - **values** (array): an array with elements of arbitrary type to hash
@@ -522,21 +514,20 @@ See the following string functions:
 - [SHA1()](functions-string.html#sha1)
 - [SHA512()](functions-string.html#sha512)
 
-Function calling
-----------------
+## Function calling
 
 ### APPLY()
 
 `APPLY(functionName, arguments) → retVal`
 
-Dynamically call the function *funcName* with the arguments specified.
+Dynamically call the function _funcName_ with the arguments specified.
 Arguments are given as array and are passed as separate parameters to
 the called function.
 
-Both built-in and user-defined functions can be called. 
+Both built-in and user-defined functions can be called.
 
 - **funcName** (string): a function name
-- **arguments** (array, *optional*): an array with elements of arbitrary type
+- **arguments** (array, _optional_): an array with elements of arbitrary type
 - returns **retVal** (any): the return value of the called function
 
 ```aql
@@ -548,14 +539,14 @@ APPLY( "SUBSTRING", [ "this is a test", 0, 7 ] )
 
 `CALL(funcName, arg1, arg2, ... argN) → retVal`
 
-Dynamically call the function *funcName* with the arguments specified.
+Dynamically call the function _funcName_ with the arguments specified.
 Arguments are given as multiple parameters and passed as separate
 parameters to the called function.
 
 Both built-in and user-defined functions can be called.
 
 - **funcName** (string): a function name
-- **args** (any, *repeatable*): an arbitrary number of elements as
+- **args** (any, _repeatable_): an arbitrary number of elements as
   multiple arguments, can be omitted
 - returns **retVal** (any): the return value of the called function
 
@@ -564,8 +555,7 @@ CALL( "SUBSTRING", "this is a test", 0, 4 )
 // "this"
 ```
 
-Other functions
----------------
+## Other functions
 
 ### ASSERT() / WARN()
 
@@ -573,9 +563,9 @@ Other functions
 `WARN(expr, message) → retVal`
 
 The two functions evaluate an expression. In case the expression evaluates to
-*true* both functions will return *true*. If the expression evaluates to
-*false* *ASSERT* will throw an error and *WARN* will issue a warning and return
-*false*. This behavior allows the use of *ASSERT* and *WARN* in `FILTER`
+_true_ both functions will return _true_. If the expression evaluates to
+_false_ _ASSERT_ will throw an error and _WARN_ will issue a warning and return
+_false_. This behavior allows the use of _ASSERT_ and _WARN_ in `FILTER`
 conditions.
 
 - **expr** (expression): AQL expression to be evaluated
@@ -593,8 +583,8 @@ FOR i IN 1..3 FILTER WARN(i < 2, "i is not smaller 2") RETURN i
 
 `IN_RANGE(value, low, high, includeLow, includeHigh) → included`
 
-Returns true if *value* is greater than (or equal to) *low* and less than
-(or equal to) *high*. The values can be of different types. They are compared
+Returns true if _value_ is greater than (or equal to) _low_ and less than
+(or equal to) _high_. The values can be of different types. They are compared
 as described in [Type and value order](fundamentals-type-value-order.html) and
 is thus identical to the comparison operators `<`, `<=`, `>` and `>=` in
 behavior.
@@ -606,10 +596,10 @@ behavior.
   the range (left-closed interval) or not (left-open interval)
 - **includeHigh** (bool): whether the maximum value shall be included in
   the range (right-closed interval) or not (right-open interval)
-- returns **included** (bool): whether *value* is in the range
+- returns **included** (bool): whether _value_ is in the range
 
-If *low* and *high* are the same, but *includeLow* and/or *includeHigh* is set
-to `false`, then nothing will match. If *low* is greater than *high* nothing will
+If _low_ and _high_ are the same, but _includeLow_ and/or _includeHigh_ is set
+to `false`, then nothing will match. If _low_ is greater than _high_ nothing will
 match either.
 
 {% hint 'info' %}
@@ -681,8 +671,7 @@ See [Pregel AQL integration](../graphs-pregel.html#aql-integration).
   the attributes computed by the Pregel algorithm and the document key (and
   optionally identifier)
 
-Internal functions
-------------------
+## Internal functions
 
 The following functions are used during development of ArangoDB as a database
 system, primarily for unit testing. They are not intended to be used by end
@@ -709,7 +698,7 @@ RETURN 1 == 1 && FAIL("error") ? true : false // aborted with error
 
 `NOOPT(value) → retVal`
 
-No-operation that prevents certain query compile-time and run-time optimizations. 
+No-operation that prevents certain query compile-time and run-time optimizations.
 Constant expressions can be forced to be evaluated at runtime with this.
 This function is marked as non-deterministic so its argument withstands
 query optimization.
@@ -722,7 +711,7 @@ There is no need to call these functions explicitly, they are mainly used for
 internal testing.
 
 - **value** (any): a value of arbitrary type
-- returns **retVal** (any): *value*
+- returns **retVal** (any): _value_
 
 ```aql
 // differences in execution plan (explain)
@@ -738,11 +727,11 @@ RETURN NOOPT( CONCAT("a", "b") ) // evaluates concatenation at runtime
 
 `PASSTHRU(value) → retVal`
 
-Simply returns its call argument unmodified. There is no need to call this function 
+Simply returns its call argument unmodified. There is no need to call this function
 explicitly, it is mainly used for internal testing.
 
 - **value** (any): a value of arbitrary type
-- returns **retVal** (any): *value*
+- returns **retVal** (any): _value_
 
 ### SCHEMA_GET()
 
@@ -768,14 +757,14 @@ Test if the given document is valid according to the schema definition.
 - **schema** (object): schema definition object
 - returns **result** (object): an object with the following attributes:
   - **valid** (bool): `true` if the document fulfills the schema's requirements,
-    otherwise it will be `false` and *errorMessage* will be set
+    otherwise it will be `false` and _errorMessage_ will be set
   - **errorMessage** (string): details about the validation failure
 
 If the input document **doc** is not an object, the function will return
-a *null* value and register a warning in the query.
+a _null_ value and register a warning in the query.
 
 Using an empty **schema** object is equivalent to specifying a **schema**
-value of *null*, which will make all input objects successfully pass the 
+value of _null_, which will make all input objects successfully pass the
 validation.
 
 ### SLEEP()
@@ -785,7 +774,7 @@ validation.
 Wait for a certain amount of time before continuing the query.
 
 - **seconds** (number): amount of time to wait
-- returns a *null* value
+- returns a _null_ value
 
 ```aql
 SLEEP(1)    // wait 1 second
@@ -801,7 +790,7 @@ no need to call this function explicitly, it is mainly used for internal
 testing.
 
 - **expression** (any): arbitrary expression
-- returns **retVal** (any): the return value of the *expression*
+- returns **retVal** (any): the return value of the _expression_
 
 ```aql
 // differences in execution plan (explain)
@@ -819,5 +808,5 @@ of the Coordinator.
 - returns **serverVersion** (string): the server version string
 
 ```aql
-RETURN VERSION()        // e.g. "3.10.0" 
+RETURN VERSION()        // e.g. "3.10.0"
 ```

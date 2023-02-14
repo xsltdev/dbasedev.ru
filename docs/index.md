@@ -7,15 +7,19 @@ hide:
 
 # Базы данных
 
-<!--
-![MongoDB](mongodb.svg){: style="height:48px;width:48px;vertical-align:middle;"}
+[![MongoDB](mongodb.svg){: style="height:48px;width:48px;vertical-align:middle;"}](/mongodb/)
 [MongoDB](/mongodb/)
 : Это мощная, гибкая и масштабируемая система управления базами данных (СУБД) общего назначения.
--->
 
-![ArangoDB](arangodb.svg){: style="height:48px;width:48px;vertical-align:middle;"}
+[![ArangoDB](arangodb.svg){: style="height:48px;width:48px;vertical-align:middle;"}](/arangodb/)
 [ArangoDB](/arangodb/)
 : Масштабируемая, полностью управляемая графическая база данных, хранилище документов и поисковая система в одном месте.
+
+## ORM
+
+[![Prisma](prisma-orm/logo-prisma.svg){: style="height:42px;width:135px;vertical-align:middle;"}](prisma-orm/index.md)
+[Prisma](prisma-orm/index.md)
+: Prisma — это инструмент, позволяющий работать с реляционными (PostgreSQL, MySQL, SQL Server, SQLite) и нереляционной ([MongoDB](/mongodb/)) базами данных с помощью JavaScript или TypeScript без использования SQL (хотя такая возможность имеется).
 
 !!!abstract "Справочники"
 

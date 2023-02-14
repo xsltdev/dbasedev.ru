@@ -1,4 +1,4 @@
-# Known limitations for AQL queries
+# Известные ограничения для запросов AQL
 
 The following hard-coded limitations exist for AQL queries:
 

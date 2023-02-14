@@ -1,15 +1,9 @@
----
-layout: default
-description: This type of query is supposed to find the shortest path between two given documents(startVertex and targetVertex) in your graph
----
-Shortest Path in AQL
-====================
+# Кратчайшие пути в AQL
 
-General query idea
-------------------
+## General query idea
 
 This type of query is supposed to find the shortest path between two given documents
-(*startVertex* and *targetVertex*) in your graph. For all vertices on this shortest
+(_startVertex_ and _targetVertex_) in your graph. For all vertices on this shortest
 path you will get a result in form of a set with two items:
 
 1. The vertex on this path.
@@ -32,17 +26,16 @@ shortest path in exactly this order. Than the shortest path statement will
 return the following pairs:
 
 | Vertex | Edge  |
-|--------|-------|
-|    A   | null  |
-|    B   | A → B |
-|    C   | B → C |
-|    D   | C → D |
+| ------ | ----- |
+| A      | null  |
+| B      | A → B |
+| C      | B → C |
+| D      | C → D |
 
 Note: The first edge will always be `null` because there is no edge pointing
-to the *startVertex*.
+to the _startVertex_.
 
-Syntax
-------
+## Syntax
 
 Now let's see how we can write a shortest path query.
 You have two options here, you can either use a named graph or a set of edge
@@ -60,7 +53,7 @@ FOR vertex[, edge]
 
 - `FOR`: emits up to two variables:
   - **vertex** (object): the current vertex on the shortest path
-  - **edge** (object, *optional*): the edge pointing to the vertex
+  - **edge** (object, _optional_): the edge pointing to the vertex
 - `IN` `OUTBOUND|INBOUND|ANY`: defines in which direction edges are followed
   (outgoing, incoming, or both)
 - **startVertex** `TO` **targetVertex** (both string\|object): the two vertices between
@@ -70,14 +63,14 @@ FOR vertex[, edge]
   documents does not exist, the result is empty as well and there is no warning.
 - `GRAPH` **graphName** (string): the name identifying the named graph. Its vertex and
   edge collections will be looked up.
-- `OPTIONS` **options** (object, *optional*): used to modify the execution of the
+- `OPTIONS` **options** (object, _optional_): used to modify the execution of the
   traversal. Only the following attributes have an effect, all others are ignored:
   - **weightAttribute** (string): a top-level edge attribute that should be used
-  to read the edge weight. If the attribute is not existent or not numeric, the
-  *defaultWeight* will be used instead. The attribute value must not be negative.
+    to read the edge weight. If the attribute is not existent or not numeric, the
+    _defaultWeight_ will be used instead. The attribute value must not be negative.
   - **defaultWeight** (number): this value will be used as fallback if there is
-  no *weightAttribute* in the edge document, or if it is not a number.
-  The value must not be negative. The default is `1`.
+    no _weightAttribute_ in the edge document, or if it is not a number.
+    The value must not be negative. The default is `1`.
 
 {% hint 'info' %}
 Shortest Path traversals do not support negative weights. If a document
@@ -104,10 +97,10 @@ edge collections. The rest of the behavior is similar to the named version.
 
 For shortest path with a list of edge collections you can optionally specify the
 direction for some of the edge collections. Say for example you have three edge
-collections *edges1*, *edges2* and *edges3*, where in *edges2* the direction
-has no relevance, but in *edges1* and *edges3* the direction should be taken into
+collections _edges1_, _edges2_ and _edges3_, where in _edges2_ the direction
+has no relevance, but in _edges1_ and _edges3_ the direction should be taken into
 account. In this case you can use `OUTBOUND` as general search direction and `ANY`
-specifically for *edges2* as follows:
+specifically for _edges2_ as follows:
 
 ```aql
 FOR vertex IN OUTBOUND SHORTEST_PATH
@@ -119,74 +112,73 @@ All collections in the list that do not specify their own direction will use the
 direction defined after `IN` (here: `OUTBOUND`). This allows to use a different
 direction for each collection in your path search.
 
-Conditional shortest path
--------------------------
+## Conditional shortest path
 
 The SHORTEST_PATH computation will only find an unconditioned shortest path.
 With this construct it is not possible to define a condition like: "Find the
-shortest path where all edges are of type *X*". If you want to do this, use a
+shortest path where all edges are of type _X_". If you want to do this, use a
 normal [Traversal](graphs-traversals.html) instead with the option
 `{order: "bfs"}` in combination with `LIMIT 1`.
 
 Please also consider [to use `WITH`](operations-with.html) to specify the collections you expect to be involved.
 
-Examples
---------
+## Examples
+
 We will create a simple symmetric traversal demonstration graph:
 
 ![traversal graph](../images/traversal_graph.png)
 
 {% arangoshexample examplevar="examplevar" script="script" result="result" %}
-    @startDocuBlockInline GRAPHSP_01_create_graph
-    @EXAMPLE_ARANGOSH_OUTPUT{GRAPHSP_01_create_graph}
-    ~addIgnoreCollection("circles");
-    ~addIgnoreCollection("edges");
-    var examples = require("@arangodb/graph-examples/example-graph.js");
-    var graph = examples.loadGraph("traversalGraph");
-    db.circles.toArray();
-    db.edges.toArray();
-    @END_EXAMPLE_ARANGOSH_OUTPUT
-    @endDocuBlock GRAPHSP_01_create_graph
+@startDocuBlockInline GRAPHSP_01_create_graph
+@EXAMPLE_ARANGOSH_OUTPUT{GRAPHSP_01_create_graph}
+~addIgnoreCollection("circles");
+~addIgnoreCollection("edges");
+var examples = require("@arangodb/graph-examples/example-graph.js");
+var graph = examples.loadGraph("traversalGraph");
+db.circles.toArray();
+db.edges.toArray();
+@END_EXAMPLE_ARANGOSH_OUTPUT
+@endDocuBlock GRAPHSP_01_create_graph
 {% endarangoshexample %}
 {% include arangoshexample.html id=examplevar script=script result=result %}
 
 We start with the shortest path from **A** to **D** as above:
 
 {% arangoshexample examplevar="examplevar" script="script" result="result" %}
-    @startDocuBlockInline GRAPHSP_02_A_to_D
-    @EXAMPLE_ARANGOSH_OUTPUT{GRAPHSP_02_A_to_D}
-    db._query("FOR v, e IN OUTBOUND SHORTEST_PATH 'circles/A' TO 'circles/D' GRAPH 'traversalGraph' RETURN [v._key, e._key]");
-    db._query("FOR v, e IN OUTBOUND SHORTEST_PATH 'circles/A' TO 'circles/D' edges RETURN [v._key, e._key]");
-    @END_EXAMPLE_ARANGOSH_OUTPUT
-    @endDocuBlock GRAPHSP_02_A_to_D
+@startDocuBlockInline GRAPHSP_02_A_to_D
+@EXAMPLE_ARANGOSH_OUTPUT{GRAPHSP_02_A_to_D}
+db.\_query("FOR v, e IN OUTBOUND SHORTEST_PATH 'circles/A' TO 'circles/D' GRAPH 'traversalGraph' RETURN [v._key, e._key]");
+db.\_query("FOR v, e IN OUTBOUND SHORTEST_PATH 'circles/A' TO 'circles/D' edges RETURN [v._key, e._key]");
+@END_EXAMPLE_ARANGOSH_OUTPUT
+@endDocuBlock GRAPHSP_02_A_to_D
 {% endarangoshexample %}
 {% include arangoshexample.html id=examplevar script=script result=result %}
 
 We can see our expectations are fulfilled. We find the vertices in the correct ordering and
-the first edge is *null*, because no edge is pointing to the start vertex on this path.
+the first edge is _null_, because no edge is pointing to the start vertex on this path.
 
 We can also compute shortest paths based on documents found in collections:
 
 {% arangoshexample examplevar="examplevar" script="script" result="result" %}
-    @startDocuBlockInline GRAPHSP_03_A_to_D
-    @EXAMPLE_ARANGOSH_OUTPUT{GRAPHSP_03_A_to_D}
-    db._query("FOR a IN circles FILTER a._key == 'A' FOR d IN circles FILTER d._key == 'D' FOR v, e IN OUTBOUND SHORTEST_PATH a TO d GRAPH 'traversalGraph' RETURN [v._key, e._key]");
-    db._query("FOR a IN circles FILTER a._key == 'A' FOR d IN circles FILTER d._key == 'D' FOR v, e IN OUTBOUND SHORTEST_PATH a TO d edges RETURN [v._key, e._key]");
-    @END_EXAMPLE_ARANGOSH_OUTPUT
-    @endDocuBlock GRAPHSP_03_A_to_D
+@startDocuBlockInline GRAPHSP_03_A_to_D
+@EXAMPLE_ARANGOSH_OUTPUT{GRAPHSP_03_A_to_D}
+db.\_query("FOR a IN circles FILTER a.\_key == 'A' FOR d IN circles FILTER d.\_key == 'D' FOR v, e IN OUTBOUND SHORTEST_PATH a TO d GRAPH 'traversalGraph' RETURN [v._key, e._key]");
+db.\_query("FOR a IN circles FILTER a.\_key == 'A' FOR d IN circles FILTER d.\_key == 'D' FOR v, e IN OUTBOUND SHORTEST_PATH a TO d edges RETURN [v._key, e._key]");
+@END_EXAMPLE_ARANGOSH_OUTPUT
+@endDocuBlock GRAPHSP_03_A_to_D
 {% endarangoshexample %}
 {% include arangoshexample.html id=examplevar script=script result=result %}
 
 And finally clean it up again:
 
 {% arangoshexample examplevar="examplevar" script="script" result="result" %}
-    @startDocuBlockInline GRAPHSP_99_drop_graph
-    @EXAMPLE_ARANGOSH_OUTPUT{GRAPHSP_99_drop_graph}
-    var examples = require("@arangodb/graph-examples/example-graph.js");
-    examples.dropGraph("traversalGraph");
-    ~removeIgnoreCollection("circles");
-    ~removeIgnoreCollection("edges");
-    @END_EXAMPLE_ARANGOSH_OUTPUT
-    @endDocuBlock GRAPHSP_99_drop_graph
+@startDocuBlockInline GRAPHSP_99_drop_graph
+@EXAMPLE_ARANGOSH_OUTPUT{GRAPHSP_99_drop_graph}
+var examples = require("@arangodb/graph-examples/example-graph.js");
+examples.dropGraph("traversalGraph");
+~removeIgnoreCollection("circles");
+~removeIgnoreCollection("edges");
+@END_EXAMPLE_ARANGOSH_OUTPUT
+@endDocuBlock GRAPHSP_99_drop_graph
 {% endarangoshexample %}
 {% include arangoshexample.html id=examplevar script=script result=result %}

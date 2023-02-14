@@ -1,9 +1,4 @@
----
-layout: default
-description: There are multiple ways to work with graphs in ArangoDB,as well as different ways to query your graphs using AQL
----
-Graphs in AQL
-=============
+# Графы в AQL
 
 There are multiple ways to work with [graphs in ArangoDB](../graphs.html),
 as well as different ways to query your graphs using AQL.
@@ -17,7 +12,7 @@ Named graphs can be defined through the [graph-module](../graphs-general-graphs.
 or via the [web interface](../programs-web-interface.html).
 The definition contains the name of the graph, and the vertex and edge collections
 involved. Since the management functions are layered on top of simple sets of
-document and edge collections, you can also use regular AQL functions to work with them. 
+document and edge collections, you can also use regular AQL functions to work with them.
 
 Both variants (named graphs and loosely coupled collection sets a.k.a. anonymous graphs)
 are supported by the AQL language constructs for graph querying. These constructs
@@ -32,7 +27,7 @@ make full use of optimizations and therefore best performance is to be expected:
 - [AQL All Shortest Paths](graphs-all-shortest-paths.html) to find all shortest
   paths between two given documents.
 
-- [AQL k Shortest Paths](graphs-kshortest-paths.html) to find the first *k*
+- [AQL k Shortest Paths](graphs-kshortest-paths.html) to find the first _k_
   paths in order of length (or weight) between two given documents.
 
 - [AQL k Paths](graphs-k-paths.html) to find all paths between two given documents.
@@ -41,6 +36,6 @@ These types of queries are only useful if you use edge collections and/or graphs
 your data model.
 
 {% hint 'info' %}
-New to graphs? [**Take our free graph course for freshers**](https://www.arangodb.com/arangodb-graph-course/){:target="_blank"}
+New to graphs? [**Take our free graph course for freshers**](https://www.arangodb.com/arangodb-graph-course/){:target="\_blank"}
 and get from zero knowledge to advanced query techniques.
 {% endhint %}
