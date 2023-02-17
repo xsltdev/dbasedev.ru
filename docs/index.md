@@ -21,6 +21,10 @@ hide:
 [Prisma](prisma-orm/index.md)
 : Prisma — это инструмент, позволяющий работать с реляционными (PostgreSQL, MySQL, SQL Server, SQLite) и нереляционной ([MongoDB](/mongodb/)) базами данных с помощью JavaScript или TypeScript без использования SQL (хотя такая возможность имеется).
 
+<!-- 
+https://github.com/brianc/node-postgres-docs
+-->
+
 !!!abstract "Справочники"
 
     [![HTML](html.svg){: style="height:16px;width:16px;vertical-align:middle;"} HTML + CSS](https://hcdev.ru/) &nbsp;&nbsp;&nbsp;
