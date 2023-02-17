@@ -1,53 +1,43 @@
-# Data Queries
+# Запросы данных
 
-There are two fundamental types of AQL queries:
+Существует два основных типа запросов AQL:
 
-- queries which access data (read documents)
-- queries which modify data (create, update, replace, delete documents)
+- запросы, которые обращаются к данным (читают документы)
+- запросы, которые изменяют данные (создают, обновляют, заменяют, удаляют документы)
 
-## Data Access Queries
+## Запросы доступа к данным
 
-Retrieving data from the database with AQL does always include a **RETURN**
-operation. It can be used to return a static value, such as a string:
+Извлечение данных из базы данных с помощью AQL всегда включает операцию `RETURN`. Его можно использовать для возврата статического значения, например строки:
 
 ```aql
 RETURN "Hello ArangoDB!"
 ```
 
-The query result is always an array of elements, even if a single element was
-returned and contains a single element in that case: `["Hello ArangoDB!"]`
+Результатом запроса всегда является массив элементов, даже если был возвращен один элемент, и в этом случае он содержит один элемент: `["Hello ArangoDB!"]`.
 
-The function `DOCUMENT()` can be called to retrieve a single document via
-its document handle, for instance:
+Функцию `DOCUMENT()` можно вызвать для получения одного документа через его дескриптор документа, например:
 
 ```aql
 RETURN DOCUMENT("users/phil")
 ```
 
-`RETURN` is usually accompanied by a **FOR** loop to iterate over the
-documents of a collection. The following query executes the loop body for all
-documents of a collection called `users`. Each document is returned unchanged
-in this example:
+`RETURN` обычно сопровождается циклом `FOR` для перебора документов коллекции. Следующий запрос выполняет тело цикла для всех документов коллекции, называемой пользователями. В этом примере каждый документ возвращается без изменений:
 
 ```aql
 FOR doc IN users
   RETURN doc
 ```
 
-Instead of returning the raw `doc`, one can easily create a projection:
+Вместо того, чтобы возвращать необработанный документ, можно легко создать проекцию:
 
 ```aql
 FOR doc IN users
   RETURN { user: doc, newAttribute: true }
 ```
 
-For every user document, an object with two attributes is returned. The value
-of the attribute `user` is set to the content of the user document, and
-`newAttribute` is a static attribute with the boolean value `true`.
+Для каждого пользовательского документа возвращается объект с двумя атрибутами. Значением атрибута `user` установлено содержимое пользовательского документа, а `newAttribute` — это статический атрибут с логическим значением `true`.
 
-Operations like **FILTER**, **SORT** and **LIMIT** can be added to the loop body
-to narrow and order the result. Instead of above shown call to `DOCUMENT()`,
-one can also retrieve the document that describes user `phil` like so:
+В тело цикла можно добавить такие операции, как `FILTER`, `SORT` и `LIMIT`, чтобы сузить и упорядочить результат. Вместо показанного выше вызова `DOCUMENT()` можно также получить документ, который описывает пользователя `phil` следующим образом:
 
 ```aql
 FOR doc IN users
@@ -55,11 +45,7 @@ FOR doc IN users
   RETURN doc
 ```
 
-The document key is used in this example, but any other attribute could equally
-be used for filtering. Since the document key is guaranteed to be unique, no
-more than a single document can match this filter. For other attributes this
-may not be the case. To return a subset of active users (determined by an
-attribute called `status`), sorted by name in ascending order, you can do:
+В этом примере используется ключ документа, но любой другой атрибут может также использоваться для фильтрации. Поскольку ключ документа гарантированно уникален, этому фильтру может соответствовать не более одного документа. Для других атрибутов это может быть не так. Чтобы вернуть подмножество активных пользователей (определяемых атрибутом, называемым `status`), отсортированных по имени в порядке возрастания, вы можете сделать:
 
 ```aql
 FOR doc IN users
@@ -68,24 +54,19 @@ FOR doc IN users
   LIMIT 10
 ```
 
-Note that operations do not have to occur in a fixed order and that their order
-can influence the result significantly. Limiting the number of documents
-before a filter is usually not what you want, because it easily misses a lot
-of documents that would fulfill the filter criterion, but are ignored because
-of a premature `LIMIT` clause. Because of the aforementioned reasons, `LIMIT`
-is usually put at the very end, after `FILTER`, `SORT` and other operations.
+Обратите внимание, что операции не обязательно должны выполняться в фиксированном порядке и что их порядок может существенно повлиять на результат. Ограничение количества документов перед фильтром, как правило, не то, что вам нужно, потому что оно легко упускает множество документов, которые удовлетворяют критерию фильтра, но игнорируются из-за преждевременного предложения `LIMIT`. По вышеупомянутым причинам `LIMIT` обычно ставится в самом конце, после `FILTER`, `SORT` и других операций.
 
-See the [High Level Operations](operations.html) chapter for more details.
+См. «[Операции высокого уровня](operations.md)» для получения более подробной информации.
 
-## Data Modification Queries
+## Запросы на изменение данных
 
-AQL supports the following data modification operations:
+AQL поддерживает следующие операции модификации данных:
 
-- **INSERT**: insert new documents into a collection
-- **UPDATE**: partially update existing documents in a collection
-- **REPLACE**: completely replace existing documents in a collection
-- **REMOVE**: remove existing documents from a collection
-- **UPSERT**: conditionally insert or update documents in a collection
+- **INSERT**: вставлять новые документы в коллекцию
+- **UPDATE**: частично обновить существующие документы в коллекции
+- **REPLACE**: полностью заменить существующие документы в коллекции
+- **REMOVE**: удалить существующие документы из коллекции
+- **UPSERT**: условно вставить или обновить документы в коллекции
 
 You can use them to modify the data of one or multiple documents with a single
 query. This is superior to fetching and updating the documents individually with

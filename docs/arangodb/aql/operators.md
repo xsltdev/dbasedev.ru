@@ -119,13 +119,9 @@ AQL также поддерживает следующие альтернати�
 
 Результат логических операторов в AQL определяется следующим образом:
 
-- `lhs && rhs` returns `lhs` if it is `false` or would be `false` when converted
-  to a boolean. If `lhs` is `true` or would be `true` when converted to a boolean,
-  `rhs` is returned.
-- `lhs || rhs` returns `lhs` if it is `true` or would be `true` when converted
-  to a boolean. If `lhs` is `false` or would be `false` when converted to a boolean,
-  `rhs` is returned.
-- `! value` returns the negated value of `value` converted to a boolean
+- `lhs && rhs` возвращает `lhs`, если оно `false` или было бы `false` при преобразовании в логическое значение. Если левое значение истинно или могло бы быть истинным при преобразовании в логическое значение, возвращается правое значение.
+- `lhs || rhs` возвращает `lhs`, если оно истинно или было бы истинным при преобразовании в логическое значение. Если `lhs` имеет значение `false` или будет ложным при преобразовании в логическое значение, возвращается `rhs`.
+- `! value` возвращает инвертированное значение `value`, преобразованное в логическое значение.
 
 ```aql
 u.age > 15 && u.address.city != ""
@@ -134,21 +130,19 @@ NOT u.isInvalid
 1 || ! 0
 ```
 
-Passing non-boolean values to a logical operator is allowed. Any non-boolean operands
-are casted to boolean implicitly by the operator, without making the query abort.
+Передача небулевых значений логическому оператору разрешена. Любые нелогические операнды неявно преобразуются оператором в логические, не прерывая выполнение запроса.
 
-The _conversion to a boolean value_ works as follows:
+_Преобразование в логическое значение_ работает следующим образом:
 
-- `null` is converted to `false`
-- boolean values remain unchanged
-- all numbers unequal to zero are `true`, zero is `false`
-- an empty string is `false`, all other strings are `true`
-- arrays (`[ ]`) and objects / documents (`{ }`) are `true`, regardless of their contents
+- `null` преобразуется в `false`
+- логические значения остаются неизменными
+- все числа не равные нулю истинны, ноль ложен
+- пустая строка ложна, все остальные строки верны
+- массивы (`[]`) и объекты/документы (`{}`) истинны, независимо от их содержимого
 
-The result of _logical and_ and _logical or_ operations can now have any data
-type and is not necessarily a boolean value.
+Результат операций _логического И_ и _логического ИЛИ_ теперь может иметь любой тип данных и не обязательно является логическим значением.
 
-For example, the following logical operations return boolean values:
+Например, следующие логические операции возвращают логические значения:
 
 ```aql
 25 > 1  &&  42 != 7                        // true
@@ -156,7 +150,7 @@ For example, the following logical operations return boolean values:
 25 != 25                                   // false
 ```
 
-… whereas the following logical operations do not return boolean values:
+… тогда как следующие логические операции не возвращают логические значения:
 
 ```aql
    1 || 7                                  // 1
@@ -165,20 +159,19 @@ null && true                               // null
 true && 23                                 // 23
 ```
 
-## Arithmetic operators
+## Арифметические операторы
 
-Arithmetic operators perform an arithmetic operation on two numeric
-operands. The result of an arithmetic operation is again a numeric value.
+Арифметические операторы выполняют арифметическую операцию над двумя числовыми операндами. Результатом арифметической операции снова является числовое значение.
 
-AQL supports the following arithmetic operators:
+AQL поддерживает следующие арифметические операторы:
 
-- `+` addition
-- `-` subtraction
-- `*` multiplication
-- `/` division
-- `%` modulus
+- `+` сложение
+- `-` разность
+- `*` умножение
+- `/` деление
+- `%` деление по модулю
 
-Unary plus and unary minus are supported as well:
+Унарный плюс и унарный минус также поддерживаются:
 
 ```aql
 LET x = -5
@@ -187,12 +180,9 @@ RETURN [-x, +y]
 // [5, 1]
 ```
 
-For exponentiation, there is a [numeric function](functions-numeric.html#pow) _POW()_.
-The syntax `base ** exp` is not supported.
+Для возведения в степень есть числовая функция [`POW()`](functions/numeric.md#pow). Синтаксис `base ** exp` не поддерживается.
 
-For string concatenation, you must use the [`CONCAT()` string function](functions-string.html#concat).
-Combining two strings with a plus operator (`"foo" + "bar"`) does not work!
-Also see [Common Errors](common-errors.html).
+Для конкатенации строк необходимо использовать строковую функцию [`CONCAT()`](functions/string.md#concat). Объединение двух строк с помощью оператора "плюс" (`"foo" + "bar"`) не работает!
 
 ```aql
 1 + 1
@@ -204,24 +194,16 @@ Also see [Common Errors](common-errors.html).
 +9.99
 ```
 
-The arithmetic operators accept operands of any type. Passing non-numeric values to an
-arithmetic operator casts the operands to numbers using the type casting rules
-applied by the [TO_NUMBER()](functions-type-cast.html#to_number) function:
+Арифметические операторы принимают операнды любого типа. При передаче нечисловых значений арифметическому оператору операнды приводятся к числам с использованием правил приведения типов, применяемых функцией [`TO_NUMBER()`](functions/type-cast.md#to_number):
 
-- `null` is converted to `0`
-- `false` is converted to `0`, `true` is converted to `1`
-- a valid numeric value remains unchanged, but NaN and Infinity are converted to `0`
-- string values are converted to a number if they contain a valid string representation
-  of a number. Any whitespace at the start or the end of the string is ignored. Strings
-  with any other contents are converted to the number `0`
-- an empty array is converted to `0`, an array with one member is converted to the numeric
-  representation of its sole member. Arrays with more members are converted to the number
-  `0`.
-- objects / documents are converted to the number `0`.
+- `null` преобразуется в `0`
+- `false` преобразуется в `0`, `true` преобразуется в `1`
+- допустимое числовое значение остается неизменным, но `NaN` и `Infinity` преобразуются в `0`
+- строковые значения преобразуются в число, если они содержат допустимое строковое представление числа. Любые пробелы в начале или в конце строки игнорируются. Строки с любым другим содержимым преобразуются в число `0`
+- пустой массив преобразуется в `0`, массив с одним элементом преобразуется в числовое представление его единственного элемента. Массивы с большим количеством элементов преобразуются в число `0`.
+- объекты/документы преобразуются в число `0`.
 
-An arithmetic operation that produces an invalid value, such as `1 / 0`
-(division by zero), produces a result value of `null`. The query is not
-aborted, but you may see a warning.
+Арифметическая операция, которая дает недопустимое значение, такое как `1 / 0` (деление на ноль), возвращает значение `null`. Запрос не прерывается, но вы можете увидеть предупреждение.
 
 ```aql
    1 + "a"       // 1
@@ -239,106 +221,85 @@ null + 1         // 1
    1 / 0         // null (with a 'division by zero' warning)
 ```
 
-## Ternary operator
+## Тернарный оператор
 
-AQL also supports a ternary operator that can be used for conditional
-evaluation. The ternary operator expects a boolean condition as its first
-operand, and it returns the result of the second operand if the condition
-evaluates to true, and the third operand otherwise.
+AQL также поддерживает тернарный оператор, который можно использовать для условной оценки. Тернарный оператор ожидает логическое условие в качестве своего первого операнда и возвращает результат второго операнда, если условие оценивается как истинное, и третьего операнда в противном случае.
 
-In the following example, the expression returns `u.userId` if `u.age` is
-greater than 15 or if `u.active` is `true`. Otherwise it returns `null`:
+В следующем примере выражение возвращает `u.userId`, если `u.age` больше `15` или если `u.active` имеет значение `true`. В противном случае он возвращает `null`:
 
 ```aql
 u.age > 15 || u.active == true ? u.userId : null
 ```
 
-There is also a shortcut variant of the ternary operator with just two
-operands. This variant can be used if the expression for the boolean
-condition and the return value should be the same.
+Существует также сокращенный вариант тернарного оператора всего с двумя операндами. Этот вариант можно использовать, если выражение для логического условия и возвращаемое значение должны совпадать.
 
-In the following example, the expression evaluates to `u.value` if `u.value` is
-truthy. Otherwise, a fixed string is given back:
+В следующем примере выражение оценивается как `u.value`, если `u.value` истинно. В противном случае возвращается фиксированная строка:
 
 ```aql
 u.value ? : 'value is null, 0 or not present'
 ```
 
-The condition (here just `u.value`) is only evaluated once if the second
-operand between `?` and `:` is omitted, whereas it would be evaluated twice
-in case of `u.value ? u.value : 'value is null'`.
+Условие (здесь просто `u.value`) оценивается только один раз, если второй операнд между `?` и `:` опущено, тогда как в случае `u.value ? u.value : 'value is null'`.
 
-{% hint 'info' %}
-Subqueries that are used inside expressions are pulled out of these
-expressions and executed beforehand. That means that subqueries do not
-participate in lazy evaluation of operands, for example, in the
-ternary operator. Also see
-[evaluation of subqueries](fundamentals-subqueries.html#evaluation-of-subqueries).
-{% endhint %}
+!!!info ""
 
-## Range operator
+    Подзапросы, используемые внутри выражений, извлекаются из этих выражений и выполняются заранее. Это означает, что подзапросы не участвуют в ленивом вычислении операндов, например, в тернарном операторе. См. также [оценку подзапросов](fundamentals/subqueries.md#evaluation-of-subqueries).
 
-AQL supports expressing simple numeric ranges with the `..` operator.
-This operator can be used to easily iterate over a sequence of numeric
-values.
+## Оператор диапазона
 
-The `..` operator produces an array of the integer values in the
-defined range, with both bounding values included.
+AQL поддерживает выражение простых числовых диапазонов с помощью оператора `..`. Этот оператор можно использовать для простого перебора последовательности числовых значений.
+
+Оператор `..` создает массив целочисленных значений в определенном диапазоне, включая оба ограничивающих значения.
 
 ```aql
 2010..2013
 ```
 
-The above example produces the following result:
+Приведенный выше пример дает следующий результат:
 
 ```json
 [2010, 2011, 2012, 2013]
 ```
 
-Using the range operator is equivalent to writing an array with the integer
-values in the range specified by the bounds of the range. If the bounds of
-the range operator are non-integers, they are converted to integer values first.
+Использование оператора диапазона эквивалентно записи массива с целочисленными значениями в диапазоне, заданном границами диапазона. Если границы оператора диапазона не являются целыми числами, они сначала преобразуются в целые значения.
 
-There is also a [`RANGE()` function](functions-numeric.html#range).
+Существует также функция [`RANGE()`](functions/numeric.md#range).
 
-## Array operators
+## Операторы массива
 
-AQL provides different array operators:
+AQL предоставляет различные операторы массива:
 
-- `[*]` for [array variable expansion](advanced-array-operators.html#array-expansion)
-- `[**]` for [array contraction](advanced-array-operators.html#array-contraction)
-- `[? ...]` known as the [question mark operator](advanced-array-operators.html#question-mark-operator)
-  for nested search
+- `[*]` для [расширения переменной массива](advanced/array-operators.md#array-expansion)
+- `[**]` для [сжатия массива](advanced/array-operators.md#array-contraction)
+- `[? ...]` известный как [оператор вопросительного знака](advanced/array-operators.md#question-mark-operator) для вложенного поиска
 
-## Operator precedence
+## Оператор приоритета
 
-The operator precedence in AQL is similar as in other familiar languages
-(highest precedence first):
+Приоритет операций в AQL такой же, как и в других знакомых языках (сначала наивысший приоритет):
 
-| Operator(s)                                 | Description                                                                            |
-| :------------------------------------------ | :------------------------------------------------------------------------------------- |
-| `::`                                        | scope (user-defined AQL functions)                                                     |
-| `[*]`                                       | array expansion                                                                        |
-| `[]`                                        | indexed value access (of arrays)                                                       |
-| `.`                                         | member access (of objects)                                                             |
-| `()`                                        | function call                                                                          |
-| `!`, `NOT`, `+`, `-`                        | unary not (logical negation), unary plus, unary minus                                  |
-| `*`, `/`, `%`                               | multiplication, division, modulus                                                      |
-| `+`, `-`                                    | addition, subtraction                                                                  |
-| `..`                                        | range operator                                                                         |
-| `<`, `<=`, `>=`, `>`                        | less than, less equal, greater equal, greater than                                     |
-| `IN`, `NOT IN`                              | in operator, not in operator                                                           |
-| `==`, `!=`, `LIKE`, `NOT LIKE`, `=~`, `!~`  | equality, inequality, wildcard match, wildcard non-match, regex match, regex non-match |
-| `AT LEAST`                                  | at least modifier (array comparison operator, question mark operator)                  |
-| `OUTBOUND`, `INBOUND`, `ANY`, `ALL`, `NONE` | graph traversal directions, array comparison operators, question mark operator         |
-| `&&`, `AND`                                 | logical and                                                                            |
-| `                                           |                                                                                        | `, `OR` | logical or |
-| `INTO`                                      | into operator (INSERT / UPDATE / REPLACE / REMOVE / COLLECT operations)                |
-| `WITH`                                      | with operator (WITH / UPDATE / REPLACE / COLLECT operations)                           |
-| `=`                                         | variable assignment (LET / COLLECT operations, AGGREGATE / PRUNE clauses)              |
-| `?`, `:`                                    | ternary operator, object literals                                                      |
-| `DISTINCT`                                  | distinct modifier (RETURN operations)                                                  |
-| `,`                                         | comma separator                                                                        |
+| Оператор                                    | Описание                                                       |
+| :------------------------------------------ | :------------------------------------------------------------- |
+| `::`                                        | область действия (определяемые пользователем функции AQL)      |
+| `[*]`                                       | расширение массива                                             |
+| `[]`                                        | доступ к индексированным значениям (массивов)                  |
+| `.`                                         | членский доступ (объектов)                                     |
+| `()`                                        | вызов функции                                                  |
+| `!`, `NOT`, `+`, `-`                        | унарное не (логическое отрицание), унарный плюс, унарный минус |
+| `*`, `/`, `%`                               | умножение, деление, модуль                                     |
+| `+`, `-`                                    | сложение, вычитание                                            |
+| `..`                                        | оператор диапазона                                             |
+| `<`, `<=`, `>=`, `>`                        | меньше, меньше, меньше, больше, больше, чем                    |
+| `IN`, `NOT IN`                              |                                                                |
+| `==`, `!=`, `LIKE`, `NOT LIKE`, `=~`, `!~`  |                                                                |
+| `AT LEAST`                                  |                                                                |
+| `OUTBOUND`, `INBOUND`, `ANY`, `ALL`, `NONE` |                                                                |
+| `&&`, `AND`                                 | логическое И                                                   |
+| `OR`                                        | логическое ИЛИ                                                 |
+| `INTO`                                      |                                                                |
+| `WITH`                                      |                                                                |
+| `=`                                         |                                                                |
+| `?`, `:`                                    |                                                                |
+| `DISTINCT`                                  |                                                                |
+| `,`                                         |                                                                |
 
-The parentheses `(` and `)` can be used to enforce a different operator
-evaluation order.
+Круглые скобки `(` и `)` могут использоваться для обеспечения другого порядка оценки оператора.
