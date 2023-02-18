@@ -68,20 +68,13 @@ AQL поддерживает следующие операции модифик�
 - **REMOVE**: удалить существующие документы из коллекции
 - **UPSERT**: условно вставить или обновить документы в коллекции
 
-You can use them to modify the data of one or multiple documents with a single
-query. This is superior to fetching and updating the documents individually with
-multiple queries. However, if only a single document needs to be modified,
-ArangoDB's specialized data modification operations for single documents might
-execute faster.
+Вы можете использовать их для изменения данных одного или нескольких документов с помощью одного запроса. Это лучше, чем выборка и обновление документов по отдельности с помощью нескольких запросов. Однако, если необходимо изменить только один документ, специализированные операции модификации данных ArangoDB для отдельных документов могут выполняться быстрее.
 
-Below you find some simple example queries that use these operations.
-The operations are detailed in the chapter [High Level Operations](operations.html).
+Ниже вы найдете несколько простых примеров запросов, в которых используются эти операции. Операции подробно описаны в главе «[Операции высокого уровня](operations/index.md)».
 
-### Modifying a single document
+### Изменение одного документа
 
-Let's start with the basics: `INSERT`, `UPDATE` and `REMOVE` operations on single documents.
-Here is an example that inserts a document into a collection called `users` with
-the [`INSERT` operation](operations-insert.html):
+Начнем с основ: операции `INSERT`, `UPDATE` и `REMOVE` для отдельных документов. Вот пример, который вставляет документ в коллекцию `users` с помощью операции [`INSERT`](operations/insert.md):
 
 ```aql
 INSERT {
@@ -91,15 +84,11 @@ INSERT {
 } INTO users
 ```
 
-The collection needs to exist before executing the query. AQL queries cannot
-create collections.
+Коллекция должна существовать до выполнения запроса. Запросы AQL не могут создавать коллекции.
 
-If you run the above query, the result is an empty array because we did
-not specify what to return using a `RETURN` keyword. It is optional in
-modification queries, but mandatory in data access queries. Despite the empty
-result, the above query still creates a new user document.
+Если вы запустите приведенный выше запрос, результатом будет пустой массив, потому что мы не указали, что возвращать, используя ключевое слово `RETURN`. Это необязательно в запросах на изменение, но обязательно в запросах на доступ к данным. Несмотря на пустой результат, приведенный выше запрос по-прежнему создает новый пользовательский документ.
 
-You may provide a key for the new document; if not provided, ArangoDB creates one for you.
+Вы можете предоставить ключ для нового документа; если он не указан, ArangoDB создаст его для вас.
 
 ```aql
 INSERT {
@@ -110,7 +99,7 @@ INSERT {
 } INTO users
 ```
 
-As ArangoDB is schema-free, attributes of the documents may vary:
+Поскольку ArangoDB не содержит схем, атрибуты документов могут различаться:
 
 ```aql
 INSERT {
@@ -131,9 +120,7 @@ INSERT {
 } INTO users
 ```
 
-The [`UPDATE` operation](operations-update.html) lets you add or change
-attributes of existing documents. The following query modifies a previously
-created user, changing the `status` attribute and adding a `location` attribute:
+Операция [`UPDATE`](operations/update.md) позволяет добавлять или изменять атрибуты существующих документов. Следующий запрос изменяет ранее созданного пользователя, изменяя атрибут `status` и добавляя атрибут `location`:
 
 ```aql
 UPDATE "PhilCarpenter" WITH {
@@ -142,9 +129,7 @@ UPDATE "PhilCarpenter" WITH {
 } IN users
 ```
 
-The [`REPLACE` operation](operations-replace.html) is an alternative to the
-`UPDATE` operation that lets you replace all attributes of a document
-(except for attributes that cannot be changed, like `_key`):
+Операция [`REPLACE`](operations/replace.md) является альтернативой операции `UPDATE`, которая позволяет заменить все атрибуты документа (кроме атрибутов, которые нельзя изменить, например `_key`):
 
 ```aql
 REPLACE {
@@ -156,24 +141,17 @@ REPLACE {
 } IN users
 ```
 
-You can delete a document with the [`REMOVE` operation](operations-remove.html),
-only requiring the document key to identify it:
+Вы можете удалить документ с помощью операции [`REMOVE`](operations/remove.md), требуя только ключ документа для его идентификации:
 
 ```aql
 REMOVE "GilbertoGil" IN users
 ```
 
-### Modifying multiple documents
+### Изменение нескольких документов
 
-Data modification operations are normally combined with `FOR` loops to
-iterate over a given list of documents. They can optionally be combined with
-`FILTER` statements and the like.
+Операции модификации данных обычно сочетаются с циклами `FOR` для перебора заданного списка документов. При желании их можно комбинировать с операторами `FILTER` и т. п.
 
-To create multiple new documents, use the `INSERT` operation together with `FOR`.
-You can also use `INSERT` to generate copies of existing documents from other
-collections, or to create synthetic documents (e.g. for testing purposes).
-The following query creates 1000 test users with some attributes and stores
-them in the `users` collection:
+Чтобы создать несколько новых документов, используйте операцию `INSERT` вместе с `FOR`. Вы также можете использовать `INSERT` для создания копий существующих документов из других коллекций или для создания синтетических документов (например, в целях тестирования). Следующий запрос создает 1000 тестовых пользователей с некоторыми атрибутами и сохраняет их в коллекции `users`:
 
 ```aql
 FOR i IN 1..1000
@@ -187,7 +165,7 @@ FOR i IN 1..1000
   } IN users
 ```
 
-Let's modify existing documents that match some condition:
+Давайте изменим существующие документы, соответствующие некоторому условию:
 
 ```aql
 FOR u IN users
@@ -195,7 +173,7 @@ FOR u IN users
   UPDATE u WITH { status: "inactive" } IN users
 ```
 
-You can also update existing attributes based on their previous value:
+Вы также можете обновить существующие атрибуты на основе их предыдущего значения:
 
 ```aql
 FOR u IN users
@@ -203,9 +181,7 @@ FOR u IN users
   UPDATE u WITH { numberOfLogins: u.numberOfLogins + 1 } IN users
 ```
 
-The above query only works if there is already a `numberOfLogins` attribute
-present in the document. If it is unclear whether there is a `numberOfLogins`
-attribute in the document, the increase must be made conditional:
+Приведенный выше запрос работает только в том случае, если в документе уже присутствует атрибут `numberOfLogins`. Если неясно, есть ли в документе атрибут `numberOfLogins`, увеличение необходимо сделать условным:
 
 ```aql
 FOR u IN users
@@ -215,7 +191,7 @@ FOR u IN users
   } IN users
 ```
 
-Updates of multiple attributes can be combined in a single query:
+Обновления нескольких атрибутов могут быть объединены в один запрос:
 
 ```aql
 FOR u IN users
@@ -226,14 +202,9 @@ FOR u IN users
   } IN users
 ```
 
-Note than an update query might fail during execution, for example, because a
-document to be updated does not exist. In this case, the query aborts at
-the first error. In single server mode, all modifications done by the query
-are rolled back as if they never happened.
+Обратите внимание, что запрос на обновление может завершиться ошибкой во время выполнения, например, из-за того, что документ, который нужно обновить, не существует. В этом случае запрос прерывается при первой ошибке. В режиме одного сервера все изменения, сделанные запросом, откатываются, как если бы они никогда не происходили.
 
-You can copy documents from one collection to another by reading from one
-collection but write to another.
-Let's copy the contents of the `users` collection into the `backup` collection:
+Вы можете копировать документы из одной коллекции в другую, читая из одной коллекции и записывая в другую. Скопируем содержимое коллекции `users` в коллекцию `backup`:
 
 ```aql
 FOR u IN users
