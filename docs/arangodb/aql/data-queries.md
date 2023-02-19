@@ -422,21 +422,10 @@ RETURN { _key: NEW._key, type: opType }
 
 За операциями модификации данных могут дополнительно следовать операции `LET` для выполнения дальнейших вычислений и операция `RETURN` для возврата данных.
 
-### Transactional Execution
+### Транзакционное исполнение
 
-On a single server, data modification operations are executed transactionally.
-If a data modification operation fails, any changes made by it are rolled
-back automatically as if they never happened.
+На одном сервере операции модификации данных выполняются транзакционно. В случае сбоя операции модификации данных любые сделанные ею изменения автоматически откатываются, как будто их никогда и не было.
 
-If the RocksDB engine is used and intermediate commits are enabled, a query may
-execute intermediate transaction commits in case the running transaction (AQL
-query) hits the specified size thresholds. In this case, the query's operations
-carried out so far are committed and not rolled back in case of a later abort/rollback.
-That behavior can be controlled by adjusting the intermediate commit settings for
-the RocksDB engine.
+Если используется механизм RocksDB и включены промежуточные фиксации, запрос может выполнять промежуточные фиксации транзакций в случае, если текущая транзакция (запрос AQL) достигает заданных пороговых значений размера. В этом случае операции запроса, выполненные до сих пор, фиксируются и не откатываются в случае последующего прерывания/отката. Это поведение можно контролировать, настраивая параметры промежуточной фиксации для механизма RocksDB.
 
-In a cluster, AQL data modification queries are not executed transactionally.
-Additionally, AQL queries with `UPDATE`, `REPLACE`, `UPSERT`, or `REMOVE`
-operations require the `_key` attribute to be specified for all documents that
-should be modified or removed, even if a shard key attribute other than `_key`
-is chosen for the collection.
+В кластере запросы модификации данных AQL не выполняются транзакционно. Кроме того, запросы AQL с операциями `UPDATE`, `REPLACE`, `UPSERT` или `REMOVE` требуют указания атрибута `_key` для всех документов, которые должны быть изменены или удалены, даже если для коллекции выбран атрибут ключа сегмента, отличный от `_key`.

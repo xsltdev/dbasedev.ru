@@ -1,67 +1,62 @@
 # FOR
 
-The versatile `FOR` keyword can be used to iterate over a collection or View,
-all elements of an array or to traverse a graph.
+Универсальное ключевое слово **`FOR`** можно использовать для перебора коллекции или представления, всех элементов массива или для обхода графа.
 
-## Syntax
+## Синтаксис
 
-The general syntax for iterating over collections and arrays is:
+Общий синтаксис для перебора коллекций и массивов:
 
 <pre><code>FOR <em>variableName</em> IN <em>expression</em></code></pre>
 
-There is also a special variant for [graph traversals](graphs-traversals.html):
+Существует также специальный вариант для [обхода графа](graphs/traversals.md):
 
-<pre><code>FOR <em>vertexVariableName</em> [, <em>edgeVariableName</em> [, <em>pathVariableName</em> ] ] IN <em>traversalExpression</em></code></pre>
+<pre>
+<code>FOR <em>vertexVariableName</em> [, <em>edgeVariableName</em> [, <em>pathVariableName</em> ] ]
+  IN <em>traversalExpression</em></code>
+</pre>
 
-For Views, there is a special (optional) [`SEARCH` keyword](operations-search.html):
+Для представлений есть специальное (необязательное) ключевое слово [`SEARCH`](search.md):
 
 <pre><code>FOR <em>variableName</em> IN <em>viewName</em> SEARCH <em>searchExpression</em></code></pre>
 
-{% hint 'info' %}
-Views cannot be used as edge collections in traversals:
+!!!info ""
 
-```aql
-FOR v IN 1..3 ANY startVertex viewName /* invalid! */
-```
+    Представления нельзя использовать в качестве коллекций ребер в обходах:
 
-{% endhint %}
+    ```aql
+    FOR v IN 1..3 ANY startVertex viewName /* неверно! */
+    ```
 
-All variants can optionally end with an `OPTIONS { … }` clause.
+Все варианты могут дополнительно заканчиваться предложением `OPTIONS { … }`.
 
-## Usage
+## Применение
 
-Each array element returned by _expression_ is visited exactly once. It is
-required that _expression_ returns an array in all cases. The empty array is
-allowed, too. The current array element is made available for further processing
-in the variable specified by _variableName_.
+Каждый элемент массива, возвращаемый _выражением_, посещается ровно один раз. Требуется, чтобы _выражение_ возвращало массив во всех случаях. Пустой массив также разрешен. Текущий элемент массива становится доступным для дальнейшей обработки в переменной, указанной в `variableName`.
 
 ```aql
 FOR u IN users
   RETURN u
 ```
 
-This will iterate over all elements from the array `users` (note: this array
-consists of all documents from the collection named "users" in this case) and
-make the current array element available in variable `u`. `u` is not modified in
-this example but simply pushed into the result using the `RETURN` keyword.
+Это будет перебирать все элементы из массива `users` (обратите внимание: этот массив состоит из всех документов из коллекции с именем `users` в данном случае) и сделает текущий элемент массива доступным в переменной `u`. `u` не изменяется в этом примере, а просто вставляется в результат с помощью ключевого слова `RETURN`.
 
-Note: When iterating over collection-based arrays as shown here, the order of
-documents is undefined unless an explicit sort order is defined using a `SORT`
-statement.
+!!!note ""
 
-The variable introduced by `FOR` is available until the scope the `FOR` is
-placed in is closed.
+    При переборе массивов на основе коллекций, как показано здесь, порядок документов не определен, если явный порядок сортировки не определен с помощью инструкции `SORT`.
 
-Another example that uses a statically declared array of values to iterate over:
+Переменная, представленная `FOR`, доступна до тех пор, пока не будет закрыта область видимости `FOR`.
+
+Другой пример, который использует статически объявленный массив значений для перебора:
 
 ```aql
 FOR year IN [ 2011, 2012, 2013 ]
-  RETURN { "year" : year, "isLeapYear" : year % 4 == 0 && (year % 100 != 0 || year % 400 == 0) }
+  RETURN {
+	"year" : year,
+	"isLeapYear" : year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
+  }
 ```
 
-Nesting of multiple `FOR` statements is allowed, too. When `FOR` statements are
-nested, a cross product of the array elements returned by the individual `FOR`
-statements will be created.
+Допускается также вложение нескольких операторов `FOR`. Когда операторы `FOR` являются вложенными, будет создано перекрестное произведение элементов массива, возвращаемых отдельными операторами `FOR`.
 
 ```aql
 FOR u IN users
@@ -69,15 +64,9 @@ FOR u IN users
     RETURN { "user" : u, "location" : l }
 ```
 
-In this example, there are two array iterations: an outer iteration over the array
-`users` plus an inner iteration over the array `locations`. The inner array is
-traversed as many times as there are elements in the outer array. For each
-iteration, the current values of `users` and `locations` are made available for
-further processing in the variable `u` and `l`.
+В этом примере есть две итерации массива: внешняя итерация по массиву `users` плюс внутренняя итерация по массиву `locations`. Внутренний массив просматривается столько раз, сколько элементов во внешнем массиве. Для каждой итерации текущие значения `users` и `locations` становятся доступными для дальнейшей обработки в переменных `u` и `l`.
 
-You can also use subqueries, for example, to iterate over a collection
-independently and get the results back as an array, that you can then access in
-an outer `FOR` loop:
+Вы также можете использовать подзапросы, например, для независимого перебора коллекции и получения результатов обратно в виде массива, к которому затем можно получить доступ во внешнем цикле `FOR`:
 
 ```aql
 FOR u IN users
@@ -85,20 +74,19 @@ FOR u IN users
   RETURN { "user": u, "locations": subquery }
 ```
 
-Also see [Combining queries with subqueries](fundamentals-subqueries.html).
+Также см. [Объединение запросов с подзапросами](../fundamentals/subqueries.md).
 
-## Options
+## Параметры
 
-For collections and Views, the `FOR` construct supports an optional `OPTIONS`
-clause to modify behavior. The general syntax is:
+Для коллекций и представлений конструкция `FOR` поддерживает необязательное предложение `OPTIONS` для изменения поведения. Общий синтаксис:
 
-<pre><code>FOR <em>variableName</em> IN <em>expression</em> OPTIONS { <em>option</em>: <em>value</em>, <em>...</em> }</code></pre>
+<pre>
+<code>FOR <em>variableName</em> IN <em>expression</em> OPTIONS { <em>option</em>: <em>value</em>, <em>...</em> }</code>
+</pre>
 
 ### `indexHint`
 
-For collections, index hints can be given to the optimizer with the `indexHint`
-option. The value can be a single **index name** or a list of index names in
-order of preference:
+Для коллекций индексные подсказки могут быть переданы оптимизатору с помощью опции `indexHint`. Значение может быть одним именем индекса или списком имен индексов в порядке предпочтения:
 
 ```aql
 FOR … IN … OPTIONS { indexHint: "byName" }
@@ -108,20 +96,13 @@ FOR … IN … OPTIONS { indexHint: "byName" }
 FOR … IN … OPTIONS { indexHint: ["byName", "byColor"] }
 ```
 
-Whenever there is a chance to potentially use an index for this `FOR` loop,
-the optimizer will first check if the specified index can be used. In case of
-an array of indexes, the optimizer will check the feasibility of each index in
-the specified order. It will use the first suitable index, regardless of
-whether it would normally use a different index.
+Всякий раз, когда есть возможность потенциально использовать индекс для этого цикла `FOR`, оптимизатор сначала проверит, можно ли использовать указанный индекс. В случае массива индексов оптимизатор проверит выполнимость каждого индекса в указанном порядке. Он будет использовать первый подходящий индекс, независимо от того, будет ли обычно использоваться другой индекс.
 
-If none of the specified indexes is suitable, then it falls back to its normal
-logic to select another index or fails if `forceIndexHint` is enabled.
+Если ни один из указанных индексов не подходит, он возвращается к своей обычной логике выбора другого индекса или терпит неудачу, если включен `forceIndexHint`.
 
 ### `forceIndexHint`
 
-Index hints are not enforced by default. If `forceIndexHint` is set to `true`,
-then an error is generated if `indexHint` does not contain a usable index,
-instead of using a fallback index or not using an index at all.
+Подсказки индекса не применяются по умолчанию. Если для `forceIndexHint` задано значение `true`, то генерируется ошибка, если `indexHint` не содержит пригодный для использования индекс, вместо использования резервного индекса или вообще без использования индекса.
 
 ```aql
 FOR … IN … OPTIONS { indexHint: … , forceIndexHint: true }
@@ -129,7 +110,7 @@ FOR … IN … OPTIONS { indexHint: … , forceIndexHint: true }
 
 ### `disableIndex`
 
-<small>Introduced in: v3.9.1</small>
+<small>Добавлено в: v3.9.1</small>
 
 In some rare cases it can be beneficial to not do an index lookup or scan,
 but to do a full collection scan.

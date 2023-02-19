@@ -2,10 +2,14 @@
 
 <!-- Page title -->
 {% block htmltitle %} {% if page and page.meta and
-page.meta.title %}
+page.meta.title and not page.is_homepage %}
 <title>{{ page.meta.title }} ⚡️ Базы данных</title>
 {% elif page and page.title and not page.is_homepage %}
-<title>{{ page.title }} ⚡️ Базы данных</title>
+<title>
+	{{ page.title }} ⚡️ {% for doc in page.ancestors %}{%
+	if doc and doc.url %}{{ doc.title }} | {% endif %}{%
+	endfor %}Базы данных
+</title>
 {% else %}
 <title>Справочник по базам данных</title>
 {% endif %} {% endblock %}
@@ -16,7 +20,36 @@ page.meta.source %} {% include "partials/source-link.html"
 %} {% endif %} {% endblock %}
 
 <!-- Comments -->
-{% block content %} {{ super() }}
+{% block content %}
+<!-- Breadcrumbs -->
+
+{% if page and not page.is_homepage and not
+page.meta.no_breadcrumb %}
+<p style="color: var(--md-default-fg-color--light)">
+	<small>
+		<a
+			href="/"
+			style="color: var(--md-default-fg-color--light)"
+			><img
+				style="vertical-align: text-bottom"
+				width="18"
+				src="https://raw.githubusercontent.com/squidfunk/mkdocs-material/master/material/.icons/material/home.svg"
+		/></a>
+		{% for doc in page.ancestors|reverse %} {% if
+		doc.url %} &gt;
+		<a
+			href="/{{ doc.url }}"
+			style="color: var(--md-default-fg-color)"
+			>{{ doc.title }}</a
+		>
+
+		{% endif %} {% endfor %}
+	</small>
+</p>
+{% endif %}
+
+<!-- Content -->
+{{ super() }}
 
 <!-- Giscus -->
 <h2 id="__comments">{{ lang.t("meta.comments") }}</h2>

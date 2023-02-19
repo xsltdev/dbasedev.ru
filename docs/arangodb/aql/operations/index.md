@@ -1,49 +1,19 @@
-# High-level operations
+# Высокоуровневые операторы
 
-The following high-level operations are described here after:
+Высокоуровневые операторы:
 
-- [**FOR**](for.md):
-  Iterate over a collection or View, all elements of an array or traverse a graph
-
-- [**RETURN**](return.md):
-  Produce the result of a query.
-
-- [**FILTER**](filter.md):
-  Restrict the results to elements that match arbitrary logical conditions.
-
-- [**SEARCH**](search.md):
-  Query an `arangosearch` or `search-alias` View.
-
-- [**SORT**](sort.md):
-  Force a sort of the array of already produced intermediate results.
-
-- [**LIMIT**](limit.md):
-  Reduce the number of elements in the result to at most the specified number,
-  optionally skip elements (pagination).
-
-- [**LET**](let.md):
-  Assign an arbitrary value to a variable.
-
-- [**COLLECT**](collect.md):
-  Group an array by one or multiple group criteria. Can also count and aggregate.
-
-- [**WINDOW**](window.md):
-  Perform aggregations over related rows.
-
-- [**REMOVE**](remove.md):
-  Remove documents from a collection.
-
-- [**UPDATE**](update.md):
-  Partially update documents in a collection.
-
-- [**REPLACE**](replace.md):
-  Completely replace documents in a collection.
-
-- [**INSERT**](insert.md):
-  Insert new documents into a collection.
-
-- [**UPSERT**](upsert.md):
-  Update/replace an existing document, or create it in the case it does not exist.
-
-- [**WITH**](with.md):
-  Specify collections used in a query (at query begin only).
+- [**FOR**](for.md): Итерация по коллекции или представлению, всем элементам массива или обходу графа
+- [**RETURN**](return.md): Выдать результат запроса.
+- [**FILTER**](filter.md): Ограничьте результаты элементами, которые соответствуют произвольным логическим условиям.
+- [**SEARCH**](search.md): Запрос `arangsearch` или `search-alias` View.
+- [**SORT**](sort.md): Форсировать сортировку массива уже полученных промежуточных результатов.
+- [**LIMIT**](limit.md): Уменьшите количество элементов в результате до максимально указанного числа, при необходимости пропустите элементы (разбиение на страницы).
+- [**LET**](let.md): Присвоить произвольное значение переменной.
+- [**COLLECT**](collect.md): Сгруппируйте массив по одному или нескольким критериям группы. Также умеет считать и суммировать.
+- [**WINDOW**](window.md): Выполните агрегирование по связанным строкам.
+- [**REMOVE**](remove.md): Удаление документов из коллекции.
+- [**UPDATE**](update.md): Частично обновить документы в коллекции.
+- [**REPLACE**](replace.md): Полностью заменить документы в коллекции.
+- [**INSERT**](insert.md): Вставка новых документов в коллекцию.
+- [**UPSERT**](upsert.md): Обновите/замените существующий документ или создайте его, если он не существует.
+- [**WITH**](with.md): Укажите коллекции, используемые в запросе (только в начале запроса).
