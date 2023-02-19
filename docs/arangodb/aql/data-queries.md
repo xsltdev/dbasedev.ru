@@ -416,23 +416,11 @@ RETURN { _key: NEW._key, type: opType }
 
 Имя измененной коллекции (`users` и `backup` в приведенных выше случаях) должно быть известно исполнителю AQL во время компиляции запроса и не может изменяться во время выполнения. Допускается использование параметра привязки для указания имени коллекции.
 
-It is not possible to use multiple data modification operations for the same
-collection in the same query, or follow up a data modification operation for a
-specific collection with a read operation for the same collection. Neither is
-it possible to follow up any data modification operation with a traversal query
-(which may read from arbitrary collections not necessarily known at the start of
-the traversal).
+Невозможно использовать несколько операций модификации данных для одной и той же коллекции в одном запросе или выполнять операцию модификации данных для определенной коллекции операцией чтения для той же коллекции. Также невозможно выполнить какую-либо операцию модификации данных с помощью запроса обхода (который может считывать из произвольных коллекций, не обязательно известных в начале обхода).
 
-That means you may not place several `REMOVE` or `UPDATE` statements for the same
-collection into the same query. It is however possible to modify different collections
-by using multiple data modification operations for different collections in the
-same query.
-In case you have a query with several places that need to remove documents from the
-same collection, it is recommended to collect these documents or their keys in an array
-and have the documents from that array removed using a single `REMOVE` operation.
+Это означает, что вы не можете помещать несколько операторов `REMOVE` или `UPDATE` для одной и той же коллекции в один и тот же запрос. Однако можно изменять разные коллекции, используя несколько операций модификации данных для разных коллекций в одном запросе. Если у вас есть запрос с несколькими местами, в котором необходимо удалить документы из одной коллекции, рекомендуется собрать эти документы или их ключи в массив и удалить документы из этого массива с помощью одной операции `REMOVE`.
 
-Data modification operations can optionally be followed by `LET` operations to
-perform further calculations and a `RETURN` operation to return data.
+За операциями модификации данных могут дополнительно следовать операции `LET` для выполнения дальнейших вычислений и операция `RETURN` для возврата данных.
 
 ### Transactional Execution
 

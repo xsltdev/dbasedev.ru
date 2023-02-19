@@ -2,5 +2,5 @@ nav:
     - index.md
     - mongodb
     - arangodb
-    - prisma-orm
+    - orm
     - Спасибо: https://boosty.to/bndby
