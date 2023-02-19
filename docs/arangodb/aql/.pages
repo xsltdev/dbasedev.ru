@@ -5,7 +5,7 @@ nav:
     - fundamentals
     - operators.md
     - data-queries.md
-    - operations
-    - functions
-    - graphs
-    - advanced
+#    - operations
+#    - functions
+#    - graphs
+#    - advanced

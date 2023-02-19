@@ -211,47 +211,27 @@ FOR u IN users
   INSERT u IN backup
 ```
 
-Note that both collections must already exist when the query is executed.
-The query might fail if the `backup` collection already contains documents,
-as executing the insert might attempt to insert the same document (identified
-by the `_key` attribute) again. This triggers a unique key constraint violation
-and aborts the query. In single server mode, all changes made by the query
-are also rolled back.
-To make such a copy operation work in all cases, the target collection can
-be emptied beforehand, using a `REMOVE` query or by truncating it by other means.
+Обратите внимание, что обе коллекции должны уже существовать на момент выполнения запроса. Запрос может завершиться ошибкой, если коллекция `backup` уже содержит документы, так как выполнение вставки может попытаться снова вставить тот же документ (определяемый атрибутом `_key`). Это вызывает нарушение ограничения уникального ключа и прерывает запрос. В режиме одного сервера все изменения, сделанные запросом, также откатываются. Чтобы такая операция копирования работала во всех случаях, целевую коллекцию можно предварительно очистить, используя запрос `REMOVE` или усекая ее другими способами.
 
-To not just partially update, but completely replace existing documents, use
-the `REPLACE` operation.
-The following query replaces all documents in the `backup` collection with
-the documents found in the `users` collection. Documents common to both
-collections are replaced. All other documents remain unchanged.
-Documents are compared using their `_key` attributes:
+Чтобы не просто частично обновить, а полностью заменить существующие документы, воспользуйтесь операцией `REPLACE`. Следующий запрос заменяет все документы в коллекции `backup` документами, найденными в коллекции `users`. Документы, общие для обоих сборников, заменены. Все остальные документы остаются без изменений. Документы сравниваются по их атрибутам `_key`:
 
 ```aql
 FOR u IN users
   REPLACE u IN backup
 ```
 
-The above query fails if there are documents in the `users` collection that are
-not in the `backup` collection yet. In this case, the query would attempt to replace
-documents that do not exist. If such case is detected while executing the query,
-the query is aborted. In single server mode, all changes made by the query are
-rolled back.
+Приведенный выше запрос завершается ошибкой, если в коллекции `users` есть документы, которых еще нет в коллекции `backup`. В этом случае запрос попытается заменить несуществующие документы. Если такой случай обнаруживается при выполнении запроса, запрос прерывается. В режиме одного сервера все изменения, сделанные запросом, откатываются.
 
-To make the query succeed regardless of the errors, use the `ignoreErrors`
-query option:
+Чтобы сделать запрос успешным независимо от ошибок, используйте опцию запроса `ignoreErrors`:
 
 ```aql
 FOR u IN users
   REPLACE u IN backup OPTIONS { ignoreErrors: true }
 ```
 
-This continues the query execution if errors occur during a `REPLACE`, `UPDATE`,
-`INSERT`, or `REMOVE` operation.
+Это продолжает выполнение запроса, если во время операции `REPLACE`, `UPDATE`, `INSERT` или `REMOVE` возникают ошибки.
 
-Finally, let's find some documents in collection `users` and remove them
-from collection `backup`. The link between the documents in both collections is
-established via the documents' keys:
+Наконец, давайте найдем несколько документов в коллекции `users` и удалим их из коллекции `backup`. Связь между документами в обеих коллекциях устанавливается через ключи документов:
 
 ```aql
 FOR u IN users
@@ -259,7 +239,7 @@ FOR u IN users
   REMOVE u IN backup
 ```
 
-The following example removes all documents from both `users` and `backup`:
+В следующем примере удаляются все документы как из `users`, так и из `backup`:
 
 ```aql
 LET r1 = (FOR u IN users  REMOVE u IN users)
@@ -267,14 +247,11 @@ LET r2 = (FOR u IN backup REMOVE u IN backup)
 RETURN true
 ```
 
-### Altering substructures
+### Изменение подструктур
 
-To modify lists in documents, for example, to update specific attributes of
-objects in an array, you can compute a new array and then update the document
-attribute in question. This may involve the use of subqueries and temporary
-variables.
+Чтобы изменить списки в документах, например, чтобы обновить определенные атрибуты объектов в массиве, вы можете вычислить новый массив, а затем обновить соответствующий атрибут документа. Это может включать использование подзапросов и временных переменных.
 
-Create a collection named `complexCollection` and run the following query:
+Создайте коллекцию с именем `complexCollection` и выполните следующий запрос:
 
 ```aql
 FOR doc IN [
@@ -307,17 +284,15 @@ FOR doc IN [
 ] INSERT doc INTO complexCollection
 ```
 
-The following query updates the `subList` top-level attribute of documents.
-The `attributeToAlter` values in the nested object are changed if the adjacent
-`filterByMe` attribute is `true`:
+Следующий запрос обновляет атрибут верхнего уровня документов `subList`. Значения `attributeToAlter` во вложенном объекте изменяются, если соседний атрибут `filterByMe` имеет значение `true`:
 
 ```aql
 FOR doc in complexCollection
   LET alteredList = (
     FOR element IN doc.subList
-       RETURN element.filterByMe
-              ? MERGE(element, { attributeToAlter: "new value" })
-              : element
+      RETURN element.filterByMe
+		? MERGE(element, { attributeToAlter: "new value" })
+		: element
   )
   UPDATE doc WITH { subList: alteredList } IN complexCollection
   RETURN NEW
@@ -360,12 +335,7 @@ FOR doc in complexCollection
 ]
 ```
 
-To improve the query's performance, you can only update documents if there is
-a change to the `subList` to be saved. Instead of comparing the current and the
-altered list directly, you may compare their hash values using the
-[`HASH()` function](functions-miscellaneous.html#hash), which is faster for
-larger objects and arrays. You can also replace the subquery with an
-[inline expression](advanced-array-operators.html#inline-expressions):
+Чтобы повысить производительность запроса, вы можете обновлять документы только в том случае, если в `subList` есть изменения, которые необходимо сохранить. Вместо непосредственного сравнения текущего и измененного списка вы можете сравнить их хеш-значения с помощью функции [`HASH()`](functions/miscellaneous.md#hash), которая работает быстрее для больших объектов и массивов. Вы также можете заменить подзапрос [встроенным выражением](advanced/array-operators.md#inline-expressions):
 
 ```aql
 FOR doc in complexCollection
@@ -379,11 +349,9 @@ FOR doc in complexCollection
   RETURN NEW
 ```
 
-### Returning documents
+### Возвращаемые документы
 
-Data modification queries can optionally return documents. In order to reference
-the inserted, removed or modified documents in a `RETURN` statement, data modification
-statements introduce the `OLD` and/or `NEW` pseudo-values:
+Запросы на изменение данных могут дополнительно возвращать документы. Чтобы сослаться на вставленные, удаленные или измененные документы в операторе `RETURN`, операторы модификации данных вводят псевдозначения `OLD` и/или `NEW`:
 
 ```aql
 FOR i IN 1..100
@@ -405,22 +373,15 @@ FOR u IN users
   RETURN NEW
 ```
 
-`NEW` refers to the inserted or modified document revision, and `OLD` refers
-to the document revision before update or removal. `INSERT` statements can
-only refer to the `NEW` pseudo-value, and `REMOVE` operations only to `OLD`.
-`UPDATE`, `REPLACE` and `UPSERT` can refer to either.
+`NEW` относится к вставленной или измененной версии документа, а `OLD` относится к версии документа перед обновлением или удалением. Операторы `INSERT` могут ссылаться только на псевдозначение `NEW`, а операции `REMOVE` — только на `OLD`. `UPDATE`, `REPLACE` и UPSE`RT могут относиться к любому из них.
 
-In all cases, the full documents are returned with all their attributes,
-including the potentially auto-generated attributes, such as `_id`, `_key`, and `_rev`,
-and the attributes not specified in the update expression of a partial update.
+Во всех случаях возвращаются полные документы со всеми их атрибутами, включая потенциально автоматически сгенерированные атрибуты, такие как `_id`, `_key` и `_rev`, и атрибуты, не указанные в выражении частичного обновления.
 
-#### Projections of OLD and NEW
+#### Проекции документов OLD и NEW
 
-It is possible to return a projection of the documents with `OLD` or `NEW` instead of
-returning the entire documents. This can be used to reduce the amount of data returned
-by queries.
+Можно вернуть проекцию документов `OLD` или `NEW` вместо возврата всего документа. Это можно использовать для уменьшения количества данных, возвращаемых запросами.
 
-For example, the following query returns only the keys of the inserted documents:
+Например, следующий запрос возвращает только ключи вставленных документов:
 
 ```aql
 FOR i IN 1..100
@@ -428,10 +389,9 @@ FOR i IN 1..100
   RETURN NEW._key
 ```
 
-#### Using OLD and NEW in the same query
+#### Использование OLD и NEW в одном запросе
 
-For `UPDATE`, `REPLACE`, and `UPSERT` operations, both `OLD` and `NEW` can be used
-to return the previous revision of a document together with the updated revision:
+Для операций `UPDATE`, `REPLACE` и `UPSERT` можно использовать как `OLD`, так и `NEW`, чтобы вернуть предыдущую версию документа вместе с обновленной версией:
 
 ```aql
 FOR u IN users
@@ -440,14 +400,9 @@ FOR u IN users
   RETURN { old: OLD, new: NEW }
 ```
 
-#### Calculations with OLD or NEW
+#### Вычисления в OLD или NEW
 
-It is also possible to run additional calculations with `LET` statements between the
-data modification part and the final `RETURN` of an AQL query. For example, the following
-query performs an upsert operation and returns whether an existing document was
-updated, or a new document was inserted. It does so by checking the `OLD` variable
-after the `UPSERT` and using a `LET` statement to store a temporary string for
-the operation type:
+Также можно выполнить дополнительные вычисления с операторами `LET` между частью изменения данных и окончательным `RETURN` запроса AQL. Например, следующий запрос выполняет операцию `upsert` и возвращает информацию о том, был ли обновлен существующий документ или вставлен новый документ. Он делает это, проверяя переменную `OLD` после `UPSERT` и используя оператор `LET` для сохранения временной строки для типа операции:
 
 ```aql
 UPSERT { name: "test" }
@@ -457,12 +412,9 @@ LET opType = IS_NULL(OLD) ? "insert" : "update"
 RETURN { _key: NEW._key, type: opType }
 ```
 
-### Restrictions
+### Ограничения
 
-The name of the modified collection (`users` and `backup` in the above cases)
-must be known to the AQL executor at query-compile time and cannot change at
-runtime. Using a bind parameter to specify the
-[collection name](../appendix-glossary.html#collection-name) is allowed.
+Имя измененной коллекции (`users` и `backup` в приведенных выше случаях) должно быть известно исполнителю AQL во время компиляции запроса и не может изменяться во время выполнения. Допускается использование параметра привязки для указания имени коллекции.
 
 It is not possible to use multiple data modification operations for the same
 collection in the same query, or follow up a data modification operation for a
