@@ -1,3 +1,7 @@
+---
+no_breadcrumb: true
+---
+
 # ArangoDB
 
 [AQL](aql/index.md)

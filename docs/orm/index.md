@@ -1,3 +1,7 @@
+---
+no_breadcrumb: true
+---
+
 # ORM
 
 [![Prisma](prisma/logo-prisma.svg){: style="height:42px;width:135px;vertical-align:middle;"}](prisma/index.md)
