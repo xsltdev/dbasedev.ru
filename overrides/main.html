@@ -23,7 +23,7 @@ page.meta.source %} {% include "partials/source-link.html"
 {% block content %}
 <!-- Breadcrumbs -->
 
-{% if page and not page.is_homepage and not
+{% if page and not page.is_homepage and page.parent and not page.parent.is_homepage and not
 page.meta.no_breadcrumb %}
 <p style="color: var(--md-default-fg-color--light)">
 	<small>
