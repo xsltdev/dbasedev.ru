@@ -23,6 +23,8 @@ hide:
 
 <!--
 https://github.com/brianc/node-postgres-docs
+https://my-js.org/docs/guide/supabase
+https://habr.com/ru/company/timeweb/blog/648761/
 -->
 
 !!!abstract "Справочники"
