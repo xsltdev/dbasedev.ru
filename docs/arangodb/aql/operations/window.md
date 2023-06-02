@@ -1,214 +1,170 @@
 # WINDOW
 
-{{ page.description }}
-{:class="lead"}
+Операция `WINDOW` может использоваться для агрегирования по соседним документам, или предшествующим и/или последующим строкам, другими словами. Она также может агрегировать на основе значения или диапазона длительности относительно атрибута документа.
 
-The `WINDOW` operation can be used for aggregations over adjacent documents, or
-preceding and / or following rows in other words. It can also aggregate based
-on a value or duration range relative to a document attribute.
+Операция выполняет `COLLECT AGGREGATE`-подобную операцию над набором строк запроса. Однако если операция `COLLECT` группирует несколько строк запроса в одну группу результатов, то операция `WINDOW` выдает результат для каждой строки запроса:
 
-The operation performs a `COLLECT AGGREGATE`-like operation on a set
-of query rows. However, whereas a `COLLECT` operation groups multiple query
-rows into a single result group, a `WINDOW` operation produces a result for
-each query row:
+-   Строка, для которой происходит оценка функции, называется текущей строкой.
+-   Строки запроса, связанные с текущей строкой, над которой происходит оценка функции, составляют рамку окна для текущей строки.
 
-- The row for which function evaluation occurs is called the current row.
-- The query rows related to the current row over which function evaluation
-  occurs, comprise the window frame for the current row.
+Рамки окон определяются относительно текущего ряда:
 
-Window frames are determined with respect to the current row:
+-   Определив рамку окна как все строки от начала запроса до текущей строки, можно вычислить текущие итоги для каждой строки.
+-   Определив рамку, простирающуюся на _N_ строк по обе стороны от текущей строки, вы можете вычислить скользящие средние.
 
-- By defining a window frame to be all rows from the query start to the current
-  row, you can compute running totals for each row.
-- By defining a frame as extending _N_ rows on either side of the current row,
-  you can compute rolling averages.
+## Синтаксис
 
-## Syntax
+Существует два варианта синтаксиса для операций `WINDOW`.
 
-There are two syntax variants for `WINDOW` operations.
-
-**Row-based** (adjacent documents):
+**На основе строк** (смежные документы):
 
 <pre><code>WINDOW { preceding: <em>numPrecedingRows</em>, following: <em>numFollowingRows</em> } AGGREGATE <em>variableName</em> = <em>aggregateExpression</em></code></pre>
 
-**Range-based** (value or duration range):
+**Range-based** (диапазон значений или продолжительности):
 
 <pre><code>WINDOW <em>rangeValue</em> WITH { preceding: <em>offsetPreceding</em>, following: <em>offsetFollowing</em> } AGGREGATE <em>variableName</em> = <em>aggregateExpression</em></code></pre>
 
-Calls to the following functions are supported in aggregation expressions:
+В агрегатных выражениях поддерживаются вызовы следующих функций:
 
-- `LENGTH()` / `COUNT()`
-- `MIN()`
-- `MAX()`
-- `SUM()`
-- `AVERAGE()` / `AVG()`
-- `STDDEV_POPULATION()` / `STDDEV()`
-- `STDDEV_SAMPLE()`
-- `VARIANCE_POPULATION()` / `VARIANCE()`
-- `VARIANCE_SAMPLE()`
-- `UNIQUE()`
-- `SORTED_UNIQUE()`
-- `COUNT_DISTINCT()` / `COUNT_UNIQUE()`
-- `BIT_AND()`
-- `BIT_OR()`
-- `BIT_XOR()`
+-   `LENGTH()` / `COUNT()`
+-   `MIN()`
+-   `MAX()`
+-   `SUM()`
+-   `AVERAGE()` / `AVG()`
+-   `STDDEV_POPULATION()` / `STDDEV()`
+-   `STDDEV_SAMPLE()`
+-   `VARIANCE_POPULATION()` / `VARIANCE()`
+-   `VARIANCE_SAMPLE()`
+-   `UNIQUE()`
+-   `SORTED_UNIQUE()`
+-   `COUNT_DISTINCT()` / `COUNT_UNIQUE()`
+-   `BIT_AND()`
+-   `BIT_OR()`
+-   `BIT_XOR()`
 
-## Row-based Aggregation
+## Агрегирование по строкам
 
-The first syntax form of `WINDOW` allows aggregating over a fixed number of
-rows, following or preceding the current row. It is also possible to define
-that **all** preceding or following rows should be aggregated (`"unbounded"`).
-The number of rows has to be determined at query compile time.
+Первая синтаксическая форма `WINDOW` позволяет агрегировать по фиксированному количеству строк, следующих или предшествующих текущей строке. Также можно определить, что **все** предшествующие или последующие строки должны быть агрегированы (`неограниченно`). Количество строк должно быть определено во время компиляции запроса.
 
-Below query demonstrates the use of window frames to compute **running totals**
-as well as **rolling averages** computed from the current row and the rows that
-immediately precede and follow it:
+Приведенный ниже запрос демонстрирует использование оконных фреймов для вычисления **пробегающих итогов**, а также **пробегающих средних**, вычисляемых по текущей строке и строкам, непосредственно предшествующим и следующим за ней:
 
-    {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline windowAggregationRow
-    @EXAMPLE_AQL{windowAggregationRow}
-    @DATASET{observationsSampleDataset}
-    FOR t IN observations
-      SORT t.time
-      WINDOW { preceding: 1, following: 1 }
-      AGGREGATE rollingAverage = AVG(t.val), rollingSum = SUM(t.val)
-      WINDOW { preceding: "unbounded", following: 0}
-      AGGREGATE cumulativeSum = SUM(t.val)
-      RETURN {
-        time: t.time,
-        subject: t.subject,
-        val: t.val,
-        rollingAverage, // average of the window's values
-        rollingSum,     // sum of the window's values
-        cumulativeSum   // running total
-      }
-    @END_EXAMPLE_AQL
-    @endDocuBlock windowAggregationRow
-    {% endaqlexample %}
-    {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
+```
+@startDocuBlockInline windowAggregationRow
+@EXAMPLE_AQL{windowAggregationRow}
+@DATASET{observationsSampleDataset}
+FOR t IN observations
+	SORT t.time
+	WINDOW { preceding: 1, following: 1 }
+	AGGREGATE rollingAverage = AVG(t.val), rollingSum = SUM(t.val)
+	WINDOW { preceding: "unbounded", following: 0}
+	AGGREGATE cumulativeSum = SUM(t.val)
+	RETURN {
+		time: t.time,
+		subject: t.subject,
+		val: t.val,
+		rollingAverage, // average of the window's values
+		rollingSum,     // sum of the window's values
+		cumulativeSum   // running total
+	}
+@END_EXAMPLE_AQL
+@endDocuBlock windowAggregationRow
+```
 
-The row order is controlled by the `SORT` operation on the `time` attribute.
+Порядок строк контролируется операцией `SORT` над атрибутом `time`.
 
-The first `WINDOW` operation aggregates the previous, current, and next row
-(preceding and following is set to 1) and calculates the average and sum of
-these three values. In case of the first row, there is no preceding row but a
-following row, hence the values `10` and `0` are added up to calculate the sum,
-which is divided by 2 to compute the average. For the second row, the values
-`10`, `0` and `9` are summed up and divided by 3, and so on.
+Первая операция `WINDOW` объединяет предыдущий, текущий и следующий ряд (предшествующий и последующий имеют значение 1) и вычисляет среднее и сумму этих трех значений. В случае первого ряда нет предыдущего ряда, но есть следующий ряд, поэтому значения `10` и `0` складываются для вычисления суммы, которая делится на 2 для вычисления среднего значения. Для второго ряда значения `10`, `0` и `9` суммируются и делятся на 3, и так далее.
 
-The second `WINDOW` operation aggregates all previous values (unbounded) to
-calculate a running sum. For the first row, that is just `10`, for the second
-row it is `10` + `0`, for the third `10` + `0` + `9`, and so on.
+Вторая операция `WINDOW` объединяет все предыдущие значения (не ограниченные) для вычисления текущей суммы. Для первого ряда это просто `10`, для второго - `10` + `0`, для третьего `10` + `0` + `9`, и так далее.
 
-| time                | subject | val | rollingAverage | rollingSum | cumulativeSum |
-| ------------------- | ------- | --: | -------------: | ---------: | ------------: |
-| 2021-05-25 07:00:00 | st113   |  10 |              5 |         10 |            10 |
-| 2021-05-25 07:00:00 | xh458   |   0 |         6.333… |         19 |            10 |
-| 2021-05-25 07:15:00 | st113   |   9 |         6.333… |         19 |            19 |
-| 2021-05-25 07:15:00 | xh458   |  10 |        14.666… |         44 |            29 |
-| 2021-05-25 07:30:00 | st113   |  25 |        13.333… |         40 |            54 |
-| 2021-05-25 07:30:00 | xh458   |   5 |        16.666… |         50 |            59 |
-| 2021-05-25 07:45:00 | st113   |  20 |        18.333… |         55 |            79 |
+<!-- 0002.part.md -->
+
+| time                | subject | val | rollingAverage | rollingSum | cumulativeSum | cumulativeSum |
+| ------------------- | ------- | --: | -------------: | ---------: | ------------: | ------------- |
+| 2021-05-25 07:00:00 | st113   |  10 |              5 |         10 |            10 | 10            | 10 |
+| 2021-05-25 07:00:00 | xh458   |   0 |       6.333... |         19 |            10 |
+| 2021-05-25 07:15:00 | st113   |   9 |       6.333... |         19 |            19 | 19            |
+| 2021-05-25 07:15:00 | xh458   |  10 |      14.666... |         44 |            29 |
+| 2021-05-25 07:30:00 | st113   |  25 |      13.333... |         40 |            54 |
+| 2021-05-25 07:30:00 | xh458   |   5 |      16.666... |         50 |            59 |
+| 2021-05-25 07:45:00 | st113   |  20 |      18.333... |         55 |            79 |
 | 2021-05-25 07:45:00 | xh458   |  30 |             25 |         75 |           109 |
 | 2021-05-25 08:00:00 | xh458   |  25 |           27.5 |         55 |           134 |
 
-The below query demonstrates the use of window frames to compute running totals
-within each `subject` group of `time`-ordered query rows, as well as rolling
-sums and averages computed from the current row and the rows that immediately
-precede and follow it, also per `subject` group and sorted by `time`:
+Приведенный ниже запрос демонстрирует использование оконных рамок для вычисления текущих итогов в каждой `subject` группе упорядоченных по `времени` строк запроса, а также скользящих сумм и средних, вычисленных по текущей строке и строкам, непосредственно предшествующим и следующим за ней, также по `subject` группе и отсортированных по `времени`:
 
-    {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline windowAggregationRowGrouped
-    @EXAMPLE_AQL{windowAggregationRowGrouped}
-    @DATASET{observationsSampleDataset}
-    FOR t IN observations
-      COLLECT subject = t.subject INTO group = t
-      LET subquery = (FOR t2 IN group
-        SORT t2.time
-        WINDOW { preceding: 1, following: 1 }
-        AGGREGATE rollingAverage = AVG(t2.val), rollingSum = SUM(t2.val)
-        WINDOW { preceding: "unbounded", following: 0 }
-        AGGREGATE cumulativeSum = SUM(t2.val)
-        RETURN {
-          time: t2.time,
-          subject: t2.subject,
-          val: t2.val,
-          rollingAverage,
-          rollingSum,
-          cumulativeSum
-        }
-      )
-      // flatten subquery result
-      FOR t2 IN subquery
-        RETURN t2
-    @END_EXAMPLE_AQL
-    @endDocuBlock windowAggregationRowGrouped
-    {% endaqlexample %}
-    {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
+```
+@startDocuBlockInline windowAggregationRowGrouped
+@EXAMPLE_AQL{windowAggregationRowGrouped}
+@DATASET{observationsSampleDataset}
+FOR t IN observations
+	COLLECT subject = t.subject INTO group = t
+	LET subquery = (FOR t2 IN group
+	SORT t2.time
+	WINDOW { preceding: 1, following: 1 }
+	AGGREGATE rollingAverage = AVG(t2.val), rollingSum = SUM(t2.val)
+	WINDOW { preceding: "unbounded", following: 0 }
+	AGGREGATE cumulativeSum = SUM(t2.val)
+	RETURN {
+		time: t2.time,
+		subject: t2.subject,
+		val: t2.val,
+		rollingAverage,
+		rollingSum,
+		cumulativeSum
+	}
+	)
+	// flatten subquery result
+	FOR t2 IN subquery
+		RETURN t2
+@END_EXAMPLE_AQL
+@endDocuBlock windowAggregationRowGrouped
+```
 
-If you look at the first row with the subject `xh458`, then you can see the
-cumulative sum reset and that the rolling average and sum does not take the
-previous row into account that belongs to subject `st113`.
+Если посмотреть на первый ряд с темой `xh458`, то можно увидеть, что кумулятивная сумма обнулилась и что скользящее среднее и сумма не учитывают предыдущий ряд, принадлежащий теме `st113`.
 
-| time                | subject | val | rollingAverage | rollingSum | cumulativeSum |
-| ------------------- | ------- | --: | -------------: | ---------: | ------------: |
-| 2021-05-25 07:00:00 | st113   |  10 |            9.5 |         19 |            10 |
-| 2021-05-25 07:15:00 | st113   |   9 |        14.666… |         44 |            19 |
-| 2021-05-25 07:30:00 | st113   |  25 |             18 |         54 |            44 |
+| time                | subject | val | rollingAverage | rollingSum | cumulativeSum | cumulativeSum       |
+| ------------------- | ------- | --: | -------------: | ---------: | ------------: | ------------------- |
+| 2021-05-25 07:00:00 | st113   |  10 |            9.5 |         19 |            10 | 10                  |
+| 2021-05-25 07:15:00 | st113   |   9 |      14.666... |         44 |            19 |
+| 2021-05-25 07:30:00 | st113   |  25 |             18 |         54 |            44 | 2021-05-25 07:30:00 | st113 | 25 | 18 | 54 | 44 |
 | 2021-05-25 07:45:00 | st113   |  20 |           22.5 |         45 |            64 |
-| 2021-05-25 07:00:00 | xh458   |   0 |              5 |         10 |             0 |
-| 2021-05-25 07:15:00 | xh458   |  10 |              5 |         15 |            10 |
+| 2021-05-25 07:00:00 | xh458   |   0 |              5 |         10 |             0 | 0                   |
+| 2021-05-25 07:15:00 | xh458   |  10 |              5 |         15 |            10 | 10                  |
 | 2021-05-25 07:30:00 | xh458   |   5 |             15 |         45 |            15 |
 | 2021-05-25 07:45:00 | xh458   |  30 |             20 |         60 |            45 |
 | 2021-05-25 08:00:00 | xh458   |  25 |           27.5 |         55 |            70 |
 
-## Range-based Aggregation
+## Агрегация на основе диапазона
 
-The second syntax form of `WINDOW` allows aggregating over a all documents
-within a value range. Offsets are differences in attribute values from the
-current document.
+Вторая синтаксическая форма `WINDOW` позволяет агрегировать по всем документам в пределах диапазона значений. Смещение - это разница в значениях атрибутов по сравнению с текущим документом.
 
-Attribute values have to be numeric. The offset calculations are performed by
-adding or subtracting the numeric offsets specified in the `following` and
-`preceding` attribute. The offset numbers have to be positive and have to be
-determined at query compile time. The default offset is `0`.
+Значения атрибутов должны быть числовыми. Вычисления смещения выполняются путем сложения или вычитания числовых смещений, указанных в атрибутах `following` и `preceding`. Числа смещения должны быть положительными и должны быть определены во время компиляции запроса. По умолчанию смещение равно `0`.
 
-The range based window syntax requires the input rows to be sorted by the row
-value. To ensure correctness of the result, the AQL optimizer will
-automatically insert a `SORT` statement into the query in front of the `WINDOW`
-statement. The optimizer may be able to optimize away that `SORT` statement
-later if a sorted index is present on the group criteria.
+Синтаксис окна на основе диапазона требует, чтобы входные строки были отсортированы по значению строки. Для обеспечения корректности результата оптимизатор AQL автоматически вставит в запрос оператор `SORT` перед оператором `WINDOW`. В дальнейшем оптимизатор может отказаться от этого оператора `SORT`, если для групповых критериев имеется индекс сортировки.
 
-The following query demonstrates the use of window frames to compute totals as
-well as averages computed from the current document and the documents that have
-attribute values in `t.val` in the range of `[-10, +5]` (inclusive), preceding
-and following:
+<!-- 0004.part.md -->
 
-    {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline windowAggregationRangeValue
-    @EXAMPLE_AQL{windowAggregationRangeValue}
-    @DATASET{observationsSampleDataset}
-    FOR t IN observations
-      WINDOW t.val WITH { preceding: 10, following: 5 }
-      AGGREGATE rollingAverage = AVG(t.val), rollingSum = SUM(t.val)
-      RETURN {
-        time: t.time,
-        subject: t.subject,
-        val: t.val,
-        rollingAverage,
-        rollingSum
-      }
-    @END_EXAMPLE_AQL
-    @endDocuBlock windowAggregationRangeValue
-    {% endaqlexample %}
-    {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
+Следующий запрос демонстрирует использование оконных фреймов для вычисления итогов, а также средних значений, вычисленных на основе текущего документа и документов, имеющих значения атрибутов в `t.val` в диапазоне `[-10, +5]` (включительно), предшествующих и последующих:
 
-The value range of the first row is `[-10, 5]` since `val` is `0`, thus the
-values from the first and second row are added up to `5` with the average being
-`2.5`. The value range of the last row is `[20, 35]` as `val` is `30`, which
-means that the last four rows get aggregated to a sum of `100` and an average
-of `25` (the range is inclusive, i.e. `val` falls within the range with a value
-of `20`).
+```
+@startDocuBlockInline windowAggregationRangeValue
+@EXAMPLE_AQL{windowAggregationRangeValue}
+@DATASET{observationsSampleDataset}
+FOR t IN observations
+	WINDOW t.val WITH { preceding: 10, following: 5 }
+	AGGREGATE rollingAverage = AVG(t.val), rollingSum = SUM(t.val)
+	RETURN {
+		time: t.time,
+		subject: t.subject,
+		val: t.val,
+		rollingAverage,
+		rollingSum
+	}
+@END_EXAMPLE_AQL
+@endDocuBlock windowAggregationRangeValue
+```
+
+Диапазон значений первой строки - `[-10, 5]`, так как `val` - `0`, поэтому значения из первой и второй строки складываются до `5`, а среднее значение равно `2.5`. Диапазон значений последней строки - `[20, 35]`, так как `val` - `30`, что означает, что последние четыре строки суммируются до суммы `100` и среднего значения `25` (диапазон включительно, т.е. `val` попадает в диапазон со значением `20`).
 
 | time                | subject | val | rollingAverage | rollingSum |
 | ------------------- | ------- | --: | -------------: | ---------: |
@@ -219,57 +175,38 @@ of `20`).
 | 2021-05-25 07:15:00 | xh458   |  10 |            6.8 |         34 |
 | 2021-05-25 07:45:00 | st113   |  20 |             18 |         90 |
 | 2021-05-25 07:30:00 | st113   |  25 |             25 |        100 |
-| 2021-05-25 08:00:00 | xh458   |  25 |             25 |        100 |
+| 2021-05-25 08:00:00 | xh458   |  25 |             25 |         25 | 100 |
 | 2021-05-25 07:45:00 | xh458   |  30 |             25 |        100 |
 
-## Duration-based Aggregation
+## Агрегирование по временным интервалам
 
-Aggregating by time intervals is a subtype of range-based aggregation that
-uses the second syntax form of `WINDOW` but with ISO durations.
+Агрегирование по временным интервалам - это подтип агрегирования на основе диапазона, который использует вторую синтаксическую форму `WINDOW`, но с длительностями ISO.
 
-To support `WINDOW` frames over time-series data the `WINDOW` operation may
-calculate timestamp offsets using positive ISO 8601 duration strings, like
-`P1Y6M` (1 year and 6 months) or `PT12H30M` (12 hours and 30 minutes). Also see
-[Date functions](functions-date.html#comparison-and-calculation).
-In contrast to the ISO 8601 standard, week components may be freely combined
-with other components. For example, `P1WT1H` and `P1M1W` are both valid.
-Fractional values are only supported for seconds, and only with up to three
-decimals after the separator, i.e., millisecond precision. For example,
-`PT0.123S` is a valid duration while `PT0.5H` and `PT0.1234S` are not.
+Для поддержки фреймов `WINDOW` над данными временных рядов операция `WINDOW` может вычислять смещения временных меток, используя положительные строки длительности ISO 8601, например `P1Y6M` (1 год и 6 месяцев) или `PT12H30M` (12 часов и 30 минут). Также смотрите [Функции даты](../functions/date.md). В отличие от стандарта ISO 8601, компоненты недели могут свободно комбинироваться с другими компонентами. Например, `P1WT1H` и `P1M1W` являются допустимыми. Дробные значения поддерживаются только для секунд, и только с точностью до трех десятичных знаков после разделителя, т.е. с точностью до миллисекунды. Например, `PT0.123S` является допустимой продолжительностью, а `PT0.5H` и `PT0.1234S` - нет.
 
-Durations can be specified separately in `following` and `preceding`.
-If such a duration is used, then the attribute value of the current document
-must be a number and is treated as numeric **timestamp in milliseconds**.
-The range is inclusive. If either bound is not specified, it is treated as an
-empty duration (i.e., `P0D`).
+Длительности могут быть указаны отдельно в `following` и `preceding`. Если используется такая длительность, то значение атрибута текущего документа должно быть числом и рассматривается как числовой **timestamp в миллисекундах**. Диапазон включительно. Если ни одна из границ не указана, она рассматривается как пустая длительность (т.е. `P0D`).
 
-The following query demonstrates the use of window frames to compute rolling
-sums and averages over observations in the last 30 minutes (inclusive), based
-on the document attribute `time` that is converted from a datetime string to a
-numeric timestamp:
+Следующий запрос демонстрирует использование оконных фреймов для вычисления скользящих сумм и средних по наблюдениям за последние 30 минут (включительно) на основе атрибута документа `time`, который преобразуется из строки времени даты в числовую метку времени:
 
-    {% aqlexample examplevar="examplevar" type="type" query="query" bind="bind" result="result" %}
-    @startDocuBlockInline windowAggregationRangeDuration
-    @EXAMPLE_AQL{windowAggregationRangeDuration}
-    @DATASET{observationsSampleDataset}
-    FOR t IN observations
-      WINDOW DATE_TIMESTAMP(t.time) WITH { preceding: "PT30M" }
-      AGGREGATE rollingAverage = AVG(t.val), rollingSum = SUM(t.val)
-      RETURN {
-        time: t.time,
-        subject: t.subject,
-        val: t.val,
-        rollingAverage,
-        rollingSum
-      }
-    @END_EXAMPLE_AQL
-    @endDocuBlock windowAggregationRangeDuration
-    {% endaqlexample %}
-    {% include aqlexample.html id=examplevar type=type query=query bind=bind result=result %}
+```
+@startDocuBlockInline windowAggregationRangeDuration
+@EXAMPLE_AQL{windowAggregationRangeDuration}
+@DATASET{observationsSampleDataset}
+FOR t IN observations
+	WINDOW DATE_TIMESTAMP(t.time) WITH { preceding: "PT30M" }
+	AGGREGATE rollingAverage = AVG(t.val), rollingSum = SUM(t.val)
+	RETURN {
+		time: t.time,
+		subject: t.subject,
+		val: t.val,
+		rollingAverage,
+		rollingSum
+	}
+@END_EXAMPLE_AQL
+@endDocuBlock windowAggregationRangeDuration
+```
 
-With a time of `07:30:00`, everything from `07:00:00` to `07:30:00` on the same
-day falls within the duration range with `preceding: "PT30M"`, thus aggregating
-the top six rows to a sum of `59` and an average of `9.8333…`.
+При времени `07:30:00` все, что происходит с `07:00:00` до `07:30:00` в тот же день, попадает в диапазон продолжительности с `предшествующим: "PT30M"`, таким образом, агрегируя шесть верхних строк с суммой `59` и средним значением `9.8333...`.
 
 | time                | subject | val | rollingAverage | rollingSum |
 | ------------------- | ------- | --: | -------------: | ---------: |
@@ -277,8 +214,10 @@ the top six rows to a sum of `59` and an average of `9.8333…`.
 | 2021-05-25 07:00:00 | xh458   |   0 |              5 |         10 |
 | 2021-05-25 07:15:00 | st113   |   9 |           7.25 |         29 |
 | 2021-05-25 07:15:00 | xh458   |  10 |           7.25 |         29 |
-| 2021-05-25 07:30:00 | st113   |  25 |        9.8333… |         59 |
-| 2021-05-25 07:30:00 | xh458   |   5 |        9.8333… |         59 |
+| 2021-05-25 07:30:00 | st113   |  25 |      9.8333... |         59 |
+| 2021-05-25 07:30:00 | xh458   |   5 |      9.8333... |         59 |
 | 2021-05-25 07:45:00 | st113   |  20 |           16.5 |         99 |
 | 2021-05-25 07:45:00 | xh458   |  30 |           16.5 |         99 |
 | 2021-05-25 08:00:00 | xh458   |  25 |             21 |        105 |
+
+<!-- 0007.part.md -->

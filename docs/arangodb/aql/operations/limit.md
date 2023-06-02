@@ -1,21 +1,19 @@
 # LIMIT
 
-The `LIMIT` statement allows slicing the result array using an
-offset and a count. It reduces the number of elements in the result to at most
-the specified number.
+Оператор `LIMIT` позволяет нарезать массив результатов с помощью смещения и подсчета. Это уменьшает количество элементов в результате до максимального указанного числа.
 
-## Syntax
+## Синтаксис
 
-Two general forms of `LIMIT` are:
+Две общие формы оператора `LIMIT`:
 
 <pre><code>LIMIT <em>count</em>
 LIMIT <em>offset</em>, <em>count</em></code></pre>
 
-The first form allows specifying only the `count` value whereas the second form
-allows specifying both `offset` and `count`. The first form is identical using
-the second form with an `offset` value of `0`.
+Первая форма позволяет указать только значение `count`, в то время как вторая форма позволяет указать и `offset` и `count`. Первая форма идентична использованию второй формы со значением `offset` равным `0`.
 
-## Usage
+## Использование
+
+<!-- 0001.part.md -->
 
 ```aql
 FOR u IN users
@@ -23,15 +21,13 @@ FOR u IN users
   RETURN u
 ```
 
-Above query returns the first five documents of the `users` collection.
-It could also be written as `LIMIT 0, 5` for the same result.
-Which documents it actually returns is rather arbitrary, because no explicit
-sorting order is specified however. Therefore, a limit should be usually
-accompanied by a `SORT` operation.
+<!-- 0002.part.md -->
 
-The `offset` value specifies how many elements from the result shall be
-skipped. It must be 0 or greater. The `count` value specifies how many
-elements should be at most included in the result.
+Вышеприведенный запрос возвращает первые пять документов коллекции `users`. Его также можно записать как `LIMIT 0, 5` для получения того же результата. Какие документы возвращаются на самом деле, довольно произвольно, поскольку явный порядок сортировки не указан. Поэтому ограничение обычно должно сопровождаться операцией `SORT`.
+
+Значение `offset` указывает, сколько элементов из результата должно быть пропущено. Оно должно быть равно 0 или больше. Значение `count` указывает, сколько элементов должно быть включено в результат.
+
+<!-- 0003.part.md -->
 
 ```aql
 FOR u IN users
@@ -40,27 +36,17 @@ FOR u IN users
   RETURN u
 ```
 
-In above example, the documents of `users` are sorted, the first two results
-get skipped and it returns the next five user documents.
+<!-- 0004.part.md -->
 
-{% hint 'info' %}
-Variables, expressions and subqueries can not be used for `offset` and `count`.
-The values for `offset` and `count` must be known at query compile time,
-which means that you can only use number literals, bind parameters or
-expressions that can be resolved at query compile time.
-{% endhint %}
+В приведенном выше примере документы `users` сортируются, первые два результата пропускаются и возвращаются следующие пять документов пользователей.
 
-Where a `LIMIT` is used in relation to other operations in a query has meaning.
-`LIMIT` operations before `FILTER`s in particular can change the result
-significantly, because the operations are executed in the order in which they
-are written in the query. See [FILTER](operations-filter.html#order-of-operations)
-for a detailed example.
+{% hint 'info' %} Переменные, выражения и подзапросы не могут быть использованы для `offset` и `count`. Значения `offset` и `count` должны быть известны во время компиляции запроса, что означает, что вы можете использовать только литералы чисел, параметры связывания или выражения, которые могут быть определены во время компиляции запроса. {% endhint %}
 
-The `LIMIT` operation never applies to write operations (`INSERT`, `UPDATE`,
-`REPLACE`, `REMOVE`, `UPSERT`) but only their returned results. In the following
-example, five documents are created, regardless of the `LIMIT 2`. The `LIMIT`
-operation only constrains the number of documents returned by the query (via
-`RETURN`) to the first two:
+То, где `LIMIT` используется по отношению к другим операциям в запросе, имеет значение. В частности, операции `LIMIT` перед `FILTER` могут существенно изменить результат, поскольку операции выполняются в том порядке, в котором они записаны в запросе. Подробный пример см. в [FILTER](../operations/filter.md).
+
+Операция `LIMIT` никогда не применяется к операциям записи (`INSERT`, `UPDATE`, `REPLACE`, `REMOVE`, `UPSERT`), а только к их возвращаемым результатам. В следующем примере создается пять документов, независимо от `LIMIT 2`. Операция `LIMIT` ограничивает количество документов, возвращаемых запросом (через `RETURN`), только первыми двумя:
+
+<!-- 0005.part.md -->
 
 ```aql
 FOR i IN 1..5
@@ -68,3 +54,7 @@ FOR i IN 1..5
   LIMIT 2
   RETURN NEW
 ```
+
+<!-- 0006.part.md -->
+
+<!-- 0007.part.md -->

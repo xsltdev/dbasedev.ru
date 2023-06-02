@@ -1,51 +1,60 @@
 # REMOVE
 
-The `REMOVE` keyword can be used to remove documents from a collection.
+Ключевое слово `REMOVE` может быть использовано для удаления документов из коллекции.
 
-Each `REMOVE` operation is restricted to a single collection, and the
-[collection name](../appendix-glossary.html#collection-name) must not be dynamic.
-Only a single `REMOVE` statement per collection is allowed per AQL query, and
-it cannot be followed by read or write operations that access the same collection, by
-traversal operations, or AQL functions that can read documents.
+Каждая операция `REMOVE` ограничена одной коллекцией, и имя коллекции не должно быть динамическим. В одном запросе AQL допускается только один оператор `REMOVE` для одной коллекции, и за ним не могут следовать операции чтения или записи, которые обращаются к той же коллекции, операции обхода или функции AQL, которые могут читать документы.
 
-## Syntax
+## Синтаксис
 
-The syntax for a remove operation is:
+Синтаксис операции удаления следующий:
 
 <pre><code>REMOVE <em>keyExpression</em> IN <em>collection</em></code></pre>
 
-It can optionally end with an `OPTIONS { … }` clause.
+Опционально он может заканчиваться предложением `OPTIONS { ... }`.
 
-`collection` must contain the name of the collection to remove the documents
-from. `keyExpression` must be an expression that contains the document identification.
-This can either be a string (which must then contain the
-[document key](../appendix-glossary.html#document-key)) or a
-document, which must contain a `_key` attribute.
+`collection` должно содержать имя коллекции, из которой нужно удалить документы. `keyExpression` должно быть выражением, содержащим идентификатор документа. Это может быть либо строка (которая затем должна содержать ключ документа), либо документ, который должен содержать атрибут `_key`.
 
-The following queries are thus equivalent:
+Таким образом, следующие запросы эквивалентны:
+
+<!-- 0001.part.md -->
 
 ```aql
 FOR u IN users
   REMOVE { _key: u._key } IN users
 ```
 
+<!-- 0002.part.md -->
+
+<!-- 0003.part.md -->
+
 ```aql
 FOR u IN users
   REMOVE u._key IN users
 ```
+
+<!-- 0004.part.md -->
+
+<!-- 0005.part.md -->
 
 ```aql
 FOR u IN users
   REMOVE u IN users
 ```
 
-A remove operation can remove arbitrary documents, and the documents
-do not need to be identical to the ones produced by a preceding `FOR` statement:
+<!-- 0006.part.md -->
+
+Операция remove может удалять произвольные документы, и эти документы не обязательно должны быть идентичны тем, которые были получены предшествующим оператором `FOR`:
+
+<!-- 0007.part.md -->
 
 ```aql
 FOR i IN 1..1000
   REMOVE { _key: CONCAT('test', i) } IN users
 ```
+
+<!-- 0008.part.md -->
+
+<!-- 0009.part.md -->
 
 ```aql
 FOR u IN users
@@ -53,21 +62,30 @@ FOR u IN users
   REMOVE { _key: u._key } IN backup
 ```
 
-A single document can be removed as well, using a document key string or a
-document with `_key` attribute:
+<!-- 0010.part.md -->
+
+Можно удалить и отдельный документ, используя строку ключа документа или документ с атрибутом `_key`:
+
+<!-- 0011.part.md -->
 
 ```aql
 REMOVE 'john' IN users
 ```
+
+<!-- 0012.part.md -->
+
+<!-- 0013.part.md -->
 
 ```aql
 LET doc = DOCUMENT('users/john')
 REMOVE doc IN users
 ```
 
-The restriction of a single remove operation per query and collection
-applies. The following query causes an _access after data-modification_
-error because of the third remove operation:
+<!-- 0014.part.md -->
+
+Применяется ограничение на одну операцию удаления в запросе и коллекции. Следующий запрос вызывает ошибку _доступ после модификации данных_ из-за третьей операции удаления:
+
+<!-- 0015.part.md -->
 
 ```aql
 REMOVE 'john' IN users
@@ -75,58 +93,67 @@ REMOVE 'john' IN backups // OK, different collection
 REMOVE 'mary' IN users   // Error, users collection again
 ```
 
-## Query options
+<!-- 0016.part.md -->
+
+## Параметры запроса
 
 ### `ignoreErrors`
 
-`ignoreErrors` can be used to suppress query errors that may occur when trying to
-remove non-existing documents. For example, the following query will fail if one
-of the to-be-deleted documents does not exist:
+`ignoreErrors` можно использовать для подавления ошибок запроса, которые могут возникнуть при попытке удалить несуществующие документы. Например, следующий запрос будет неудачным, если один из удаляемых документов не существует:
+
+<!-- 0017.part.md -->
 
 ```aql
 FOR i IN 1..1000
   REMOVE { _key: CONCAT('test', i) } IN users
 ```
 
-By specifying the `ignoreErrors` query option, these errors can be suppressed so
-the query completes:
+<!-- 0018.part.md -->
+
+Указав опцию запроса `ignoreErrors`, эти ошибки можно подавить, чтобы запрос завершился:
+
+<!-- 0019.part.md -->
 
 ```aql
 FOR i IN 1..1000
   REMOVE { _key: CONCAT('test', i) } IN users OPTIONS { ignoreErrors: true }
 ```
 
+<!-- 0020.part.md -->
+
 ### `waitForSync`
 
-To make sure data has been written to disk when a query returns, there is the `waitForSync`
-query option:
+Чтобы убедиться, что данные были записаны на диск при возврате запроса, существует опция запроса `waitForSync`:
+
+<!-- 0021.part.md -->
 
 ```aql
 FOR i IN 1..1000
   REMOVE { _key: CONCAT('test', i) } IN users OPTIONS { waitForSync: true }
 ```
 
+<!-- 0022.part.md -->
+
 ### `ignoreRevs`
 
-In order to not accidentally remove documents that have been updated since you last fetched
-them, you can use the option `ignoreRevs` to either let ArangoDB compare the `_rev` values and
-only succeed if they still match, or let ArangoDB ignore them (default):
+Чтобы случайно не удалить документы, которые были обновлены с момента последнего извлечения, вы можете использовать опцию `ignoreRevs`, чтобы либо позволить ArangoDB сравнивать значения `_rev` и добиваться успеха, только если они совпадают, либо позволить ArangoDB игнорировать их (по умолчанию):
+
+<!-- 0023.part.md -->
 
 ```aql
 FOR i IN 1..1000
   REMOVE { _key: CONCAT('test', i), _rev: "1287623" } IN users OPTIONS { ignoreRevs: false }
 ```
 
+<!-- 0024.part.md -->
+
 ### `exclusive`
 
-The RocksDB engine does not require collection-level locks. Different write
-operations on the same collection do not block each other, as
-long as there are no _write-write conflicts_ on the same documents. From an application
-development perspective it can be desired to have exclusive write access on collections,
-to simplify the development. Note that writes do not block reads in RocksDB.
-Exclusive access can also speed up modification queries, because we avoid conflict checks.
+Движок RocksDB не требует блокировок на уровне коллекции. Различные операции записи в одну и ту же коллекцию не блокируют друг друга, если нет конфликтов _запись-запись_ на одних и тех же документах. С точки зрения разработки приложений может быть желательным иметь исключительный доступ на запись в коллекции, чтобы упростить разработку. Обратите внимание, что записи не блокируют чтения в RocksDB. Исключительный доступ также может ускорить запросы на модификацию, поскольку мы избегаем проверки конфликтов.
 
-Use the `exclusive` option to achieve this effect on a per query basis:
+Используйте опцию `exclusive` для достижения этого эффекта на основе каждого запроса:
+
+<!-- 0025.part.md -->
 
 ```aql
 FOR doc IN collection
@@ -135,29 +162,36 @@ FOR doc IN collection
   OPTIONS { exclusive: true }
 ```
 
+<!-- 0026.part.md -->
+
 ### `refillIndexCaches`
 
-Whether to delete existing entries from the in-memory edge cache and refill it
-with other edges if edge documents are removed.
+Удалять ли существующие записи из кэша граней в памяти и пополнять его другими гранями, если документы граней удаляются.
+
+<!-- 0027.part.md -->
 
 ```aql
 REMOVE { _key: "123" } IN edgeColl
   OPTIONS { refillIndexCaches: true }
 ```
 
-## Returning the removed documents
+<!-- 0028.part.md -->
 
-The removed documents can also be returned by the query. In this case, the
-`REMOVE` statement must be followed by a `RETURN` statement (intermediate `LET`
-statements are allowed, too).`REMOVE` introduces the pseudo-value `OLD` to
-refer to the removed documents:
+## Возвращение удаленных документов
+
+Удаленные документы также могут быть возвращены запросом. В этом случае за оператором `REMOVE` должен следовать оператор `RETURN` (допускаются также промежуточные операторы `LET`).`REMOVE` вводит псевдо-значение `OLD` для ссылки на удаленные документы:
+
+<!-- 0029.part.md -->
 
 ```aql
 REMOVE keyExpression IN collection options RETURN OLD
 ```
 
-Following is an example using a variable named `removed` for capturing the removed
-documents. For each removed document, the document key will be returned.
+<!-- 0030.part.md -->
+
+Ниже приведен пример использования переменной с именем `removed` для регистрации удаленных документов. Для каждого удаленного документа будет возвращен ключ документа.
+
+<!-- 0031.part.md -->
 
 ```aql
 FOR u IN users
@@ -166,17 +200,14 @@ FOR u IN users
   RETURN removed._key
 ```
 
-## Transactionality
+<!-- 0032.part.md -->
 
-On a single server, the document removal is executed transactionally in an
-all-or-nothing fashion.
+## Транзакционность
 
-If the RocksDB engine is used and intermediate commits are enabled, a query may
-execute intermediate transaction commits in case the running transaction (AQL
-query) hits the specified size thresholds. In this case, the query's operations
-carried out so far will be committed and not rolled back in case of a later
-abort/rollback. That behavior can be controlled by adjusting the intermediate
-commit settings for the RocksDB engine.
+На одном сервере удаление документов выполняется транзакционно по принципу "все или ничего".
 
-For sharded collections, the entire query and/or remove operation may not be
-transactional, especially if it involves different shards and/or DB-Servers.
+Если используется движок RocksDB и включены промежуточные фиксации, запрос может выполнять промежуточные фиксации транзакций в случае, если запущенная транзакция (AQL-запрос) достигнет заданных пороговых значений размера. В этом случае операции запроса, выполненные до сих пор, будут зафиксированы и не будут откатаны в случае последующего отмены/отката. Это поведение можно контролировать, изменяя настройки промежуточной фиксации для движка RocksDB.
+
+Для коллекций с шардированием вся операция запроса и/или удаления может не быть транзакционной, особенно если она затрагивает разные шарды и/или DB-серверы.
+
+<!-- 0033.part.md -->

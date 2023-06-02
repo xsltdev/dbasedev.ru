@@ -1,16 +1,12 @@
 # COLLECT
 
-The `COLLECT` operation can be used to group data by one or multiple group
-criteria. It can also be used to retrieve all distinct values, count
-how often values occur, and calculate statistical properties efficiently.
+Операция `COLLECT` может использоваться для группировки данных по одному или нескольким критериям группировки. Она также может использоваться для получения всех отдельных значений, подсчета частоты встречаемости значений и эффективного вычисления статистических свойств.
 
-The `COLLECT` statement will eliminate all local variables in the current
-scope. After `COLLECT` only the variables introduced by `COLLECT` itself are
-available.
+Оператор `COLLECT` удаляет все локальные переменные в текущей области видимости. После `COLLECT` доступны только переменные, введенные самим `COLLECT`.
 
-## Syntax
+## Синтаксис
 
-There are several syntax variants for `COLLECT` operations:
+Существует несколько вариантов синтаксиса для операций `COLLECT`:
 
 <pre><code>COLLECT <em>variableName</em> = <em>expression</em>
 COLLECT <em>variableName</em> = <em>expression</em> INTO <em>groupsVariable</em>
@@ -23,17 +19,15 @@ COLLECT AGGREGATE <em>variableName</em> = <em>aggregateExpression</em>
 COLLECT AGGREGATE <em>variableName</em> = <em>aggregateExpression</em> INTO <em>groupsVariable</em>
 COLLECT WITH COUNT INTO <em>countVariable</em></code></pre>
 
-All variants can optionally end with an `OPTIONS { … }` clause.
+Все варианты могут опционально заканчиваться предложением `OPTIONS { ... }`.
 
-## Grouping syntaxes
+## Синтаксис группировки
 
-The first syntax form of `COLLECT` only groups the result by the defined group
-criteria specified in _expression_. In order to further process the results
-produced by `COLLECT`, a new variable (specified by _variableName_) is introduced.
-This variable contains the group value.
+Первая синтаксическая форма `COLLECT` группирует результат только по определенным групповым критериям, указанным в _выражении_. Для дальнейшей обработки результатов, полученных с помощью `COLLECT`, вводится новая переменная (заданная _variableName_). Эта переменная содержит значение группы.
 
-Here's an example query that find the distinct values in `u.city` and makes
-them available in variable `city`:
+Вот пример запроса, который находит отдельные значения в `u.city` и делает их доступными в переменной `city`:
+
+<!-- 0001.part.md -->
 
 ```aql
 FOR u IN users
@@ -43,17 +37,11 @@ FOR u IN users
   }
 ```
 
-The second form does the same as the first form, but additionally introduces a
-variable (specified by _groupsVariable_) that contains all elements that fell into the
-group. This works as follows: The _groupsVariable_ variable is an array containing
-as many elements as there are in the group. Each member of that array is
-a JSON object in which the value of every variable that is defined in the
-AQL query is bound to the corresponding attribute. Note that this considers
-all variables that are defined before the `COLLECT` statement, but not those on
-the top level (outside of any `FOR`), unless the `COLLECT` statement is itself
-on the top level, in which case all variables are taken. Furthermore note
-that it is possible that the optimizer moves `LET` statements out of `FOR`
-statements to improve performance.
+<!-- 0002.part.md -->
+
+Вторая форма делает то же самое, что и первая, но дополнительно вводит переменную (заданную _groupsVariable_), которая содержит все элементы, попавшие в группу. Это работает следующим образом: Переменная _groupsVariable_ - это массив, содержащий столько элементов, сколько их в группе. Каждый член этого массива представляет собой объект JSON, в котором значение каждой переменной, определенной в запросе AQL, привязано к соответствующему атрибуту. Обратите внимание, что при этом учитываются все переменные, определенные до оператора `COLLECT`, но не те, которые находятся на верхнем уровне (вне любого `FOR`), если только оператор `COLLECT` сам не находится на верхнем уровне, в этом случае учитываются все переменные. Кроме того, обратите внимание, что оптимизатор может перемещать операторы `LET` из операторов `FOR` для повышения производительности.
+
+<!-- 0003.part.md -->
 
 ```aql
 FOR u IN users
@@ -64,13 +52,13 @@ FOR u IN users
   }
 ```
 
-In the above example, the array `users` will be grouped by the attribute
-`city`. The result is a new array of documents, with one element per distinct
-`u.city` value. The elements from the original array (here: `users`) per city are
-made available in the variable `groups`. This is due to the `INTO` clause.
+<!-- 0004.part.md -->
 
-`COLLECT` also allows specifying multiple group criteria. Individual group
-criteria can be separated by commas:
+В приведенном выше примере массив `users` будет сгруппирован по атрибуту `city`. В результате будет получен новый массив документов, с одним элементом для каждого отдельного значения `u.city`. Элементы исходного массива (здесь: `users`) для каждого города доступны в переменной `groups`. Это происходит благодаря предложению `INTO`.
+
+`COLLECT` также позволяет указать несколько групповых критериев. Отдельные групповые критерии могут быть разделены запятыми:
+
+<!-- 0005.part.md -->
 
 ```aql
 FOR u IN users
@@ -82,14 +70,15 @@ FOR u IN users
   }
 ```
 
-In the above example, the array `users` is grouped by country first and then
-by city, and for each distinct combination of country and city, the users
-will be returned.
+<!-- 0006.part.md -->
 
-## Discarding obsolete variables
+В приведенном выше примере массив `users` сгруппирован сначала по стране, а затем по городу, и для каждой отдельной комбинации страны и города будут возвращены пользователи.
 
-The third form of `COLLECT` allows rewriting the contents of the _groupsVariable_
-using an arbitrary _projectionExpression_:
+## Отказ от устаревших переменных
+
+Третья форма `COLLECT` позволяет переписать содержимое _groupsVariable_ с помощью произвольной _projectionExpression_:
+
+<!-- 0007.part.md -->
 
 ```aql
 FOR u IN users
@@ -101,12 +90,13 @@ FOR u IN users
   }
 ```
 
-In the above example, only the _projectionExpression_ is `u.name`. Therefore,
-only this attribute is copied into the _groupsVariable_ for each document.
-This is probably much more efficient than copying all variables from the scope into
-the _groupsVariable_ as it would happen without a _projectionExpression_.
+<!-- 0008.part.md -->
 
-The expression following `INTO` can also be used for arbitrary computations:
+В приведенном выше примере только _projectionExpression_ является `u.name`. Поэтому только этот атрибут копируется в _groupsVariable_ для каждого документа. Это, вероятно, гораздо эффективнее, чем копирование всех переменных из области видимости в _groupsVariable_, как это произошло бы без _projectionExpression_.
+
+Выражение, следующее за `INTO`, также может быть использовано для произвольных вычислений:
+
+<!-- 0009.part.md -->
 
 ```aql
 FOR u IN users
@@ -121,16 +111,13 @@ FOR u IN users
   }
 ```
 
-`COLLECT` also provides an optional `KEEP` clause that can be used to control
-which variables will be copied into the variable created by `INTO`. If no
-`KEEP` clause is specified, all variables from the scope will be copied as
-sub-attributes into the _groupsVariable_.
-This is safe but can have a negative impact on performance if there
-are many variables in scope or the variables contain massive amounts of data.
+<!-- 0010.part.md -->
 
-The following example limits the variables that are copied into the _groupsVariable_
-to just `name`. The variables `u` and `someCalculation` also present in the scope
-will not be copied into _groupsVariable_ because they are not listed in the `KEEP` clause:
+`COLLECT` также предоставляет необязательное условие `KEEP`, которое можно использовать для управления тем, какие переменные будут скопированы в переменную, созданную `INTO`. Если условие `KEEP` не указано, все переменные из области видимости будут скопированы в качестве податрибутов в _groupsVariable_. Это безопасно, но может отрицательно сказаться на производительности, если в области видимости много переменных или переменные содержат большие объемы данных.
+
+В следующем примере переменные, которые копируются в _groupsVariable_, ограничиваются только `name`. Переменные `u` и `someCalculation`, также присутствующие в области видимости, не будут скопированы в _groupsVariable_, поскольку они не указаны в предложении `KEEP`:
+
+<!-- 0011.part.md -->
 
 ```aql
 FOR u IN users
@@ -143,17 +130,17 @@ FOR u IN users
   }
 ```
 
-`KEEP` is only valid in combination with `INTO`. Only valid variable names can
-be used in the `KEEP` clause. `KEEP` supports the specification of multiple
-variable names.
+<!-- 0012.part.md -->
 
-## Group length calculation
+`KEEP` действует только в сочетании с `INTO`. В предложении `KEEP` можно использовать только правильные имена переменных. `KEEP` поддерживает указание нескольких имен переменных.
 
-`COLLECT` also provides a special `WITH COUNT` clause that can be used to
-determine the number of group members efficiently.
+## Вычисление длины группы
 
-The simplest form just returns the number of items that made it into the
-`COLLECT`:
+`COLLECT` также предоставляет специальное предложение `WITH COUNT`, которое может быть использовано для эффективного определения количества членов группы.
+
+В простейшей форме возвращается только количество элементов, попавших в `COLLECT`:
+
+<!-- 0013.part.md -->
 
 ```aql
 FOR u IN users
@@ -161,14 +148,21 @@ FOR u IN users
   RETURN length
 ```
 
-The above is equivalent to, but less efficient than:
+<!-- 0014.part.md -->
+
+Вышеприведенный вариант эквивалентен, но менее эффективен, чем:
+
+<!-- 0015.part.md -->
 
 ```aql
 RETURN LENGTH(users)
 ```
 
-The `WITH COUNT` clause can also be used to efficiently count the number
-of items in each group:
+<!-- 0016.part.md -->
+
+Предложение `WITH COUNT` также можно использовать для эффективного подсчета количества элементов в каждой группе:
+
+<!-- 0017.part.md -->
 
 ```aql
 FOR u IN users
@@ -179,18 +173,17 @@ FOR u IN users
   }
 ```
 
-{% hint 'info' %}
-The `WITH COUNT` clause can only be used together with an `INTO` clause.
-{% endhint %}
+!!!info ""
 
-## Aggregation
+    Предложение `WITH COUNT` можно использовать только вместе с предложением `INTO`.
 
-A `COLLECT` statement can be used to perform aggregation of data per group. To
-only determine group lengths, the `WITH COUNT INTO` variant of `COLLECT` can be
-used as described before.
+## Агрегация
 
-For other aggregations, it is possible to run aggregate functions on the `COLLECT`
-results:
+Оператор `COLLECT` можно использовать для агрегирования данных по группам. Чтобы определить только длину группы, можно использовать вариант `WITH COUNT INTO` оператора `COLLECT`, как описано ранее.
+
+Для других агрегаций можно запустить агрегатные функции на результатах `COLLECT`:
+
+<!-- 0019.part.md -->
 
 ```aql
 FOR u IN users
@@ -202,13 +195,15 @@ FOR u IN users
   }
 ```
 
-The above however requires storing all group values during the collect operation for
-all groups, which can be inefficient.
+<!-- 0020.part.md -->
 
-The special `AGGREGATE` variant of `COLLECT` allows building the aggregate values
-incrementally during the collect operation, and is therefore often more efficient.
+Однако вышеописанный способ требует хранения всех значений группы во время операции сбора для всех групп, что может быть неэффективным.
 
-With the `AGGREGATE` variant the above query becomes:
+Специальный вариант `AGGREGATE` функции `COLLECT` позволяет создавать агрегатные значения постепенно во время операции сбора и поэтому часто является более эффективным.
+
+При использовании варианта `AGGREGATE` приведенный выше запрос становится:
+
+<!-- 0021.part.md -->
 
 ```aql
 FOR u IN users
@@ -221,9 +216,11 @@ FOR u IN users
   }
 ```
 
-The `AGGREGATE` keyword can only be used after the `COLLECT` keyword. If used, it
-must directly follow the declaration of the grouping keys. If no grouping keys
-are used, it must follow the `COLLECT` keyword directly:
+<!-- 0022.part.md -->
+
+Ключевое слово `AGGREGATE` может использоваться только после ключевого слова `COLLECT`. Если оно используется, то должно следовать непосредственно за объявлением ключей группировки. Если ключи группировки не используются, оно должно следовать непосредственно за ключевым словом `COLLECT`:
+
+<!-- 0023.part.md -->
 
 ```aql
 FOR u IN users
@@ -234,11 +231,11 @@ FOR u IN users
   }
 ```
 
-Only specific expressions are allowed on the right-hand side of each `AGGREGATE`
-assignment:
+<!-- 0024.part.md -->
 
-- on the top level, an aggregate expression must be a call to one of the
-  supported aggregation functions:
+В правой части каждого присваивания `AGGREGATE` допускаются только определенные выражения:
+
+- на верхнем уровне агрегированное выражение должно быть вызовом одной из поддерживаемых функций агрегирования:
 
   - `LENGTH()` / `COUNT()`
   - `MIN()`
@@ -256,17 +253,22 @@ assignment:
   - `BIT_OR()`
   - `BIT_XOR()`
 
-- an aggregate expression must not refer to variables introduced by the `COLLECT` itself
+- агрегированное выражение не должно ссылаться на переменные, введенные самим `COLLECT`.
 
-## `COLLECT` vs. `RETURN DISTINCT`
+## `COLLECT` против `RETURN DISTINCT`
 
-In order to make a result set unique, one can either use `COLLECT` or
-`RETURN DISTINCT`.
+Для того чтобы сделать набор результатов уникальным, можно использовать либо `COLLECT`, либо `RETURN DISTINCT`.
+
+<!-- 0025.part.md -->
 
 ```aql
 FOR u IN users
   RETURN DISTINCT u.age
 ```
+
+<!-- 0026.part.md -->
+
+<!-- 0027.part.md -->
 
 ```aql
 FOR u IN users
@@ -274,62 +276,41 @@ FOR u IN users
   RETURN age
 ```
 
-Behind the scenes, both variants create a _CollectNode_. However, they use
-different implementations of `COLLECT` that have different properties:
+<!-- 0028.part.md -->
 
-- `RETURN DISTINCT` **maintains the order of results**, but it is limited to
-  a single value.
+За кулисами оба варианта создают _CollectNode_. Однако они используют разные реализации `COLLECT`, которые имеют разные свойства:
 
-- `COLLECT` **changes the order of results** (sorted or undefined), but it
-  supports multiple values and is more flexible than `RETURN DISTINCT`.
+- `RETURN DISTINCT` **сохраняет порядок результатов**, но он ограничен одним значением.
 
-Aside from `COLLECT`s sophisticated grouping and aggregation capabilities, it
-allows you to place a `LIMIT` operation before `RETURN` to potentially stop the
-`COLLECT` operation early.
+- `COLLECT` **изменяет порядок результатов** (отсортированный или неопределенный), но поддерживает несколько значений и является более гибким, чем `RETURN DISTINCT`.
 
-## `COLLECT` options
+Помимо сложных возможностей группировки и агрегации, `COLLECT` позволяет поместить операцию `LIMIT` перед `RETURN`, чтобы потенциально остановить операцию `COLLECT` раньше времени.
+
+## Параметры `COLLECT`
 
 ### `method`
 
-There are two variants of `COLLECT` that the optimizer can choose from:
-the _sorted_ and the _hash_ variant. The `method` option can be used in a
-`COLLECT` statement to inform the optimizer about the preferred method,
-`"sorted"` or `"hash"`.
+Существует два варианта `COLLECT`, которые оптимизатор может выбрать: вариант _sorted_ и вариант _hash_. Опция `method` может быть использована в операторе `COLLECT`, чтобы сообщить оптимизатору о предпочтительном методе, `"sorted"` или `"hash"`.
+
+<!-- 0029.part.md -->
 
 ```aql
 COLLECT ... OPTIONS { method: "sorted" }
 ```
 
-If no method is specified by the user, then the optimizer will create a plan
-that uses the _sorted_ method, and an additional plan using the _hash_ method
-if the `COLLECT` statement qualifies for it.
+<!-- 0030.part.md -->
 
-If the method is explicitly set to _sorted_, then the optimizer will always use
-the _sorted_ variant of `COLLECT` and not even create a plan using the _hash_
-variant. If it is explicitly set to _hash_, then the optimizer will create a
-plan using the _hash_ method **only if the `COLLECT` statement qualifies**.
-Not all `COLLECT` statements can use the _hash_ method, in particular ones with
-an `INTO` clause are not eligible. In case the `COLLECT` statement qualifies,
-there will only be one plan that uses the _hash_ method. Otherwise, the
-optimizer will default to the _sorted_ method.
+Если метод не указан пользователем, то оптимизатор создаст план, использующий метод _sorted_, и дополнительный план, использующий метод _hash_, если оператор `COLLECT` удовлетворяет его требованиям.
 
-The _sorted_ method requires its input to be sorted by the group criteria
-specified in the `COLLECT` clause. To ensure correctness of the result, the
-optimizer will automatically insert a `SORT` operation into the query in front
-of the `COLLECT` statement. The optimizer may be able to optimize away that
-`SORT` operation later if a sorted index is present on the group criteria.
+Если метод явно установлен в _sorted_, то оптимизатор всегда будет использовать _sorted_ вариант `COLLECT` и даже не создаст план с использованием _hash_ варианта. Если он явно установлен в _hash_, то оптимизатор будет создавать план с использованием метода _hash_ **только если оператор `COLLECT` соответствует требованиям**. Не все операторы `COLLECT` могут использовать метод _hash_, в частности, операторы с клаузулой `INTO` не подходят. Если оператор `COLLECT` соответствует требованиям, то будет только один план, использующий метод _hash_. В противном случае оптимизатор по умолчанию будет использовать метод _sorted_.
 
-In case a `COLLECT` statement qualifies for using the _hash_ variant, the
-optimizer will create an extra plan for it at the beginning of the planning
-phase. In this plan, no extra `SORT` statement will be added in front of the
-`COLLECT`. This is because the _hash_ variant of `COLLECT` does not require
-sorted input. Instead, a `SORT` statement will be added after the `COLLECT` to
-sort its output. This `SORT` statement may be optimized away again in later
-stages.
+Метод _sorted_ требует, чтобы его входные данные были отсортированы по групповым критериям, указанным в предложении `COLLECT`. Для обеспечения корректности результата оптимизатор автоматически вставит в запрос операцию `SORT` перед оператором `COLLECT`. В дальнейшем оптимизатор может отказаться от этой операции `SORT`, если для групповых критериев имеется отсортированный индекс.
 
-If the sort order of the `COLLECT` is irrelevant to the user, adding the extra
-instruction `SORT null` after the `COLLECT` will allow the optimizer to remove
-the sorts altogether:
+Если оператор `COLLECT` претендует на использование варианта _hash_, оптимизатор создаст для него дополнительный план в начале фазы планирования. В этом плане перед оператором `COLLECT` не будет добавляться дополнительный оператор `SORT`. Это связано с тем, что _hash_ вариант `COLLECT` не требует отсортированного ввода. Вместо этого после `COLLECT` будет добавлен оператор `SORT` для сортировки его вывода. Этот оператор `SORT` может быть снова оптимизирован на последующих этапах.
+
+Если порядок сортировки в `COLLECT` не имеет значения для пользователя, добавление дополнительной инструкции `SORT null` после `COLLECT` позволит оптимизатору полностью удалить сортировку:
+
+<!-- 0031.part.md -->
 
 ```aql
 FOR u IN users
@@ -338,24 +319,17 @@ FOR u IN users
   RETURN age
 ```
 
-Which `COLLECT` variant is used by the optimizer if no preferred method is set
-explicitly depends on the optimizer's cost estimations. The created plans with
-the different `COLLECT` variants will be shipped through the regular
-optimization pipeline. In the end, the optimizer will pick the plan with the
-lowest estimated total cost as usual.
+<!-- 0032.part.md -->
 
-In general, the _sorted_ variant of `COLLECT` should be preferred in cases when
-there is a sorted index present on the group criteria. In this case the
-optimizer can eliminate the `SORT` operation in front of the `COLLECT`, so that
-no `SORT` will be left.
+Какой вариант `COLLECT` используется оптимизатором, если явно не задан предпочтительный метод, зависит от оценок затрат оптимизатора. Созданные планы с различными вариантами `COLLECT` будут проходить через обычный конвейер оптимизации. В итоге оптимизатор, как обычно, выберет план с наименьшей оценкой общей стоимости.
 
-If there is no sorted index available on the group criteria, the up-front sort
-required by the _sorted_ variant can be expensive. In this case it is likely
-that the optimizer will prefer the _hash_ variant of `COLLECT`, which does not
-require its input to be sorted.
+В целом, _сортированный_ вариант `COLLECT` следует предпочесть в тех случаях, когда в групповых критериях присутствует сортированный индекс. В этом случае оптимизатор может исключить операцию `SORT` перед `COLLECT`, так что никакого `SORT` не останется.
 
-Which variant of `COLLECT` will actually be used can be figured out by looking
-at the execution plan of a query, specifically the comment of the _CollectNode_:
+Если в критериях группы нет отсортированного индекса, то предварительная сортировка, требуемая вариантом _sorted_, может оказаться дорогостоящей. В этом случае, скорее всего, оптимизатор предпочтет _hash_ вариант `COLLECT`, который не требует сортировки входных данных.
+
+Какой вариант `COLLECT` будет использоваться на самом деле, можно выяснить, посмотрев на план выполнения запроса, в частности, на комментарий _CollectNode_:
+
+<!-- 0033.part.md -->
 
 ```aql
 Execution plan:
@@ -367,3 +341,7 @@ Execution plan:
   6   SortNode                     5       - SORT name ASC   /* sorting strategy: standard */
   5   ReturnNode                   5       - RETURN name
 ```
+
+<!-- 0034.part.md -->
+
+<!-- 0035.part.md -->

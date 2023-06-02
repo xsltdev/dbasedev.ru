@@ -1,19 +1,18 @@
 # SORT
 
-The `SORT` statement will force a sort of the array of already produced
-intermediate results in the current block. `SORT` allows specifying one or
-multiple sort criteria and directions.
+Оператор `SORT` принудительно отсортирует массив уже полученных промежуточных результатов в текущем блоке. `SORT` позволяет указать один или несколько критериев и направлений сортировки.
 
-## Syntax
+## Синтаксис
 
-The general syntax is:
+Общий синтаксис следующий:
 
 <pre><code>SORT <em>expression</em> <em>direction</em></code></pre>
 
-## Usage
+## Использование
 
-Example query that is sorting by lastName (in ascending order), then firstName
-(in ascending order), then by id (in descending order):
+Пример запроса, который сортирует по LastName (в порядке возрастания), затем по FirstName (в порядке возрастания), затем по id (в порядке убывания):
+
+<!-- 0001.part.md -->
 
 ```aql
 FOR u IN users
@@ -21,49 +20,54 @@ FOR u IN users
   RETURN u
 ```
 
-Specifying the _direction_ is optional. The default (implicit) direction for a
-sort expression is the ascending order. To explicitly specify the sort direction,
-the keywords `ASC` (ascending) and `DESC` can be used. Multiple sort criteria can be
-separated using commas. In this case the direction is specified for each
-expression separately. For example
+<!-- 0002.part.md -->
+
+Указание _направления_ необязательно. По умолчанию (неявное) направление для выражения сортировки - это порядок по возрастанию. Чтобы явно указать направление сортировки, можно использовать ключевые слова `ASC` (по возрастанию) и `DESC`. Несколько критериев сортировки могут быть разделены запятыми. В этом случае направление указывается для каждого выражения отдельно. Например
+
+<!-- 0003.part.md -->
 
 ```aql
 SORT doc.lastName, doc.firstName
 ```
 
-will first sort documents by lastName in ascending order and then by
-firstName in ascending order.
+<!-- 0004.part.md -->
+
+сначала отсортирует документы по фамилии в порядке возрастания, а затем по имени в порядке возрастания.
+
+<!-- 0005.part.md -->
 
 ```aql
 SORT doc.lastName DESC, doc.firstName
 ```
 
-will first sort documents by lastName in descending order and then by
-firstName in ascending order.
+<!-- 0006.part.md -->
+
+сначала отсортирует документы по LastName в порядке убывания, а затем по FirstName в порядке возрастания.
+
+<!-- 0007.part.md -->
 
 ```aql
 SORT doc.lastName, doc.firstName DESC
 ```
 
-will first sort documents by lastName in ascending order and then by
-firstName in descending order.
+<!-- 0008.part.md -->
 
-{% hint 'warning' %}
-When iterating over collection-based arrays, the order of documents is
-always **undefined unless an explicit sort order is defined** using `SORT`.
-{% endhint %}
+сначала отсортирует документы по LastName в порядке возрастания, а затем по FirstName в порядке убывания.
 
-Constant `SORT` expressions can be used to indicate that no particular
-sort order is desired.
+!!!warning ""
+
+    При итерации по массивам, основанным на коллекциях, порядок документов всегда **не определен, если не задан явный порядок сортировки** с помощью `SORT`.
+
+Постоянные выражения `SORT` могут быть использованы для указания того, что не требуется определенный порядок сортировки.
+
+<!-- 0009.part.md -->
 
 ```aql
 SORT null
 ```
 
-Constant `SORT` expressions will be optimized away by the AQL
-optimizer during optimization, but specifying them explicitly may enable further
-optimizations if the optimizer does not need to take into account any particular
-sort order. This is especially the case after a `COLLECT` statement, which is
-supposed to produce a sorted result. Specifying an extra `SORT null` after the
-`COLLECT` statement allows to AQL optimizer to remove the post-sorting of the
-collect results altogether. Also see [`COLLECT` option `method`](operations-collect.html#method).
+<!-- 0010.part.md -->
+
+Постоянные выражения `SORT` будут отсортированы оптимизатором AQL во время оптимизации, но их явное указание может позволить дальнейшую оптимизацию, если оптимизатору не нужно учитывать какой-либо конкретный порядок сортировки. Это особенно актуально после оператора `COLLECT`, который должен выдать отсортированный результат. Указание дополнительного `SORT null` после оператора `COLLECT` позволяет оптимизатору AQL полностью убрать пост-сортировку результатов сбора. Также смотрите [`COLLECT` опция `method`](collect.md).
+
+<!-- 0011.part.md -->

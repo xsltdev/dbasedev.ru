@@ -1,157 +1,170 @@
 # REPLACE
 
-Each `REPLACE` operation is restricted to a single collection, and the
-[collection name](../appendix-glossary.html#collection-name) must not be dynamic.
-Only a single `REPLACE` statement per collection is allowed per AQL query, and
-it cannot be followed by read or write operations that access the same collection,
-by traversal operations, or AQL functions that can read documents.
+Каждая операция `REPLACE` ограничена одной коллекцией, и имя коллекции не должно быть динамическим. В одном запросе AQL допускается только один оператор `REPLACE` для коллекции, и за ним не могут следовать операции чтения или записи, обращающиеся к той же коллекции, операции обхода или функции AQL, которые могут читать документы.
 
-You cannot replace the `_id`, `_key`, and `_rev` system attributes, but you can
-replace the `_from` and `_to` attributes.
+Нельзя заменить системные атрибуты `_id`, `_key` и `_rev`, но можно заменить атрибуты `_from` и `_to`.
 
-Replacing a document modifies the document's revision number (`_rev` attribute)
-with a server-generated value.
+Замена документа изменяет номер ревизии документа (атрибут `_rev`) на генерируемое сервером значение.
 
-## Syntax
+## Синтаксис
 
-The two syntaxes for a replace operation are:
+Для операции замены существует два синтаксиса:
 
 <pre><code>REPLACE <em>document</em> IN <em>collection</em>
 REPLACE <em>keyExpression</em> WITH <em>document</em> IN <em>collection</em></code></pre>
 
-Both variants can optionally end with an `OPTIONS { … }` clause.
+Оба варианта могут опционально заканчиваться предложением `OPTIONS { ... }`.
 
-`collection` must contain the name of the collection in which the document
-should be replaced.
+`collection` должно содержать имя коллекции, в которой должен быть заменен документ.
 
-`document` must be an object and contain the attributes and values to set.
-**All existing attributes** in the stored document **are removed** from it and
-**only the provided attributes are set** (excluding the immutable `_id` and
-`_key` attributes and the system-managed `_rev` attribute). This distinguishes
-the `REPLACE` from the `UPDATE` operation, which only affects the attributes
-you specify in the operation and doesn't change other attributes of the stored
-document.
+`document` должен быть объектом и содержать атрибуты и значения для установки. **Все существующие атрибуты** в хранимом документе **удаляются** из него и **устанавливаются только предоставленные атрибуты** (за исключением неизменяемых атрибутов `_id` и `_key` и управляемого системой атрибута `_rev`). Это отличает операцию `REPLACE` от операции `UPDATE`, которая влияет только на атрибуты, указанные в операции, и не изменяет другие атрибуты хранимого документа.
 
 ### `REPLACE <document> IN <collection>`
 
-Using the first syntax, the `document` object must have a `_key` attribute with
-the document key. The existing document with this key is replaced with the
-attributes provided by the `document` object (except for the `_id`, `_key`, and
-`_rev` system attributes).
+При использовании первого синтаксиса объект `document` должен иметь атрибут `_key` с ключом документа. Существующий документ с этим ключом заменяется атрибутами, предоставленными объектом `document` (за исключением системных атрибутов `_id`, `_key` и `_rev`).
 
-The following query replaces the document identified by the key `my_key` in the
-`users` collection, only setting a `name` and a `status` attribute. The key is
-passed via the `_key` attribute alongside other attributes:
+Следующий запрос заменяет документ, идентифицированный ключом `my_key` в коллекции `users`, устанавливая только атрибуты `name` и `status`. Ключ передается через атрибут `_key` наряду с другими атрибутами:
+
+<!-- 0001.part.md -->
+
+<!-- 0002.part.md -->
 
 ```aql
 REPLACE { _key: "my_key", name: "Jon", status: "active" } IN users
 ```
 
-The following query is invalid because the object does not contain a `_key`
-attribute and thus it is not possible to determine the document to
-be replaced:
+<!-- 0003.part.md -->
+
+Следующий запрос недействителен, поскольку объект не содержит атрибута `_key`, и поэтому невозможно определить заменяемый документ:
+
+<!-- 0004.part.md -->
 
 ```aql
 REPLACE { name: "Jon" } IN users
 ```
 
-You can combine the `REPLACE` operation with a `FOR` loop to determine the
-necessary key attributes, like shown below:
+<!-- 0005.part.md -->
+
+Вы можете объединить операцию `REPLACE` с циклом `FOR` для определения необходимых ключевых атрибутов, как показано ниже:
+
+<!-- 0006.part.md -->
 
 ```aql
 FOR u IN users
   REPLACE { _key: u._key, name: CONCAT(u.firstName, " ", u.lastName), status: u.status } IN users
 ```
 
-Note that the `REPLACE` and `FOR` operations are independent of each other and
-`u` does not automatically define a document for the `REPLACE` statement.
-Thus, the following query is invalid:
+<!-- 0007.part.md -->
+
+Обратите внимание, что операции `REPLACE` и `FOR` независимы друг от друга, и `u` не определяет автоматически документ для оператора `REPLACE`. Таким образом, следующий запрос является некорректным:
+
+<!-- 0008.part.md -->
 
 ```aql
 FOR u IN users
   REPLACE { name: CONCAT(u.firstName, " ", u.lastName), status: u.status } IN users
 ```
 
+<!-- 0009.part.md -->
+
 ### `REPLACE <keyExpression> WITH <document> IN <collection>`
 
-Using the second syntax, the document to replace is defined by the
-`keyExpression`. It can either be a string with the document key, an object
-which contains a `_key` attribute with the document key, or an expression that
-evaluates to either of these two. The existing document with this key is
-replaced with the attributes provided by the `document` object (except for
-the `_id`, `_key`, and `_rev` system attributes).
+При использовании второго синтаксиса документ для замены определяется `keyExpression`. Это может быть либо строка с ключом документа, либо объект, содержащий атрибут `_key` с ключом документа, либо выражение, которое оценивается как одно из этих двух. Существующий документ с этим ключом заменяется атрибутами, предоставленными объектом `document` (за исключением системных атрибутов `_id`, `_key` и `_rev`).
 
-The following query replaces the document identified by the key `my_key` in the
-`users` collection, only setting a `name` and a `status` attribute. The key is
-passed as a string in the `keyExpression`. The attributes to set are passed
-separately as the `document` object:
+Следующий запрос заменяет документ, идентифицированный ключом `my_key` в коллекции `users`, устанавливая только атрибуты `name` и `status`. Ключ передается в виде строки в `keyExpression`. Атрибуты для установки передаются отдельно в виде объекта `document`:
+
+<!-- 0010.part.md -->
 
 ```aql
 REPLACE "my_key" WITH { name: "Jon", status: "active" } IN users
 ```
 
-The `document` object may contain a `_key` attribute, but it is ignored.
+<!-- 0011.part.md -->
 
-You cannot define the document to replace using an `_id` attribute, nor pass a
-document identifier as a string (like `"users/john"`). However, you can use
-`PARSE_IDENTIFIER(<id>).key` as `keyExpression` to get the document key as a
-string:
+Объект `document` может содержать атрибут `_key`, но он игнорируется.
+
+Вы не можете определить документ для замены с помощью атрибута `_id` или передать идентификатор документа в виде строки (например, `"users/john"`). Однако вы можете использовать `PARSE_IDENTIFIER(<id>).key` в качестве `keyExpression`, чтобы получить ключ документа в виде строки:
+
+<!-- 0012.part.md -->
 
 ```aql
 LET key = PARSE_IDENTIFIER("users/john").key
 REPLACE key WITH { ... } IN users
 ```
 
-### Comparison of the syntaxes
+<!-- 0013.part.md -->
 
-Both syntaxes of the `REPLACE` operation allow you to define the document to
-modify and the attributes to set. The document to update is effectively
-identified by a document key in combination with the specified collection.
+### Сравнение синтаксисов
 
-The `REPLACE` operation supports different ways of specifying the document key.
-You can choose the syntax variant that is the most convenient for you.
+Оба синтаксиса операции `REPLACE` позволяют вам определить документ для изменения и атрибуты для установки. Документ для обновления эффективно идентифицируется ключом документа в сочетании с указанной коллекцией.
 
-The following queries are equivalent:
+Операция `REPLACE` поддерживает различные способы указания ключа документа. Вы можете выбрать наиболее удобный для вас вариант синтаксиса.
+
+Следующие запросы эквивалентны:
+
+<!-- 0014.part.md -->
 
 ```aql
 FOR u IN users
   REPLACE u WITH { name: CONCAT(u.firstName, " ", u.lastName), status: u.status } IN users
 ```
 
+<!-- 0015.part.md -->
+
+<!-- 0016.part.md -->
+
 ```aql
 FOR u IN users
   REPLACE u._key WITH { name: CONCAT(u.firstName, " ", u.lastName), status: u.status } IN users
 ```
+
+<!-- 0017.part.md -->
+
+<!-- 0018.part.md -->
 
 ```aql
 FOR u IN users
   REPLACE { _key: u._key } WITH { name: CONCAT(u.firstName, " ", u.lastName), status: u.status } IN users
 ```
 
+<!-- 0019.part.md -->
+
+<!-- 0020.part.md -->
+
 ```aql
 FOR u IN users
   REPLACE { _key: u._key, name: CONCAT(u.firstName, " ", u.lastName), status: u.status } IN users
 ```
 
-## Dynamic key expressions
+<!-- 0021.part.md -->
 
-A `REPLACE` operation may replace arbitrary documents, using either of the two
-syntaxes:
+## Выражения динамических ключей
+
+Операция `REPLACE` может заменять произвольные документы, используя любой из двух синтаксисов:
+
+<!-- 0022.part.md -->
 
 ```aql
 FOR i IN 1..1000
   REPLACE { _key: CONCAT("test", i), name: "Paula", status: "active" } IN users
 ```
 
+<!-- 0023.part.md -->
+
+<!-- 0024.part.md -->
+
 ```aql
 FOR i IN 1..1000
   REPLACE CONCAT("test", i) WITH { name: "Paula", status: "active" } IN users
 ```
 
-## Target a different collection
+<!-- 0025.part.md -->
 
-The documents a `REPLACE` operation modifies can be in a different collection
-than the ones produced by a preceding `FOR` operation:
+## Нацелить на другую коллекцию
+
+Документы, которые изменяет операция `REPLACE`, могут находиться в другой коллекции, чем те, которые были созданы предшествующей операцией `FOR`:
+
+<!-- 0026.part.md -->
 
 ```aql
 FOR u IN users
@@ -159,28 +172,29 @@ FOR u IN users
   REPLACE u WITH { status: "inactive", name: u.name } IN backup
 ```
 
-Note how documents are read from the `users` collection but replaced in another
-collection called `backup`. Both collections need to use matching document keys
-for this to work.
+<!-- 0027.part.md -->
 
-Although the `u` variable holds a whole document, it is only used to define the
-target document. The `_key` attribute of the object is extracted and the target
-document is solely defined by the document key string value and the specified
-collection of the `REPLACE` operation (`backup`). There is no link to the
-original collection (`users`).
+Обратите внимание, как документы считываются из коллекции `users`, но заменяются в другой коллекции `backup`. Для того чтобы это сработало, обе коллекции должны использовать совпадающие ключи документов.
 
-## Query options
+Хотя переменная `u` содержит целый документ, она используется только для определения целевого документа. Атрибут `_key` объекта извлекается, и целевой документ определяется только значением строки ключа документа и указанной коллекцией операции `REPLACE` (`backup`). Ссылка на исходную коллекцию (`users`) отсутствует.
 
-You can optionally set query options for the `REPLACE` operation:
+## Параметры запроса
+
+Вы можете опционально задать параметры запроса для операции `REPLACE`:
+
+<!-- 0028.part.md -->
 
 ```aql
 REPLACE ... IN users OPTIONS { ... }
 ```
 
+<!-- 0029.part.md -->
+
 ### `ignoreErrors`
 
-You can use `ignoreErrors` to suppress query errors that may occur when trying to
-replace non-existing documents or when violating unique key constraints:
+Вы можете использовать `ignoreErrors` для подавления ошибок запроса, которые могут возникнуть при попытке заменить несуществующие документы или при нарушении ограничений уникального ключа:
+
+<!-- 0030.part.md -->
 
 ```aql
 FOR i IN 1..1000
@@ -189,13 +203,15 @@ FOR i IN 1..1000
   OPTIONS { ignoreErrors: true }
 ```
 
-You cannot modify the `_id`, `_key`, and `_rev` system attributes, but attempts
-to change them are ignored and not considered errors.
+<!-- 0031.part.md -->
+
+Вы не можете изменять системные атрибуты `_id`, `_key` и `_rev`, но попытки изменить их игнорируются и не считаются ошибками.
 
 ### `waitForSync`
 
-To make sure data are durable when a replace query returns, there is the `waitForSync`
-query option:
+Для обеспечения долговечности данных при возврате запроса замены существует опция запроса `waitForSync`:
+
+<!-- 0032.part.md -->
 
 ```aql
 FOR i IN 1..1000
@@ -204,11 +220,13 @@ FOR i IN 1..1000
   OPTIONS { waitForSync: true }
 ```
 
+<!-- 0033.part.md -->
+
 ### `ignoreRevs`
 
-In order to not accidentally overwrite documents that have been modified since you last fetched
-them, you can use the option `ignoreRevs` to either let ArangoDB compare the `_rev` value and only
-succeed if they still match, or let ArangoDB ignore them (default):
+Чтобы случайно не перезаписать документы, которые были изменены с момента последнего извлечения, вы можете использовать опцию `ignoreRevs`, чтобы либо позволить ArangoDB сравнивать значение `_rev` и добиваться успеха, только если они совпадают, либо позволить ArangoDB игнорировать их (по умолчанию):
+
+<!-- 0034.part.md -->
 
 ```aql
 FOR i IN 1..1000
@@ -217,16 +235,15 @@ FOR i IN 1..1000
   OPTIONS { ignoreRevs: false }
 ```
 
+<!-- 0035.part.md -->
+
 ### `exclusive`
 
-The RocksDB engine does not require collection-level locks. Different write
-operations on the same collection do not block each other, as
-long as there are no _write-write conflicts_ on the same documents. From an application
-development perspective it can be desired to have exclusive write access on collections,
-to simplify the development. Note that writes do not block reads in RocksDB.
-Exclusive access can also speed up modification queries, because we avoid conflict checks.
+Движок RocksDB не требует блокировок на уровне коллекции. Различные операции записи в одну и ту же коллекцию не блокируют друг друга, если нет конфликтов _запись-запись_ на одних и тех же документах. С точки зрения разработки приложений может быть желательным иметь исключительный доступ на запись в коллекции, чтобы упростить разработку. Обратите внимание, что записи не блокируют чтения в RocksDB. Исключительный доступ также может ускорить запросы на модификацию, поскольку мы избегаем проверки конфликтов.
 
-Use the `exclusive` option to achieve this effect on a per query basis:
+Используйте опцию `exclusive` для достижения этого эффекта на основе каждого запроса:
+
+<!-- 0036.part.md -->
 
 ```aql
 FOR doc IN collection
@@ -235,26 +252,28 @@ FOR doc IN collection
   OPTIONS { exclusive: true }
 ```
 
+<!-- 0037.part.md -->
+
 ### `refillIndexCaches`
 
-Whether to update existing entries in the in-memory edge cache if
-edge documents are replaced.
+Нужно ли обновлять существующие записи в кэше границ в памяти, если документы границ заменяются.
+
+<!-- 0038.part.md -->
 
 ```aql
 REPLACE { _key: "123", _from: "vert/C", _to: "vert/D" } IN edgeColl
   OPTIONS { refillIndexCaches: true }
 ```
 
-## Returning the modified documents
+<!-- 0039.part.md -->
 
-You can optionally return the documents modified by the query. In this case, the `REPLACE`
-operation needs to be followed by a `RETURN` operation. Intermediate `LET` operations are
-allowed, too. These operations can refer to the pseudo-variables `OLD` and `NEW`.
-The `OLD` pseudo-variable refers to the document revisions before the replace, and `NEW`
-refers to the document revisions after the replace.
+## Возвращение измененных документов
 
-Both `OLD` and `NEW` contain all document attributes, even those not specified
-in the replace expression.
+При желании можно вернуть документы, измененные запросом. В этом случае за операцией `REPLACE` должна следовать операция `RETURN`. Допускаются также промежуточные операции `LET`. Эти операции могут ссылаться на псевдопеременные `OLD` и `NEW`. Псевдопеременная `OLD` ссылается на ревизии документа до замены, а `NEW` - на ревизии документа после замены.
+
+И `OLD`, и `NEW` содержат все атрибуты документа, даже те, которые не указаны в выражении replace.
+
+<!-- 0040.part.md -->
 
 ```aql
 REPLACE document IN collection options RETURN OLD
@@ -263,9 +282,11 @@ REPLACE keyExpression WITH document IN collection options RETURN OLD
 REPLACE keyExpression WITH document IN collection options RETURN NEW
 ```
 
-Following is an example using a variable named `previous` to return the original
-documents before modification. For each replaced document, the document key is
-returned:
+<!-- 0041.part.md -->
+
+Ниже приведен пример с использованием переменной `previous` для возврата исходных документов до их модификации. Для каждого замененного документа возвращается ключ документа:
+
+<!-- 0042.part.md -->
 
 ```aql
 FOR u IN users
@@ -274,8 +295,11 @@ FOR u IN users
   RETURN previous._key
 ```
 
-The following query uses the `NEW` pseudo-value to return the replaced
-documents, without some of their system attributes:
+<!-- 0043.part.md -->
+
+Следующий запрос использует псевдо-значение `NEW`, чтобы вернуть замененные документы без некоторых их системных атрибутов:
+
+<!-- 0044.part.md -->
 
 ```aql
 FOR u IN users
@@ -284,17 +308,14 @@ FOR u IN users
   RETURN UNSET(replaced, "_key", "_id", "_rev")
 ```
 
-## Transactionality
+<!-- 0045.part.md -->
 
-On a single server, replace operations are executed transactionally in an
-all-or-nothing fashion.
+## Транзакционность
 
-If the RocksDB engine is used and intermediate commits are enabled, a query may
-execute intermediate transaction commits in case the running transaction (AQL
-query) hits the specified size thresholds. In this case, the query's operations
-carried out so far are committed and not rolled back in case of a later
-abort/rollback. That behavior can be controlled by adjusting the intermediate
-commit settings for the RocksDB engine.
+На одном сервере операции замены выполняются транзакционно по принципу "все или ничего".
 
-For sharded collections, the entire query and/or replace operation may not be
-transactional, especially if it involves different shards and/or DB-Servers.
+Если используется движок RocksDB и включены промежуточные фиксации, запрос может выполнять промежуточные фиксации транзакций в случае, если запущенная транзакция (AQL-запрос) достигает заданных пороговых значений размера. В этом случае операции запроса, выполненные до этого момента, фиксируются и не откатываются в случае последующего отмены/отката. Это поведение можно контролировать, изменяя настройки промежуточной фиксации для движка RocksDB.
+
+Для коллекций с шардированием вся операция запроса и/или замены может не быть транзакционной, особенно если она затрагивает разные шарды и/или DB-серверы.
+
+<!-- 0046.part.md -->

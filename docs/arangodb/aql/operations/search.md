@@ -1,110 +1,94 @@
-# SEARCH
+# ПОИСК
 
-The `SEARCH` keyword starts the language construct to filter Views, accelerated
-by the underlying indexes. It guarantees to use these indexes for an efficient
-execution plan. If you use the `FILTER` keyword for Views, no indexes are
-utilized and the filtering is performed as a post-processing step.
+Ключевое слово `SEARCH` запускает языковую конструкцию для фильтрации представлений, ускоренную базовыми индексами. Это гарантирует использование этих индексов для эффективного плана выполнения. Если вы используете ключевое слово `FILTER` для представлений, индексы не используются, а фильтрация выполняется на этапе постобработки.
 
-Conceptually, a View is just another document data source,
-similar to an array or a document/edge collection, over which you can iterate
-using a [`FOR` operation](operations-for.html) in AQL:
+Концептуально, представление - это просто другой источник данных документа, подобный массиву или коллекции документов/краев, над которым вы можете выполнять итерации с помощью операции [`FOR`](for.md) в AQL:
+
+<!-- 0001.part.md -->
 
 ```aql
 FOR doc IN viewName
   RETURN doc
 ```
 
-The optional `SEARCH` operation provides the capabilities to:
+<!-- 0002.part.md -->
 
-- filter documents based on AQL Boolean expressions and functions
-- match documents located in different collections backed by a fast index
-- sort the result set based on how closely each document matched the
-  search conditions
+Дополнительная операция `ПОИСК` предоставляет возможности для:
 
-See [`arangosearch` Views](../arangosearch-views.html) and
-[`search-alias` Views](../arangosearch-views-search-alias.html) on how to set up Views.
+- фильтровать документы на основе булевых выражений и функций AQL
+- сопоставлять документы, расположенные в различных коллекциях, поддерживаемых быстрым индексом
+- сортировать набор результатов на основе того, насколько точно каждый документ соответствует условиям поиска.
 
-## Syntax
+О том, как настроить представления, смотрите [`arangosearch` Views](../arangosearch-views.html) и [`search-alias` Views](../arangosearch-views-search-alias.html).
 
-The `SEARCH` keyword is followed by an ArangoSearch filter expressions, which
-is mostly comprised of calls to ArangoSearch AQL functions.
+## Синтаксис
+
+За ключевым словом `SEARCH` следует выражение фильтра ArangoSearch, которое в основном состоит из вызовов функций ArangoSearch AQL.
 
 <pre><code>FOR <em>doc</em> IN <em>viewName</em>
   SEARCH <em>expression</em>
   OPTIONS { … }
   ...</code></pre>
 
-## Usage
+## Использование
 
-The `SEARCH` statement, in contrast to `FILTER`, is treated as a part of the
-`FOR` operation, not as an individual statement. It can not be placed freely
-in a query nor multiple times in the body of a `FOR` loop. `FOR ... IN` must be
-followed by the name of a View, not a collection. The `SEARCH` operation has to
-follow next, other operations before `SEARCH` such as `FILTER`, `COLLECT` etc.
-are not allowed in this position. Subsequent operations are possible after
-`SEARCH` and the expression however, including `SORT` to order the search
-results based on a ranking value computed by the View.
+Оператор `SEARCH`, в отличие от `FILTER`, рассматривается как часть операции `FOR`, а не как отдельный оператор. Оно не может быть свободно размещено в запросе или несколько раз в теле цикла `FOR`. `FOR ... IN` должно сопровождаться именем представления, а не коллекции. Далее должна следовать операция `SEARCH`, другие операции перед `SEARCH`, такие как `FILTER`, `COLLECT` и т.д. не допускаются в этой позиции. Последующие операции возможны после `SEARCH` и выражения, однако, включая `SORT` для упорядочивания результатов поиска на основе значения ранжирования, вычисленного представлением.
 
-_expression_ must be an ArangoSearch expression. The full power of ArangoSearch
-is harnessed and exposed via special [ArangoSearch functions](functions-arangosearch.html),
-during both the search and sort stages. On top of that, common AQL operators
-are supported.
+_выражение_ должно быть выражением ArangoSearch. Вся мощь ArangoSearch используется и раскрывается с помощью специальных [ArangoSearch functions](../functions/arangosearch.md), как на этапе поиска, так и на этапе сортировки. Кроме того, поддерживаются общие операторы AQL.
 
-Note that inline expressions and a few other things are not supported by
-`SEARCH`. The server will raise a query error in case of an invalid expression.
+Обратите внимание, что встроенные выражения и некоторые другие вещи не поддерживаются `SEARCH`. В случае некорректного выражения сервер выдаст ошибку запроса.
 
-The `OPTIONS` keyword and an object can optionally follow the search expression
-to set [Search Options](#search-options).
+Ключевое слово `OPTIONS` и объект могут опционально следовать за выражением поиска, чтобы задать Параметры поиска.
 
-### Logical operators
+### Логические операторы
 
-Logical or Boolean operators allow you to combine multiple search conditions.
+Логические или булевы операторы позволяют объединить несколько условий поиска.
 
-- `AND`, `&&` (conjunction)
-- `OR`, `||` (disjunction)
-- `NOT`, `!` (negation / inversion)
+- `AND`, `&&` (конъюнкция)
 
-[Operator precedence](operators.html#operator-precedence) needs to be taken
-into account and can be controlled with parentheses.
+<!-- 0003.part.md -->
 
-Consider the following contrived expression:
+- `OR`, `||` (дизъюнкция)
+- `NOT`, `!` (отрицание / инверсия)
 
-`doc.value < 0 OR doc.value > 5 AND doc.value IN [-10, 10]`
+Необходимо учитывать приоритет операторов [Operator precedence](../operators.md), который можно контролировать с помощью круглых скобок.
 
-`AND` has a higher precedence than `OR`. The expression is equivalent to:
+Рассмотрим следующее надуманное выражение:
 
-`doc.value < 0 OR (doc.value > 5 AND doc.value IN [-10, 10])`
+`doc.value < 0 OR doc.value > 5 AND doc.value IN [-10, 10]`.
 
-The conditions are thus:
+`AND` имеет более высокий приоритет, чем `OR`. Это выражение эквивалентно следующему:
 
-- values less than 0
-- values greater than 5, but only if it is 10
-  (or -10, but this can never be fulfilled)
+`doc.value < 0 ИЛИ (doc.value > 5 И doc.value IN [-10, 10])`.
 
-Parentheses can be used as follows to apply the `AND` condition to both of the
-`OR` conditions:
+Таким образом, условия таковы:
 
-`(doc.value < 0 OR doc.value > 5) AND doc.value IN [-10, 10]`
+- значения меньше 0
+- значения больше 5, но только если оно равно 10 (или -10, но это никогда не может быть выполнено).
 
-The conditions are now:
+Чтобы применить условие `AND` к обоим условиям `OR`, можно использовать круглые скобки следующим образом:
 
-- values less than 0, but only if it is -10
-- values greater than 5, but only if it is 10
+`(doc.value < 0 OR doc.value > 5) AND doc.value IN [-10, 10]`.
 
-### Comparison operators
+Теперь условия таковы:
 
-- `==` (equal)
-- `<=` (less than or equal)
-- `>=` (greater than or equal)
-- `<` (less than)
-- `>` (greater than)
-- `!=` (unequal)
-- `IN` (contained in array or range), also `NOT IN`
-- `LIKE` (equal with wildcards, introduced in v3.7.0), also `NOT LIKE`
+- значения меньше 0, но только если оно равно -10
+- значения больше 5, но только если оно равно 10.
 
-Also see the [`IN_RANGE()` function](functions-arangosearch.html#in_range) for
-an alternative to a combination of `<`, `<=`, `>`, `>=` operators for range
-searches.
+### Операторы сравнения
+
+- `==` (равно)
+- `<=` (меньше или равно)
+- `>=` (больше или равно)
+- `<` (меньше чем)
+- `>` (больше чем)
+- `!=` (неравно)
+- `IN` (содержится в массиве или диапазоне), также `NOT IN`.
+- `LIKE` (равно с подстановочными знаками, введено в v3.7.0), также `NOT LIKE`.
+
+Также смотрите функцию [`IN_RANGE()`](../functions/arangosearch.md) для альтернативы комбинации операторов `<`, `<=`, `>`, `>=` для поиска в диапазоне.
+
+<!-- 0004.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -114,19 +98,17 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-{% hint 'warning' %}
-The alphabetical order of characters is not taken into account by ArangoSearch,
-i.e. range queries in SEARCH operations against Views will not follow the
-language rules as per the defined Analyzer locale (except for the
-[`collation` Analyzer](../analyzers.html#collation)) nor the server language
-(startup option `--default-language`)!
-Also see [Known Issues](../release-notes-known-issues310.html#arangosearch).
-{% endhint %}
+<!-- 0005.part.md -->
 
-### Array comparison operators
+!!!warning ""
 
-[Array comparison operators](operators.html#array-comparison-operators) are
-supported:
+    Алфавитный порядок символов не учитывается ArangoSearch, т.е. запросы диапазона в операциях SEARCH над представлениями не будут следовать правилам языка согласно определенной локали анализатора (кроме анализатора [`collation`](../analyzers.html#collation)) или языку сервера (опция запуска `--default-language`)!
+
+### Операторы сравнения массивов
+
+Поддерживаются [Операторы сравнения массивов](../operators.md):
+
+<!-- 0006.part.md -->
 
 ```aql
 LET tokens = TOKENS("some input", "text_en")                 // ["some", "input"]
@@ -138,28 +120,25 @@ FOR doc IN myView SEARCH tokens  ANY <= doc.text RETURN doc // dynamic disjuncti
 FOR doc IN myView SEARCH tokens NONE <  doc.text RETURN doc // dynamic negation with comparison
 ```
 
-The following operators are equivalent in `SEARCH` expressions:
+<!-- 0007.part.md -->
 
-- `ALL IN`, `ALL ==`, `NONE !=`, `NONE NOT IN`
-- `ANY IN`, `ANY ==`
+В выражениях `ПОИСК` эквивалентны следующие операторы:
+
+- `ALL IN`, `ALL ==`, `NONE !=`, `NONE NOT IN`.
+- `ЛЮБОЙ В`, `ЛЮБОЙ ==`
 - `NONE IN`, `NONE ==`, `ALL !=`, `ALL NOT IN`
-- `ALL >`, `NONE <=`
-- `ALL >=`, `NONE <`
+- `ВСЕ >`, `НЕТ <=`
+- `ВСЕ >=`, `НЕТ <`
 - `ALL <`, `NONE >=`
-- `ALL <=`, `NONE >`
+- `ALL <=`, `NONE >`.
 
-The stored attribute referenced on the right side of the operator is like a
-single, primitive value. In case of multiple tokens, it is like having multiple
-such values as opposed to an array of values, even if the actual document
-attribute is an array. `IN` and `==` as part of array comparison operators are
-treated the same in `SEARCH` expressions for ease of use. The behavior is
-different outside of `SEARCH`, where `IN` needs to be followed by an array.
+Хранимый атрибут, на который ссылается правая часть оператора, подобен единственному, примитивному значению. В случае нескольких лексем это похоже на наличие нескольких таких значений, а не на массив значений, даже если фактический атрибут документа является массивом. `IN` и `==` как часть операторов сравнения массивов, для простоты использования, рассматриваются одинаково в выражениях `SEARCH`. Вне `SEARCH`, где за `IN` должен следовать массив, поведение отличается.
 
-### Question mark operator
+### Оператор вопросительного знака
 
-You can use the [Question mark operator](advanced-array-operators.html#question-mark-operator)
-to perform [Nested searches with ArangoSearch](../arangosearch-nested-search.html)
-(Enterprise Edition only):
+Вы можете использовать [Оператор вопросительного знака](../advanced/array-operators.md) для выполнения [Вложенного поиска с помощью ArangoSearch](../arangosearch-nested-search.html) (только в версии Enterprise Edition):
+
+<!-- 0008.part.md -->
 
 ```aql
 FOR doc IN myView
@@ -167,27 +146,28 @@ FOR doc IN myView
   RETURN doc
 ```
 
-It allows you to match nested objects in arrays that satisfy multiple conditions
-each, and optionally define how often these conditions should be fulfilled for
-the entire array. You need to configure the View specifically for this type of
-search using the `nested` property in [`arangosearch` Views](../arangosearch-views.html#link-properties)
-or in the definition of [Inverted Indexes](../indexing-inverted.html#nested-search-enterprise-edition)
-that you can add to [`search-alias` Views](../arangosearch-views-search-alias.html).
+<!-- 0009.part.md -->
 
-## Handling of non-indexed fields
+Он позволяет сопоставлять вложенные объекты в массивах, которые удовлетворяют нескольким условиям каждый, и, по желанию, определять, как часто эти условия должны выполняться для всего массива. Вам необходимо настроить представление специально для этого типа поиска с помощью свойства `nested` в [`arangosearch` Views](../arangosearch-views.html#link-properties) или в определении [Inverted Indexes](../indexing-inverted.html#nested-search-enterprise-edition), которое вы можете добавить в [`search-alias` Views](../arangosearch-views-search-alias.html).
 
-Document attributes which are not configured to be indexed by a View are
-treated by `SEARCH` as non-existent. This affects tests against the documents
-emitted from the View only.
+## Обработка неиндексированных полей
 
-For example, given a collection `myCol` with the following documents:
+Атрибуты документа, которые не настроены на индексацию в представлении, рассматриваются `SEARCH` как несуществующие. Это влияет только на тесты для документов, выдаваемых представлением.
+
+Например, если дана коллекция `myCol` со следующими документами:
+
+<!-- 0010.part.md -->
 
 ```js
 { "someAttr": "One", "anotherAttr": "One" }
 { "someAttr": "Two", "anotherAttr": "Two" }
 ```
 
-… with an `arangosearch` View where `someAttr` is indexed by the following View `myView`:
+<!-- 0011.part.md -->
+
+... с видом `arangosearch`, где `someAttr` индексируется следующим видом `myView`:
+
+<!-- 0012.part.md -->
 
 ```js
 {
@@ -202,7 +182,11 @@ For example, given a collection `myCol` with the following documents:
 }
 ```
 
-… a search on `someAttr` yields the following result:
+<!-- 0013.part.md -->
+
+... поиск по `someAttr` дает следующий результат:
+
+<!-- 0014.part.md -->
 
 ```aql
 FOR doc IN myView
@@ -210,12 +194,19 @@ FOR doc IN myView
   RETURN doc
 ```
 
+<!-- 0015.part.md -->
+
+<!-- 0016.part.md -->
+
 ```json
 [{ "someAttr": "One", "anotherAttr": "One" }]
 ```
 
-A search on `anotherAttr` yields an empty result because only `someAttr`
-is indexed by the View:
+<!-- 0017.part.md -->
+
+Поиск по `anotherAttr` дает пустой результат, потому что только `someAttr` проиндексирован в представлении:
+
+<!-- 0018.part.md -->
 
 ```aql
 FOR doc IN myView
@@ -223,19 +214,23 @@ FOR doc IN myView
   RETURN doc
 ```
 
+<!-- 0019.part.md -->
+
+<!-- 0020.part.md -->
+
 ```json
 []
 ```
 
-You can use the special `includeAllFields`
-[`arangosearch` View property](../arangosearch-views.html#link-properties)
-to index all (sub-)attributes of the source documents if desired.
+<!-- 0021.part.md -->
 
-## SEARCH with SORT
+При желании можно использовать специальное свойство `includeAllFields` [`arangosearch` View property](../arangosearch-views.html#link-properties) для индексации всех (суб-)атрибутов исходных документов.
 
-The documents emitted from a View can be sorted by attribute values with the
-standard [SORT() operation](operations-sort.html), using one or multiple
-attributes, in ascending or descending order (or a mix thereof).
+## ПОИСК с сортировкой
+
+Документы, выдаваемые представлением, могут быть отсортированы по значениям атрибутов с помощью стандартной операции [SORT()](sort.md), используя один или несколько атрибутов, в порядке возрастания или убывания (или их сочетание).
+
+<!-- 0022.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -243,22 +238,15 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-If the (left-most) fields and their sorting directions match up with the
-[primary sort order](../arangosearch-performance.html#primary-sort-order) definition
-of the View then the `SORT` operation is optimized away.
+<!-- 0023.part.md -->
 
-Apart from simple sorting, it is possible to sort the matched View documents by
-relevance score (or a combination of score and attribute values if desired).
-The document search via the `SEARCH` keyword and the sorting via the
-[ArangoSearch Scoring Functions](functions-arangosearch.html#scoring-functions),
-namely `BM25()` and `TFIDF()`, are closely intertwined.
-The query given in the `SEARCH` expression is not only used to filter documents,
-but also is used with the scoring functions to decide which document matches
-the query best. Other documents in the View also affect this decision.
+Если (крайние левые) поля и направления их сортировки совпадают с определением [primary sort order](../arangosearch-performance.html#primary-sort-order) представления, то операция `SORT` оптимизируется.
 
-Therefore the ArangoSearch scoring functions can work _only_ on documents
-emitted from a View, as both the corresponding `SEARCH` expression and the View
-itself are consulted in order to sort the results.
+Помимо простой сортировки, можно отсортировать сопоставленные документы Представления по баллу релевантности (или комбинации баллов и значений атрибутов, если это необходимо). Поиск документов с помощью ключевого слова `SEARCH` и сортировка с помощью [ArangoSearch Scoring Functions](../functions/arangosearch.md), а именно `BM25()` и `TFIDF()`, тесно взаимосвязаны. Запрос, заданный в выражении `SEARCH`, используется не только для фильтрации документов, но и с помощью скоринговых функций решает, какой документ лучше всего соответствует запросу. Другие документы в представлении также влияют на это решение.
+
+Поэтому скоринговые функции ArangoSearch могут работать _только_ с документами, выданными из представления, поскольку для сортировки результатов обращаются как к соответствующему выражению `SEARCH`, так и к самому представлению.
+
+<!-- 0024.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -267,42 +255,29 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-The [BOOST() function](functions-arangosearch.html#boost) can be used to
-fine-tune the resulting ranking by weighing sub-expressions in `SEARCH`
-differently.
+<!-- 0025.part.md -->
 
-If there is no `SEARCH` operation prior to calls to scoring functions or if
-the search expression does not filter out documents (e.g. `SEARCH true`) then
-a score of `0` will be returned for all documents.
+Функция [BOOST()](../functions/arangosearch.md) может быть использована для точной настройки результирующего ранжирования путем разного взвешивания подвыражений в `SEARCH`.
 
-## Search Options
+Если перед обращением к скоринговым функциям операция `SEARCH` не выполняется или если поисковое выражение не отфильтровывает документы (например, `SEARCH true`), то для всех документов будет возвращена оценка `0`.
 
-The `SEARCH` operation accepts an options object with the following attributes:
+## Параметры поиска
 
-- `collections` (array, _optional_): array of strings with collection names to
-  restrict the search to certain source collections
-- `conditionOptimization` (string, _optional_): controls how search criteria
-  get optimized. Possible values:
-  - `"auto"` (default): convert conditions to disjunctive normal form (DNF) and
-    apply optimizations. Removes redundant or overlapping conditions, but can
-    take quite some time even for a low number of nested conditions.
-  - `"none"`: search the index without optimizing the conditions.
-  <!-- Internal only: nodnf, noneg -->
-- `countApproximate` (string, _optional_): controls how the total count of rows
-  is calculated if the `fullCount` option is enabled for a query or when
-  a `COLLECT WITH COUNT` clause is executed (introduced in v3.7.6)
-  - `"exact"` (default): rows are actually enumerated for a precise count.
-  - `"cost"`: a cost-based approximation is used. Does not enumerate rows and
-    returns an approximate result with O(1) complexity. Gives a precise result
-    if the `SEARCH` condition is empty or if it contains a single term query
-    only (e.g. `SEARCH doc.field == "value"`), the usual eventual consistency
-    of Views aside.
+Операция `SEARCH` принимает объект options со следующими атрибутами:
 
-**Examples**
+- `collections` (массив, _опционально_): массив строк с именами коллекций для ограничения поиска определенными коллекциями источников.
+- `conditionOptimization` (string, _optional_): управляет тем, как оптимизируются критерии поиска. Возможные значения:
+  - `"auto"` (по умолчанию): преобразовывать условия в дизъюнктивную нормальную форму (ДНФ) и применять оптимизацию. Удаляет избыточные или пересекающиеся условия, но может занять довольно много времени даже при небольшом количестве вложенных условий.
+  - `"none"`: поиск в индексе без оптимизации условий.
+- `countApproximate` (строка, _опционально_): определяет, как подсчитывается общее количество строк, если для запроса включена опция `fullCount` или выполняется условие `COLLECT WITH COUNT` (введено в v3.7.6).
+  - `"exact"` (по умолчанию): строки фактически перечисляются для точного подсчета.
+  - `"cost"`: используется аппроксимация на основе затрат. Не перечисляет строки и возвращает приблизительный результат со сложностью O(1). Дает точный результат, если условие `SEARCH` пустое или содержит только однословный запрос (например, `SEARCH doc.field == "value"`), при этом обычная конечная согласованность Views отпадает.
 
-Given a View with three linked collections `coll1`, `coll2` and `coll3` it is
-possible to return documents from the first two collections only and ignore the
-third using the `collections` option:
+**Примеры**
+
+При наличии представления с тремя связанными коллекциями `coll1`, `coll2` и `coll3` можно вернуть документы только из первых двух коллекций и игнорировать третью, используя опцию `collections`:
+
+<!-- 0026.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -310,5 +285,8 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-The search expression `true` matches all View documents. You can use any valid
-expression here while limiting the scope to the chosen source collections.
+<!-- 0027.part.md -->
+
+Поисковое выражение `true` соответствует всем документам View. Вы можете использовать здесь любое допустимое выражение, ограничивая область поиска выбранными коллекциями источников.
+
+<!-- 0028.part.md -->

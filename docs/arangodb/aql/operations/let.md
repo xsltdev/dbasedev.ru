@@ -1,19 +1,20 @@
 # LET
 
-The `LET` statement can be used to assign an arbitrary value to a variable.
-The variable is then introduced in the scope the `LET` statement is placed in.
+Оператор `LET` может быть использован для присвоения произвольного значения переменной. Затем переменная вводится в область видимости, в которой находится оператор `LET`.
 
-## Syntax
+## Синтаксис
 
 <pre><code>LET <em>variableName</em> = <em>expression</em></code></pre>
 
-_expression_ can be a simple expression or a subquery.
+_expression_ может быть простым выражением или подзапросом.
 
-For allowed variable names [AQL Syntax](fundamentals-syntax.html#names).
+Для разрешенных имен переменных [Синтаксис AQL](../fundamentals/syntax.md).
 
-## Usage
+## Использование
 
-Variables are immutable in AQL, which means they can not be re-assigned:
+Переменные в AQL неизменяемы, что означает, что они не могут быть переназначены:
+
+<!-- 0001.part.md -->
 
 ```aql
 LET a = [1, 2, 3]  // initial assignment
@@ -23,8 +24,11 @@ LET a = PUSH(a, 4) // parsing error, variable 'a' is assigned multiple times
 LET b = PUSH(a, 4) // allowed, result: [1, 2, 3, 4]
 ```
 
-`LET` statements are mostly used to declare complex computations and to avoid
-repeated computations of the same value at multiple parts of a query.
+<!-- 0002.part.md -->
+
+Операторы `LET` в основном используются для объявления сложных вычислений и для того, чтобы избежать повторных вычислений одного и того же значения в нескольких частях запроса.
+
+<!-- 0003.part.md -->
 
 ```aql
 FOR u IN users
@@ -36,12 +40,13 @@ FOR u IN users
   }
 ```
 
-In the above example, the computation of the number of recommendations is
-factored out using a `LET` statement, thus avoiding computing the value twice in
-the `RETURN` statement.
+<!-- 0004.part.md -->
 
-Another use case for `LET` is to declare a complex computation in a subquery,
-making the whole query more readable.
+В приведенном выше примере вычисление количества рекомендаций разложено на части с помощью оператора `LET`, что позволяет избежать двойного вычисления значения в операторе `RETURN`.
+
+Еще один случай использования `LET` - объявление сложного вычисления в подзапросе, что делает весь запрос более читабельным.
+
+<!-- 0005.part.md -->
 
 ```aql
 FOR u IN users
@@ -62,3 +67,7 @@ FOR u IN users
     "memberShips" : memberships
   }
 ```
+
+<!-- 0006.part.md -->
+
+<!-- 0007.part.md -->

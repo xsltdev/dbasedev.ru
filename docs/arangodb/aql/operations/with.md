@@ -1,63 +1,46 @@
 # WITH
 
-An AQL query can start with a `WITH` keyword followed by a list of collections
-that the query implicitly reads from.
+Запрос AQL может начинаться с ключевого слова `WITH`, за которым следует список коллекций, из которых неявно читается запрос.
 
-Implicit means that the collections are not specified explicitly in language
-constructs like
+Неявный означает, что коллекции не указаны явно в таких конструкциях языка, как
 
-- `FOR ... IN collection`
-- `INSERT ... INTO collection`
-- `UPDATE ... IN collection`
-- `GRAPH "graph-name"` (via the graph definition)
+-   `FOR ... IN collection`
+-   `INSERT ... INTO collection`
+-   `UPDATE ... в коллекции`
+-   `GRAPH "graph-name"` (через определение графа)
 
-etc. but are only known at runtime of the query. Such dynamic collection access
-is invisible to the AQL query parser at query compile time. Dynamic access is
-possible via the `DOCUMENT()` function as well as with graph traversals (in
-particular the variant using collection sets), because edges may point to
-arbitrary vertex collections.
+и т.д., но известны только во время выполнения запроса. Такой динамический доступ к коллекции невидим для парсера запросов AQL во время компиляции запроса. Динамический доступ возможен через функцию `DOCUMENT()`, а также при обходе графа (в частности, в варианте с использованием наборов коллекций), поскольку ребра могут указывать на произвольные коллекции вершин.
 
-Collections that are explicitly used in a query are automatically detected by
-the AQL query parser. Any additional collections that will be involved in the
-query but cannot be detected automatically by the query parser can be manually
-specified using a `WITH` statement.
+Коллекции, которые явно используются в запросе, автоматически определяются парсером запросов AQL. Любые дополнительные коллекции, которые будут задействованы в запросе, но не могут быть определены автоматически парсером запроса, могут быть указаны вручную с помощью оператора `WITH`.
 
-## Syntax
+## Синтаксис
 
 <pre><code>WITH <em>collection1</em> [, <em>collection2</em> [, ... <em>collectionN</em> ] ]</code></pre>
 
-`WITH` is also a keyword that is used in other contexts, for example in `UPDATE`
-statements. It must be placed at the very start of the query to declare
-additional collections.
+`WITH` также является ключевым словом, которое используется в других контекстах, например, в операторах `UPDATE`. Оно должно быть помещено в самое начало запроса, чтобы объявить дополнительные коллекции.
 
-## Usage
+## Использование
 
-With RocksDB as storage engine, the `WITH` operation is only required if you
-use a cluster deployment and only for AQL queries that dynamically read from
-vertex collections as part of graph traversals.
+При использовании RocksDB в качестве механизма хранения операция `WITH` требуется только в случае кластерного развертывания и только для запросов AQL, которые динамически читают из коллекций вершин как часть обхода графа.
 
-You can enable the `--query.require-with` startup option to make single server
-instances require `WITH` declarations like cluster deployments to ease development,
-see [Requiring `WITH` statements](../programs-arangod-options.html#--queryrequire-with).
+Вы можете включить опцию запуска `--query.require-with`, чтобы заставить одиночные экземпляры сервера требовать декларации `WITH`, как кластерные развертывания, для облегчения разработки.
 
-Dynamic access via the `DOCUMENT()` function does not require you to list the
-involved collections. Using named graphs in traversals (`GRAPH "graph-name"`)
-does not require it either, assuming that all vertices are in collections that
-are part of the graph, as enforced by the [Graph API](../http/gharial.html).
-That means, it is only necessary for traversals using anonymous graphs /
-[collection sets](graphs-traversals.html#working-with-collection-sets).
+Динамический доступ через функцию `DOCUMENT()` не требует перечисления задействованных коллекций. Использование именованных графов в обходах (`GRAPH "graph-name"`) также не требует этого, предполагая, что все вершины находятся в коллекциях, которые являются частью графа, как это предусмотрено [Graph API](../http/gharial.html). Это означает, что он необходим только для обходов, использующих анонимные графы / [наборы коллекций](../graphs/traversals.md).
 
-The following example query specifies an edge collection `usersHaveManagers`
-to perform a graph traversal. It is the only explicitly specified collection in
-the query. It does not need to be declared using the `WITH` operation.
+<!-- 0001.part.md -->
 
-However, the involved vertex collections need to be declared. In this example,
-the edges of the edge collection reference vertices of a collection called
-`managers`. This collection is declared at the beginning of the query using the
-`WITH` operation:
+Следующий пример запроса указывает коллекцию ребер `usersHaveManagers` для выполнения обхода графа. Это единственная явно указанная коллекция в запросе. Ее не нужно объявлять с помощью операции `WITH`.
+
+Однако коллекции вершин необходимо объявить. В этом примере ребра коллекции edge ссылаются на вершины коллекции `managers`. Эта коллекция объявляется в начале запроса с помощью операции `WITH`:
+
+<!-- 0002.part.md -->
 
 ```aql
 WITH managers
 FOR v, e, p IN 1..2 OUTBOUND 'users/1' usersHaveManagers
   RETURN { v, e, p }
 ```
+
+<!-- 0003.part.md -->
+
+<!-- 0004.part.md -->

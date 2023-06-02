@@ -1,79 +1,63 @@
 # Функции ArangoSearch
 
-You can form search expressions by composing ArangoSearch function calls,
-logical operators and comparison operators. This allows you to filter Views
-as well as to utilize inverted indexes to filter collections.
+Вы можете формировать поисковые выражения, комбинируя вызовы функций ArangoSearch, логические операторы и операторы сравнения. Это позволяет фильтровать представления, а также использовать инвертированные индексы для фильтрации коллекций.
 
-The AQL [`SEARCH` operation](operations-search.html) accepts search expressions,
-such as `PHRASE(doc.text, "foo bar", "text_en")`, for querying Views. You can
-combine ArangoSearch filter and context functions as well as operators like
-`AND` and `OR` to form complex search conditions. Similarly, the
-[`FILTER` operation](operations-filter.html) accepts such search expressions
-when using [inverted indexes](../indexing-inverted.html).
+Операция AQL [`SEARCH`](../operations/search.md) принимает поисковые выражения, такие как `PHRASE(doc.text, "foo bar", "text_en")`, для запроса представлений. Вы можете комбинировать функции фильтра и контекста ArangoSearch, а также операторы `AND` и `OR` для формирования сложных условий поиска. Аналогично, операция [`FILTER`](../operations/filter.md) принимает такие поисковые выражения при использовании [инвертированных индексов](../indexing-inverted.html).
 
-Scoring functions allow you to rank matches and to sort results by relevance.
-They are limited to Views.
+Функции подсчета баллов позволяют ранжировать совпадения и сортировать результаты по релевантности. Они ограничены функцией Views.
 
-Search highlighting functions let you retrieve the string positions of matches.
-They are limited to Views.
+Функции подсветки поиска позволяют получить позиции строк совпадений. Они ограничены представлениями.
 
-You can use most functions also without an inverted index or a View and the
-`SEARCH` keyword, but then they are not accelerated by an index.
+Большинство функций можно использовать и без инвертированного индекса или без представления и ключевого слова `SEARCH`, но тогда они не ускоряются индексом.
 
-See [Information Retrieval with ArangoSearch](../arangosearch.html) for an
-introduction.
-
-## Context Functions
+## Контекстные функции
 
 ### ANALYZER()
 
 `ANALYZER(expr, analyzer) → retVal`
 
-Sets the Analyzer for the given search expression.
+Устанавливает анализатор для заданного поискового выражения.
 
-{% hint 'info' %}
-The `ANALYZER()` function is only applicable for queries against `arangosearch` Views.
+!!!info ""
 
-In queries against `search-alias` Views and inverted indexes, you don't need to
-specify Analyzers because every field can be indexed with a single Analyzer only
-and they are inferred from the index definition.
-{% endhint %}
+    Функция `ANALYZER()` применима только для запросов к представлениям `arangosearch`.
 
-The default Analyzer is `identity` for any search expression that is used for
-filtering `arangosearch` Views. This utility function can be used
-to wrap a complex expression to set a particular Analyzer. It also sets it for
-all the nested functions which require such an argument to avoid repeating the
-Analyzer parameter. If an Analyzer argument is passed to a nested function
-regardless, then it takes precedence over the Analyzer set via `ANALYZER()`.
 
-The `TOKENS()` function is an exception. It requires the Analyzer name to be
-passed in in all cases even if wrapped in an `ANALYZER()` call, because it is
-not an ArangoSearch function but a regular string function which can be used
-outside of `SEARCH` operations.
+    В запросах к представлениям `search-alias` и инвертированным индексам не нужно указывать анализаторы, так как каждое поле может быть проиндексировано только одним анализатором, и они выводятся из определения индекса.
 
-- **expr** (expression): any valid search expression
-- **analyzer** (string): name of an [Analyzer](../analyzers.html).
-- returns **retVal** (any): the expression result that it wraps
+Анализатором по умолчанию является `identity` для любого поискового выражения, которое используется для фильтрации представлений `arangosearch`. Эта служебная функция может быть использована для обертывания сложного выражения для установки определенного анализатора. Она также устанавливает его для всех вложенных функций, которым требуется такой аргумент, чтобы избежать повторения параметра Analyzer. Если аргумент Analyzer передается во вложенную функцию независимо, то он имеет приоритет над Analyzer, установленным через `ANALYZER()`.
 
-#### Example: Using a custom Analyzer
+<!-- 0001.part.md -->
 
-Assuming a View definition with an Analyzer whose name and type is `delimiter`:
+Функция `TOKENS()` является исключением. Она требует передачи имени анализатора во всех случаях, даже если обернута в вызов `ANALYZER()`, поскольку это не функция ArangoSearch, а функция регулярной строки, которая может использоваться вне операций `SEARCH`.
+
+-   **expr** (выражение): любое допустимое поисковое выражение
+-   **analyzer** (строка): имя [Analyzer](../analyzers.html).
+-   возвращает **retVal** (любой): результат выражения, который он обертывает.
+
+#### Пример: Использование пользовательского анализатора
+
+Предположим определение представления с анализатором, имя и тип которого `delimiter`:
+
+<!-- 0002.part.md -->
 
 ```json
 {
-  "links": {
-    "coll": {
-      "analyzers": [ "delimiter" ],
-      "includeAllFields": true,
+    "links": {
+        "coll": {
+            "analyzers": ["delimiter"],
+            "includeAllFields": true
+        }
     }
-  },
-  ...
+    // ...
 }
 ```
 
-… with the Analyzer properties `{ "delimiter": "|" }` and an example document
-`{ "text": "foo|bar|baz" }` in the collection `coll`, the following query would
-return the document:
+<!-- 0003.part.md -->
+
+... со свойствами анализатора `{"delimiter": "|" }` и примером документа `{ "text": "foo|bar|baz" }` в коллекции `coll`, следующий запрос вернет документ:
+
+<!-- 0004.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -81,12 +65,11 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-The expression `doc.text == "bar"` has to be wrapped by `ANALYZER()` in order
-to set the Analyzer to `delimiter`. Otherwise the expression would be evaluated
-with the default `identity` Analyzer. `"foo|bar|baz" == "bar"` would not match,
-but the View does not even process the indexed fields with the `identity`
-Analyzer. The following query would also return an empty result because of
-the Analyzer mismatch:
+<!-- 0005.part.md -->
+
+Выражение `doc.text == "bar"` должно быть обернуто `ANALYZER()`, чтобы установить анализатор на `delimiter`. В противном случае выражение будет оценено с помощью анализатора по умолчанию `identity`. `"foo|bar|baz" == "bar"` не будет соответствовать, но View даже не обрабатывает индексированные поля с помощью анализатора `identity`. Следующий запрос также вернет пустой результат из-за несоответствия анализатора:
+
+<!-- 0006.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -95,10 +78,13 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-#### Example: Setting the Analyzer context with and without `ANALYZER()`
+<!-- 0007.part.md -->
 
-In below query, the search expression is swapped by `ANALYZER()` to set the
-`text_en` Analyzer for both `PHRASE()` functions:
+#### Пример: Установка контекста анализатора с `ANALYZER()` и без него
+
+В приведенном ниже запросе поисковое выражение подменяется `ANALYZER()` для установки анализатора `text_en` для обеих функций `PHRASE()`:
+
+<!-- 0008.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -106,7 +92,11 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-Without the usage of `ANALYZER()`:
+<!-- 0009.part.md -->
+
+Без использования `ANALYZER()`:
+
+<!-- 0010.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -114,12 +104,13 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-#### Example: Analyzer precedence and specifics of the `TOKENS()` function
+<!-- 0011.part.md -->
 
-In the following example `ANALYZER()` is used to set the Analyzer `text_en`,
-but in the second call to `PHRASE()` a different Analyzer is set (`identity`)
-which overrules `ANALYZER()`. Therefore, the `text_en` Analyzer is used to find
-the phrase _foo_ and the `identity` Analyzer to find _bar_:
+#### Пример: Приоритет анализатора и особенности функции `TOKENS()`
+
+В следующем примере `ANALYZER()` используется для установки анализатора `text_en`, но при втором вызове `PHRASE()` устанавливается другой анализатор (`identity`), который отменяет `ANALYZER()`. Поэтому для поиска фразы _foo_ используется анализатор `text_en`, а для поиска _bar_ - анализатор `identity`:
+
+<!-- 0012.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -127,12 +118,11 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-Despite the wrapping `ANALYZER()` function, the Analyzer name can not be
-omitted in calls to the `TOKENS()` function. Both occurrences of `text_en`
-are required, to set the Analyzer for the expression `doc.text IN ...` and
-for the `TOKENS()` function itself. This is because the `TOKENS()` function
-is a regular string function that does not take the Analyzer context into
-account:
+<!-- 0013.part.md -->
+
+Несмотря на обертывающую функцию `ANALYZER()`, имя анализатора не может быть опущено в вызовах функции `TOKENS()`. Оба вхождения `text_en` необходимы, чтобы установить анализатор для выражения `doc.text IN ...` и для самой функции `TOKENS()`. Это связано с тем, что функция `TOKENS()` является функцией регулярной строки, которая не учитывает контекст анализатора:
+
+<!-- 0014.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -140,19 +130,21 @@ FOR doc IN viewName
   RETURN doc
 ```
 
+<!-- 0015.part.md -->
+
 ### BOOST()
 
 `BOOST(expr, boost) → retVal`
 
-Override boost in the context of a search expression with a specified value,
-making it available for scorer functions. By default, the context has a boost
-value equal to `1.0`.
+Переопределяет boost в контексте поискового выражения с заданным значением, делая его доступным для функций scorer. По умолчанию контекст имеет значение boost, равное `1.0`.
 
-- **expr** (expression): any valid search expression
-- **boost** (number): numeric boost value
-- returns **retVal** (any): the expression result that it wraps
+-   **expr** (выражение): любое допустимое поисковое выражение.
+-   **boost** (число): числовое значение boost
+-   возвращает **retVal** (любой): результат выражения, который он обертывает.
 
-#### Example: Boosting a search sub-expression
+#### Пример: Усиление поискового подвыражения
+
+<!-- 0016.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -162,8 +154,11 @@ FOR doc IN viewName
   RETURN { text: doc.text, score }
 ```
 
-Assuming a View with the following documents indexed and processed by the
-`text_en` Analyzer:
+<!-- 0017.part.md -->
+
+Предположим, что имеется представление со следующими документами, проиндексированными и обработанными анализатором `text_en`:
+
+<!-- 0018.part.md -->
 
 ```js
 { "text": "foo bar" }
@@ -173,50 +168,55 @@ Assuming a View with the following documents indexed and processed by the
 { "text": "baz" }
 ```
 
-… the result of above query would be:
+<!-- 0019.part.md -->
+
+... результатом вышеприведенного запроса будет:
+
+<!-- 0020.part.md -->
 
 ```json
 [
-  {
-    "text": "foo bar",
-    "score": 2.787301540374756
-  },
-  {
-    "text": "foo baz",
-    "score": 1.6895781755447388
-  },
-  {
-    "text": "foo",
-    "score": 1.525835633277893
-  },
-  {
-    "text": "bar",
-    "score": 0.9913395643234253
-  }
+    {
+        "text": "foo bar",
+        "score": 2.787301540374756
+    },
+    {
+        "text": "foo baz",
+        "score": 1.6895781755447388
+    },
+    {
+        "text": "foo",
+        "score": 1.525835633277893
+    },
+    {
+        "text": "bar",
+        "score": 0.9913395643234253
+    }
 ]
 ```
 
-## Filter Functions
+<!-- 0021.part.md -->
+
+## Функции фильтрации
 
 ### EXISTS()
 
-{% hint 'info' %}
-If you use `arangosearch` Views, the `EXISTS()` function only matches values if
-you set the **storeValues** link property to `"id"` in the View definition
-(the default is `"none"`).
-{% endhint %}
+!!!info ""
 
-#### Testing for attribute presence
+    Если вы используете представления `arangosearch`, функция `EXISTS()` будет находить значения, только если вы установили свойство ссылки **storeValues** на `"id"` в определении представления (по умолчанию `"none"`).
+
+#### Проверка наличия атрибута
 
 `EXISTS(path)`
 
-Match documents where the attribute at `path` is present.
+Искать документы, в которых присутствует атрибут `path`.
 
-- **path** (attribute path expression): the attribute to test in the document
-- returns nothing: the function evaluates to a boolean, but this value cannot be
-  returned. The function can only be called in a search expression. It throws
-  an error if used outside of a [`SEARCH` operation](operations-search.html) or
-  a `FILTER` operation that uses an inverted index.
+-   **path** (выражение пути атрибута): атрибут для проверки в документе.
+-   ничего не возвращает: функция оценивает булево значение, но это значение не может быть возвращено. Функция может быть вызвана только в выражении поиска. При ее использовании вне операции [`SEARCH`](../operations/search.md) или операции `FILTER`, использующей инвертированный индекс, выдается ошибка.
+
+<!-- конец списка -->
+
+<!-- 0022.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -224,25 +224,27 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-#### Testing for attribute type
+<!-- 0023.part.md -->
+
+#### Тестирование на тип атрибута
 
 `EXISTS(path, type)`
 
-Match documents where the attribute at `path` is present _and_ is of the
-specified data type.
+Искать документы, в которых атрибут по адресу `path` присутствует _и_ имеет указанный тип данных.
 
-- **path** (attribute path expression): the attribute to test in the document
-- **type** (string): data type to test for, can be one of:
-  - `"null"`
-  - `"bool"` / `"boolean"`
-  - `"numeric"`
-  - `"type"` (matches `null`, `boolean`, and `numeric` values)
-  - `"string"`
-  - `"analyzer"` (see below)
-- returns nothing: the function evaluates to a boolean, but this value cannot be
-  returned. The function can only be called in a search expression. It throws
-  an error if used outside of a [`SEARCH` operation](operations-search.html) or
-  a `FILTER` operation that uses an inverted index.
+-   **path** (выражение пути атрибута): проверяемый атрибут в документе
+-   **type** (строка): тип данных для проверки, может быть одним из:
+    -   `null`
+    -   `"bool"` / `"boolean"`
+    -   `числовой`
+    -   `тип` (соответствует значениям `null`, `boolean` и `numeric`)
+    -   `строка`
+    -   `анализатор` (см. ниже)
+-   ничего не возвращает: функция оценивает булево значение, но это значение не может быть возвращено. Функция может быть вызвана только в поисковом выражении. Она выдает ошибку, если используется вне операции [`SEARCH`](../operations/search.md) или операции `FILTER`, использующей инвертированный индекс.
+
+<!-- конец списка -->
+
+<!-- 0024.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -250,22 +252,22 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-#### Testing for Analyzer index status
+<!-- 0025.part.md -->
+
+#### Тестирование на состояние индекса анализатора
 
 `EXISTS(path, "analyzer", analyzer)`
 
-Match documents where the attribute at `path` is present _and_ was indexed
-by the specified `analyzer`.
+Искать документы, в которых атрибут по адресу `path` присутствует _и_ был проиндексирован указанным `анализатором`.
 
-- **path** (attribute path expression): the attribute to test in the document
-- **type** (string): string literal `"analyzer"`
-- **analyzer** (string, _optional_): name of an [Analyzer](../analyzers.html).
-  Uses the Analyzer of a wrapping `ANALYZER()` call if not specified or
-  defaults to `"identity"`
-- returns nothing: the function evaluates to a boolean, but this value cannot be
-  returned. The function can only be called in a search expression. It throws
-  an error if used outside of a [`SEARCH` operation](operations-search.html) or
-  a `FILTER` operation that uses an inverted index.
+-   **path** (выражение пути атрибута): проверяемый атрибут в документе
+-   **type** (string): строковый литерал `анализатор`.
+-   **analyzer** (string, _опционально_): имя [анализатора](../analyzers.html). Использует анализатор обертывающего вызова `ANALYZER()`, если не указан, или по умолчанию используется `"identity"`.
+-   ничего не возвращает: функция оценивает булево значение, но это значение не может быть возвращено. Функция может быть вызвана только в поисковом выражении. При ее использовании вне операции [`SEARCH`](../operations/search.md) или операции `FILTER`, использующей инвертированный индекс, выдает ошибку.
+
+<!-- конец списка -->
+
+<!-- 0026.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -273,25 +275,23 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-#### Testing for nested fields
+<!-- 0027.part.md -->
+
+#### Тестирование на вложенные поля
 
 `EXISTS(path, "nested")`
 
-Match documents where the attribute at `path` is present _and_ is indexed
-as a nested field for [nested search with Views](../arangosearch-nested-search.html)
-or [inverted indexes](../indexing-inverted.html#nested-search-enterprise-edition).
+Искать документы, в которых атрибут по адресу `path` присутствует _и_ индексируется как вложенное поле для [вложенного поиска с представлениями](../arangosearch-nested-search.html) или [инвертированных индексов](../indexing-inverted.html#nested-search-enterprise-edition).
 
-- **path** (attribute path expression): the attribute to test in the document
-- **type** (string): string literal `"nested"`
-- returns nothing: the function evaluates to a boolean, but this value cannot be
-  returned. The function can only be called in a search expression. It throws
-  an error if used outside of a [`SEARCH` operation](operations-search.html) or
-  a `FILTER` operation that uses an inverted index.
+-   **path** (выражение пути атрибута): атрибут для проверки в документе.
+-   **type** (строка): строковый литерал `"nested"`.
+-   ничего не возвращает: функция оценивает булево значение, но это значение не может быть возвращено. Функция может быть вызвана только в поисковом выражении. При ее использовании вне операции [`SEARCH`](../operations/search.md) или операции `FILTER`, использующей инвертированный индекс, выдает ошибку.
 
-**Examples**
+**Примеры**.
 
-Only return documents from the View `viewName` whose `text` attribute is indexed
-as a nested field:
+Возвращает только документы из вида `viewName`, чей атрибут `text` проиндексирован как вложенное поле:
+
+<!-- 0028.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -299,8 +299,11 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-Only return documents whose `attr` attribute and its nested `text` attribute are
-indexed as nested fields:
+<!-- 0029.part.md -->
+
+Возвращает только те документы, атрибут `attr` и его вложенный атрибут `text` проиндексированы как вложенные поля:
+
+<!-- 0030.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -308,8 +311,11 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-Only return documents from the collection `coll` whose `text` attribute is indexed
-as a nested field by an inverted index:
+<!-- 0031.part.md -->
+
+Возвращает только документы из коллекции `coll`, чей атрибут `text` проиндексирован как вложенное поле инвертированным индексом:
+
+<!-- 0032.part.md -->
 
 ```aql
 FOR doc IN coll OPTIONS { indexHint: "inv-idx", forceIndexHint: true }
@@ -317,8 +323,11 @@ FOR doc IN coll OPTIONS { indexHint: "inv-idx", forceIndexHint: true }
   RETURN doc
 ```
 
-Only return documents whose `attr` attribute and its nested `text` attribute are
-indexed as nested fields:
+<!-- 0033.part.md -->
+
+Возвращает только те документы, атрибут `attr` и его вложенный атрибут `text` проиндексированы как вложенные поля:
+
+<!-- 0034.part.md -->
 
 ```aql
 FOR doc IN coll OPTIONS { indexHint: "inv-idx", forceIndexHint: true }
@@ -326,54 +335,45 @@ FOR doc IN coll OPTIONS { indexHint: "inv-idx", forceIndexHint: true }
   RETURN doc
 ```
 
+<!-- 0035.part.md -->
+
 ### IN_RANGE()
 
 `IN_RANGE(path, low, high, includeLow, includeHigh) → included`
 
-Match documents where the attribute at `path` is greater than (or equal to)
-`low` and less than (or equal to) `high`.
+Искать документы, в которых атрибут по адресу `path` больше (или равен) `low` и меньше (или равен) `high`.
 
-You can use `IN_RANGE()` for searching more efficiently compared to an equivalent
-expression that combines two comparisons with a logical conjunction:
+Вы можете использовать `IN_RANGE()` для более эффективного поиска по сравнению с эквивалентным выражением, которое объединяет два сравнения с логической связью:
 
-- `IN_RANGE(path, low, high, true, true)` instead of `low <= value AND value <= high`
-- `IN_RANGE(path, low, high, true, false)` instead of `low <= value AND value < high`
-- `IN_RANGE(path, low, high, false, true)` instead of `low < value AND value <= high`
-- `IN_RANGE(path, low, high, false, false)` instead of `low < value AND value < high`
+-   `IN_RANGE(path, low, high, true, true)` вместо `low <= value AND value <= high`.
+-   `IN_RANGE(path, low, high, true, false)` вместо `low <= value AND value < high`
+-   `IN_RANGE(path, low, high, false, true)` вместо `low < value AND value <= high`
+-   `IN_RANGE(path, low, high, false, false)` вместо `low < value AND value < high`
 
-`low` and `high` can be numbers or strings (technically also `null`, `true`
-and `false`), but the data type must be the same for both.
+`low` и `high` могут быть числами или строками (технически также `null`, `true` и `false`), но тип данных должен быть одинаковым для обоих.
 
-{% hint 'warning' %}
-The alphabetical order of characters is not taken into account by ArangoSearch,
-i.e. range queries in SEARCH operations against Views will not follow the
-language rules as per the defined Analyzer locale (except for the
-[`collation` Analyzer](../analyzers.html#collation)) nor the server language
-(startup option `--default-language`)!
-Also see [Known Issues](../release-notes-known-issues310.html#arangosearch).
-{% endhint %}
+!!!warning ""
 
-There is a corresponding [`IN_RANGE()` Miscellaneous Function](functions-miscellaneous.html#in_range)
-that is used outside of `SEARCH` operations.
+    Алфавитный порядок символов не учитывается ArangoSearch, т.е. запросы диапазона в операциях SEARCH над представлениями не будут следовать правилам языка в соответствии с определенной локалью анализатора (кроме анализатора [`collation`](../analyzers.html#collation)) или языком сервера (опция запуска `--default-language`)! Также смотрите [Известные проблемы](../release-notes-known-issues310.html#arangosearch).
 
-- **path** (attribute path expression):
-  the path of the attribute to test in the document
-- **low** (number\|string): minimum value of the desired range
-- **high** (number\|string): maximum value of the desired range
-- **includeLow** (bool): whether the minimum value shall be included in
-  the range (left-closed interval) or not (left-open interval)
-- **includeHigh** (bool): whether the maximum value shall be included in
-  the range (right-closed interval) or not (right-open interval)
-- returns **included** (bool): whether `value` is in the range
+Существует соответствующая функция [`IN_RANGE()` Miscellaneous Function](miscellaneous.md), которая используется вне операций `SEARCH`.
 
-If `low` and `high` are the same, but `includeLow` and/or `includeHigh` is set
-to `false`, then nothing will match. If `low` is greater than `high` nothing will
-match either.
+-   **path** (выражение пути атрибута): путь атрибута, который нужно проверить в документе.
+-   **low** (число|строка): минимальное значение желаемого диапазона
+-   **high** (число|строка): максимальное значение желаемого диапазона
+-   **includeLow** (bool): должно ли минимальное значение быть включено в диапазон (лево-закрытый интервал) или нет (лево-открытый интервал)
+-   **includeHigh** (bool): должно ли максимальное значение быть включено в диапазон (правый закрытый интервал) или нет (правый открытый интервал)
+-   возвращает **included** (bool): входит ли `значение` в диапазон
 
-#### Example: Using numeric ranges
+<!-- 0036.part.md -->
 
-To match documents with the attribute `value >= 3` and `value <= 5` using the
-default `"identity"` Analyzer you would write the following query:
+Если `low` и `high` одинаковы, но `includeLow` и/или `includeHigh` установлены в `false`, то ничего не будет соответствовать. Если `low` больше `high`, то также ничего не будет соответствовать.
+
+#### Пример: Использование числовых диапазонов
+
+Чтобы найти документы с атрибутами `value >= 3` и `value <= 5`, используя стандартный анализатор `"identity"`, вы напишите следующий запрос:
+
+<!-- 0037.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -381,13 +381,15 @@ FOR doc IN viewName
   RETURN doc.value
 ```
 
-This will also match documents which have an array of numbers as `value`
-attribute where at least one of the numbers is in the specified boundaries.
+<!-- 0038.part.md -->
 
-#### Example: Using string ranges
+Это также будет соответствовать документам, которые имеют массив чисел в качестве атрибута `value`, где хотя бы одно из чисел находится в указанных границах.
 
-Using string boundaries and a text Analyzer allows to match documents which
-have at least one token within the specified character range:
+#### Пример: Использование границ строк
+
+Использование границ строк и текстового анализатора позволяет найти документы, в которых хотя бы одна лексема находится в указанном диапазоне символов:
+
+<!-- 0039.part.md -->
 
 ```aql
 FOR doc IN valView
@@ -395,30 +397,27 @@ FOR doc IN valView
   RETURN doc
 ```
 
-This will match `{ "value": "bar" }` and `{ "value": "foo bar" }` because the
-_b_ of _bar_ is in the range (`"a" <= "b" < "f"`), but not `{ "value": "foo" }`
-because the _f_ of _foo_ is excluded (`high` is "f" but `includeHigh` is false).
+<!-- 0040.part.md -->
+
+Это будет соответствовать `{"value": "bar" }` и `{ "value": "foo bar" }`, потому что _b_ из _bar_ находится в диапазоне (`"a" <= "b" < "f"`), но не `{ "value": "foo" }`, потому что _f_ из _foo_ исключено (`high` - "f", но `includeHigh` - false).
 
 ### MIN_MATCH()
 
 `MIN_MATCH(expr1, ... exprN, minMatchCount) → fulfilled`
 
-Match documents where at least `minMatchCount` of the specified
-search expressions are satisfied.
+Искать документы, в которых удовлетворяется хотя бы `minMatchCount` из заданных поисковых выражений.
 
-There is a corresponding [`MIN_MATCH()` Miscellaneous function](functions-miscellaneous.html#min_match)
-that is used outside of `SEARCH` operations.
+Существует соответствующая функция [`MIN_MATCH()` Miscellaneous function](miscellaneous.md), которая используется вне операций `SEARCH`.
 
-- **expr** (expression, _repeatable_): any valid search expression
-- **minMatchCount** (number): minimum number of search expressions that should
-  be satisfied
-- returns **fulfilled** (bool): whether at least `minMatchCount` of the
-  specified expressions are `true`
+-   **expr** (выражение, _повторяемое_): любое допустимое поисковое выражение
+-   **minMatchCount** (число): минимальное количество поисковых выражений, которые должны быть удовлетворены
+-   возвращает **fulfilled** (bool): является ли хотя бы `minMatchCount` из указанных выражений `true`.
 
-#### Example: Matching a subset of search sub-expressions
+#### Пример: Соответствие подмножества поисковых подвыражений
 
-Assuming a View with a text Analyzer, you may use it to match documents where
-the attribute contains at least two out of three tokens:
+Имея представление с анализатором текста, вы можете использовать его для поиска документов, в которых атрибут содержит по крайней мере две из трех лексем:
+
+<!-- 0041.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -426,33 +425,29 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-This will match `{ "text": "the quick brown fox" }` and `{ "text": "some brown fox" }`,
-but not `{ "text": "snow fox" }` which only fulfills one of the conditions.
+<!-- 0042.part.md -->
+
+Это будет соответствовать `{"text": "the quick brown fox" }` и `{ "text": "some brown fox" }`, но не ` { "text": "``снежная лиса`` } `, который удовлетворяет только одному из условий.
 
 ### MINHASH_MATCH()
 
 `MINHASH_MATCH(path, target, threshold, analyzer) → fulfilled`
 
-Match documents with an approximate Jaccard similarity of at least the
-`threshold`, approximated with the specified `minhash` Analyzer.
+Сопоставляет документы с приблизительным сходством по Жаккарду не менее `порога`, аппроксимированным с помощью указанного анализатора `minhash`.
 
-To only compute the MinHash signatures, see the
-[`MINHASH()` Miscellaneous function](functions-miscellaneous.html#minhash).
+Чтобы вычислить только сигнатуры MinHash, см. функцию [`MINHASH()` Miscellaneous function](miscellaneous.md).
 
-- **path** (attribute path expression\|string): the path of the attribute in
-  a document or a string
-- **target** (string): the string to hash with the specified Analyzer and to
-  compare against the stored attribute
-- **threshold** (number, _optional_): a value between `0.0` and `1.0`.
-- **analyzer** (string): the name of a [`minhash` Analyzer](../analyzers.html#minhash).
-- returns **fulfilled** (bool): `true` if the approximate Jaccard similarity
-  is greater than or equal to the specified threshold, `false` otherwise
+-   **path** (выражение пути атрибута|строка): путь к атрибуту в документе или строка
+-   **target** (строка): строка для хэширования указанным анализатором и сравнения с сохраненным атрибутом.
+-   **порог** (число, _опционально_): значение между `0.0` и `1.0`.
+-   **analyzer** (строка): имя анализатора [`minhash` Analyzer](../analyzers.html#minhash).
+-   возвращает **fulfilled** (bool): `true`, если приблизительное сходство по Жаккарду больше или равно указанному порогу, `false` в противном случае.
 
-#### Example: Find documents with a text similar to a target text
+#### Пример: Поиск документов с текстом, похожим на целевой текст
 
-Assuming a View with a `minhash` Analyzer, you can use the stored
-MinHash signature to find candidates for the more expensive Jaccard similarity
-calculation:
+Предполагая представление с анализатором `minhash`, вы можете использовать сохраненную сигнатуру MinHash для поиска кандидатов для более дорогого вычисления сходства по Жаккарду:
+
+<!-- 0043.part.md -->
 
 ```aql
 LET target = "the quick brown fox jumps over the lazy dog"
@@ -466,53 +461,39 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
+<!-- 0044.part.md -->
+
 ### NGRAM_MATCH()
 
-<small>Introduced in: v3.7.0</small>
+<small>Введено в: v3.7.0</small>
 
 `NGRAM_MATCH(path, target, threshold, analyzer) → fulfilled`
 
-Match documents whose attribute value has an
-[_n_-gram similarity](https://webdocs.cs.ualberta.ca/~kondrak/papers/spire05.pdf){:target="\_blank"}
-higher than the specified threshold compared to the target value.
+Искать документы, значение атрибута которых имеет [_n_-gram similarity](https://webdocs.cs.ualberta.ca/~kondrak/papers/spire05.pdf) больше заданного порога по сравнению с целевым значением.
 
-The similarity is calculated by counting how long the longest sequence of
-matching _n_-grams is, divided by the target's total _n_-gram count.
-Only fully matching _n_-grams are counted.
+Сходство рассчитывается путем подсчета длины самой длинной последовательности совпадающих _n_-грамм, разделенной на общее количество _n_-грамм цели. Учитываются только полностью совпадающие _n_-граммы.
 
-The _n_-grams for both attribute and target are produced by the specified
-Analyzer. Increasing the _n_-gram length will increase accuracy, but reduce
-error tolerance. In most cases a size of 2 or 3 will be a good choice.
+_n_-граммы для атрибута и цели создаются указанным анализатором. Увеличение длины _n_-граммы увеличит точность, но уменьшит допустимую погрешность. В большинстве случаев размер 2 или 3 будет хорошим выбором.
 
-Also see the String Functions
-[`NGRAM_POSITIONAL_SIMILARITY()`](functions-string.html#ngram_positional_similarity)
-and [`NGRAM_SIMILARITY()`](functions-string.html#ngram_similarity)
-for calculating _n_-gram similarity that cannot be accelerated by a View index.
+Также смотрите строковые функции [`NGRAM_POSITIONAL_SIMILARITY()`](string.md) и [`NGRAM_SIMILARITY()`](string.md) для вычисления _n_-граммного сходства, которое не может быть ускорено индексом вида.
 
-- **path** (attribute path expression\|string): the path of the attribute in
-  a document or a string
-- **target** (string): the string to compare against the stored attribute
-- **threshold** (number, _optional_): a value between `0.0` and `1.0`. Defaults
-  to `0.7` if none is specified.
-- **analyzer** (string): the name of an [Analyzer](../analyzers.html).
-- returns **fulfilled** (bool): `true` if the evaluated _n_-gram similarity value
-  is greater than or equal to the specified threshold, `false` otherwise
+-   **path** (выражение пути атрибута|строка): путь атрибута в документе или строка.
+-   **target** (строка): строка для сравнения с сохраненным атрибутом.
+-   **threshold** (число, _опционально_): значение между `0.0` и `1.0`. По умолчанию `0.7`, если не указано.
+-   **analyzer** (строка): имя [Analyzer](../analyzers.html).
+-   возвращает **fulfilled** (bool): `true`, если оцененное значение сходства _n_-грамм больше или равно указанному порогу, `false` в противном случае.
 
-{% hint 'info' %}
-Use an Analyzer of type `ngram` with `preserveOriginal: false` and `min` equal
-to `max`. Otherwise, the similarity score calculated internally will be lower
-than expected.
+{% hint 'info' %} Используйте анализатор типа `ngram` с `preserveOriginal: false` и `min` равным `max`. В противном случае оценка сходства, рассчитанная внутри анализатора, будет ниже ожидаемой.
 
-The Analyzer must have the `"position"` and `"frequency"` features enabled or
-the `NGRAM_MATCH()` function will not find anything.
-{% endhint %}
+Анализатор должен иметь включенные функции `"позиция"` и `"частота"`, иначе функция `NGRAM_MATCH()` ничего не найдет. {% endhint %}
 
-#### Example: Using a custom bigram Analyzer
+#### Пример: Использование пользовательского анализатора биграмм
 
-Given a View indexing an attribute `text`, a custom _n_-gram Analyzer `"bigram"`
-(`min: 2, max: 2, preserveOriginal: false, streamType: "utf8"`) and a document
-`{ "text": "quick red fox" }`, the following query would match it (with a
-threshold of `1.0`):
+Дано представление, индексирующее атрибут `text`, пользовательский _n_-граммный анализатор `"bigram"` (`min: 2, max: 2, preserveOriginal: false, streamType: "utf8"`) и документ `{"text": "quick red fox" }`, следующий запрос будет соответствовать ему (с порогом `1.0`):
+
+<!-- 0045.part.md -->
+
+<!-- 0046.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -520,7 +501,11 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-The following will also match (note the low threshold value):
+<!-- 0047.part.md -->
+
+Следующие также будут соответствовать (обратите внимание на низкое пороговое значение):
+
+<!-- 0048.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -528,7 +513,11 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-The following will not match (note the high threshold value):
+<!-- 0049.part.md -->
+
+Следующие не будут совпадать (обратите внимание на высокое пороговое значение):
+
+<!-- 0050.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -536,10 +525,13 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-#### Example: Using constant values
+<!-- 0051.part.md -->
 
-`NGRAM_MATCH()` can be called with constant arguments, but for such calls the
-`analyzer` argument is mandatory (even for calls inside of a `SEARCH` clause):
+#### Пример: Использование постоянных значений
+
+`NGRAM_MATCH()` можно вызывать с постоянными аргументами, но для таких вызовов аргумент `analyzer` является обязательным (даже для вызовов внутри предложения `SEARCH`):
+
+<!-- 0052.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -547,9 +539,15 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
+<!-- 0053.part.md -->
+
+<!-- 0054.part.md -->
+
 ```aql
 RETURN NGRAM_MATCH("quick fox", "quick blue fox", "bigram")
 ```
+
+<!-- 0055.part.md -->
 
 ### PHRASE()
 
@@ -557,76 +555,45 @@ RETURN NGRAM_MATCH("quick fox", "quick blue fox", "bigram")
 
 `PHRASE(path, phrasePart1, skipTokens1, ... phrasePartN, skipTokensN, analyzer)`
 
-`PHRASE(path, [ phrasePart1, skipTokens1, ... phrasePartN, skipTokensN ], analyzer)`
+`PHRASE(path, [ phrasePart1, skipTokens1, ... phrasePartN, skipTokensN ], analyzer)`.
 
-Search for a phrase in the referenced attribute. It only matches documents in
-which the tokens appear in the specified order. To search for tokens in any
-order use [`TOKENS()`](functions-string.html#tokens) instead.
+Поиск фразы в атрибуте ссылки. Поиск выполняется только в тех документах, в которых лексемы появляются в указанном порядке. Для поиска лексем в любом порядке используйте [`TOKENS()`](string.md).
 
-The phrase can be expressed as an arbitrary number of `phraseParts` separated by
-_skipTokens_ number of tokens (wildcards), either as separate arguments or as
-array as second argument.
+Фраза может быть выражена в виде произвольного количества `phraseParts`, разделенных _skipTokens_ количеством лексем (подстановочных знаков), либо как отдельные аргументы, либо как массив в качестве второго аргумента.
 
-- **path** (attribute path expression): the attribute to test in the document
-- **phrasePart** (string\|array\|object): text to search for in the tokens.
-  Can also be an [array](#example-using-phrase-with-an-array-of-tokens)
-  comprised of string, array and [object tokens](#object-tokens), or tokens
-  interleaved with numbers of `skipTokens`. The specified `analyzer` is applied
-  to string and array tokens, but not for object tokens.
-- **skipTokens** (number, _optional_): amount of tokens to treat
-  as wildcards
-- **analyzer** (string, _optional_): name of an [Analyzer](../analyzers.html).
-  Uses the Analyzer of a wrapping `ANALYZER()` call if not specified or
-  defaults to `"identity"`
-- returns nothing: the function evaluates to a boolean, but this value cannot be
-  returned. The function can only be called in a search expression. It throws
-  an error if used outside of a [`SEARCH` operation](operations-search.html) or
-  a `FILTER` operation that uses an inverted index.
+-   **path** (выражение пути атрибута): атрибут для проверки в документе.
+-   **phrasePart** (строка|массив|объект): текст для поиска в токенах. Также может быть массивом, состоящим из строки, массива и объектных токенов, или токенами, чередующимися с номерами `skipTokens`. Указанный `анализатор` применяется к токенам строк и массивов, но не к токенам объектов.
+-   **skipTokens** (число, _опционально_): количество лексем, которые следует рассматривать как подстановочные знаки.
+-   **analyzer** (строка, _опционально_): имя [Analyzer](../analyzers.html). Используется анализатор из обертывающего вызова `ANALYZER()`, если не указан, или по умолчанию используется `"identity"`.
+-   ничего не возвращает: функция оценивает булево значение, но это значение не может быть возвращено. Функция может быть вызвана только в поисковом выражении. Она выдает ошибку, если используется вне операции [`SEARCH`](../operations/search.md) или операции `FILTER`, использующей инвертированный индекс.
 
-{% hint 'info' %}
-The selected Analyzer must have the `"position"` and `"frequency"` features
-enabled. The `PHRASE()` function will otherwise not find anything.
-{% endhint %}
+!!!info ""
 
-#### Object tokens
+    У выбранного анализатора должны быть включены функции `position` и `frequency`. В противном случае функция `PHRASE()` ничего не найдет.
 
-<small>Introduced in v3.7.0</small>
+#### Объектные лексемы
 
-- `{IN_RANGE: [low, high, includeLow, includeHigh]}`:
-  see [IN_RANGE()](#in_range). _low_ and _high_ can only be strings.
-- `{LEVENSHTEIN_MATCH: [token, maxDistance, transpositions, maxTerms, prefix]}`:
-  - `token` (string): a string to search
-  - `maxDistance` (number): maximum Levenshtein / Damerau-Levenshtein distance
-  - `transpositions` (bool, _optional_): if set to `false`, a Levenshtein
-    distance is computed, otherwise a Damerau-Levenshtein distance (default)
-  - `maxTerms` (number, _optional_): consider only a specified number of the
-    most relevant terms. One can pass `0` to consider all matched terms, but it may
-    impact performance negatively. The default value is `64`.
-  - `prefix` (string, _optional_): if defined, then a search for the exact
-    prefix is carried out, using the matches as candidates. The Levenshtein /
-    Damerau-Levenshtein distance is then computed for each candidate using the
-    remainders of the strings. This option can improve performance in cases where
-    there is a known common prefix. The default value is an empty string
-    (introduced in v3.7.13, v3.8.1).
-- `{STARTS_WITH: [prefix]}`: see [STARTS_WITH()](#starts_with).
-  Array brackets are optional
-- `{TERM: [token]}`: equal to `token` but without Analyzer tokenization.
-  Array brackets are optional
-- `{TERMS: [token1, ..., tokenN]}`: one of `token1, ..., tokenN` can be found
-  in specified position. Inside an array the object syntax can be replaced with
-  the object field value, e.g., `[..., [token1, ..., tokenN], ...]`.
-- `{WILDCARD: [token]}`: see [LIKE()](#like).
-  Array brackets are optional
+<small>Введено в v3.7.0</small>
 
-An array token inside an array can be used in the `TERMS` case only.
+-   `{IN_RANGE: [low, high, includeLow, includeHigh]}`: смотрите `IN_RANGE()`. _low_ и _high_ могут быть только строками.
+-   `{LEVENSHTEIN_MATCH: [token, maxDistance, transpositions, maxTerms, prefix]}`:
+    -   `token` (строка): строка для поиска
+    -   `maxDistance` (число): максимальное расстояние Левенштейна / Дамерау-Левенштейна
+    -   `transpositions` (bool, _опционально_): если установлено значение `false`, вычисляется расстояние Левенштейна, иначе расстояние Дамерау-Левенштейна (по умолчанию)
+    -   `maxTerms` (число, _опционально_): учитывает только заданное число наиболее релевантных терминов. Можно передать `0`, чтобы учитывать все совпадающие термины, но это может негативно сказаться на производительности. Значение по умолчанию равно `64`.
+    -   `prefix` (строка, _опционально_): если определено, то выполняется поиск точного префикса, используя совпадения в качестве кандидатов. Затем для каждого кандидата вычисляется расстояние Левенштейна / Дамерау-Левенштейна, используя остатки строк. Эта опция может повысить производительность в случаях, когда известен общий префикс. Значение по умолчанию - пустая строка (введено в v3.7.13, v3.8.1).
+-   `{STARTS_WITH: [prefix]}`: см. `STARTS_WITH()`. Массивные скобки являются необязательными
+-   `{TERM: [token]}`: равно `token`, но без токенизации Анализатора. Скобки массива необязательны
+-   `{TERMS: [token1, ..., tokenN]}`: в указанной позиции находится один из `token1, ..., tokenN`. Внутри массива синтаксис объекта может быть заменен на значение поля объекта, например, `[..., [token1, ..., tokenN], ...]`.
+-   `{WILDCARD: [token]}`: см. `LIKE()`. Скобки массива необязательны
 
-Also see [Example: Using object tokens](#example-using-object-tokens).
+Токен массива внутри массива может использоваться только в случае `TERMS`.
 
-#### Example: Using a text Analyzer for a phrase search
+#### Пример: Использование текстового анализатора для поиска по фразе
 
-Given a View indexing an attribute `text` with the `"text_en"` Analyzer and a
-document `{ "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit" }`,
-the following query would match it:
+Дано представление, индексирующее атрибут `text` с помощью анализатора `"text_en"` и документ `{"text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit" }`, следующий запрос будет соответствовать ему:
+
+<!-- 0057.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -634,26 +601,33 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-However, this search expression does not because the tokens `"ipsum"` and
-`"lorem"` do not appear in this order:
+<!-- 0058.part.md -->
+
+Однако это поисковое выражение не работает, потому что лексемы `"ipsum"` и `"lorem"` не появляются в этом порядке:
+
+<!-- 0059.part.md -->
 
 ```aql
 PHRASE(doc.text, "ipsum lorem", "text_en")
 ```
 
-#### Example: Skip tokens for a proximity search
+<!-- 0060.part.md -->
 
-To match `"ipsum"` and `"amet"` with any two tokens in between, you can use the
-following search expression:
+#### Пример: Пропуск лексем для поиска по близости
+
+Чтобы найти соответствие между `"ipsum"` и `"amet"` с любыми двумя лексемами между ними, вы можете использовать следующее поисковое выражение:
+
+<!-- 0061.part.md -->
 
 ```aql
 PHRASE(doc.text, "ipsum", 2, "amet", "text_en")
 ```
 
-The `skipTokens` value of `2` defines how many wildcard tokens have to appear
-between _ipsum_ and _amet_. A `skipTokens` value of `0` means that the tokens
-must be adjacent. Negative values are allowed, but not very useful. These three
-search expressions are equivalent:
+<!-- 0062.part.md -->
+
+Значение `skipTokens`, равное `2`, определяет, сколько лексем подстановочного знака должно находиться между _ipsum_ и _amet_. Значение `skipTokens`, равное `0`, означает, что лексемы должны быть соседними. Отрицательные значения допустимы, но не очень полезны. Эти три поисковых выражения эквивалентны:
+
+<!-- 0063.part.md -->
 
 ```aql
 PHRASE(doc.text, "lorem ipsum", "text_en")
@@ -661,17 +635,24 @@ PHRASE(doc.text, "lorem", 0, "ipsum", "text_en")
 PHRASE(doc.text, "ipsum", -1, "lorem", "text_en")
 ```
 
-#### Example: Using `PHRASE()` with an array of tokens
+<!-- 0064.part.md -->
 
-The `PHRASE()` function also accepts an array as second argument with
-`phrasePart` and `skipTokens` parameters as elements.
+#### Пример: Использование `PHRASE()` с массивом лексем
+
+Функция `PHRASE()` также принимает в качестве второго аргумента массив с параметрами `phrasePart` и `skipTokens` в качестве элементов.
+
+<!-- 0065.part.md -->
 
 ```aql
 FOR doc IN myView SEARCH PHRASE(doc.title, ["quick brown fox"], "text_en") RETURN doc
 FOR doc IN myView SEARCH PHRASE(doc.title, ["quick", "brown", "fox"], "text_en") RETURN doc
 ```
 
-This syntax variation enables the usage of computed expressions:
+<!-- 0066.part.md -->
+
+Эта вариация синтаксиса позволяет использовать вычисляемые выражения:
+
+<!-- 0067.part.md -->
 
 ```aql
 LET proximityCondition = [ "foo", ROUND(RAND()*10), "bar" ]
@@ -680,50 +661,76 @@ FOR doc IN viewName
   RETURN doc
 ```
 
+<!-- 0068.part.md -->
+
+<!-- 0069.part.md -->
+
 ```aql
 LET tokens = TOKENS("quick brown fox", "text_en") // ["quick", "brown", "fox"]
 FOR doc IN myView SEARCH PHRASE(doc.title, tokens, "text_en") RETURN doc
 ```
 
-Above example is equivalent to the more cumbersome and static form:
+<!-- 0070.part.md -->
+
+Приведенный выше пример эквивалентен более громоздкой и статичной форме:
+
+<!-- 0071.part.md -->
 
 ```aql
 FOR doc IN myView SEARCH PHRASE(doc.title, "quick", 0, "brown", 0, "fox", "text_en") RETURN doc
 ```
 
-You can optionally specify the number of skipTokens in the array form before
-every string element:
+<!-- 0072.part.md -->
+
+Вы можете опционально указать количество skipTokens в форме массива перед каждым элементом строки:
+
+<!-- 0073.part.md -->
 
 ```aql
 FOR doc IN myView SEARCH PHRASE(doc.title, ["quick", 1, "fox", "jumps"], "text_en") RETURN doc
 ```
 
-It is the same as the following:
+<!-- 0074.part.md -->
+
+Это то же самое, что и следующее:
+
+<!-- 0075.part.md -->
 
 ```aql
 FOR doc IN myView SEARCH PHRASE(doc.title, "quick", 1, "fox", 0, "jumps", "text_en") RETURN doc
 ```
 
-#### Example: Handling of arrays with no members
+<!-- 0076.part.md -->
 
-Empty arrays are skipped:
+#### Пример: Обработка массивов без членов
+
+Пустые массивы пропускаются:
+
+<!-- 0077.part.md -->
 
 ```aql
 FOR doc IN myView SEARCH PHRASE(doc.title, "quick", 1, [], 1, "jumps", "text_en") RETURN doc
 ```
 
-The query is equivalent to:
+<!-- 0078.part.md -->
+
+Этот запрос эквивалентен:
+
+<!-- 0079.part.md -->
 
 ```aql
 FOR doc IN myView SEARCH PHRASE(doc.title, "quick", 2 "jumps", "text_en") RETURN doc
 ```
 
-Providing only empty arrays is valid, but will yield no results.
+<!-- 0080.part.md -->
 
-#### Example: Using object tokens
+Предоставление только пустых массивов допустимо, но не даст никаких результатов.
 
-Using object tokens `STARTS_WITH`, `WILDCARD`, `LEVENSHTEIN_MATCH`, `TERMS` and
-`IN_RANGE`:
+#### Пример: Использование объектных маркеров
+
+Использование объектных маркеров `STARTS_WITH`, `WILDCARD`, `LEVENSHTEIN_MATCH`, `TERMS` и `IN_RANGE`:
+
+<!-- 0081.part.md -->
 
 ```aql
 FOR doc IN myView SEARCH PHRASE(doc.title,
@@ -735,12 +742,13 @@ FOR doc IN myView SEARCH PHRASE(doc.title,
   "text_en") RETURN doc
 ```
 
-Note that the `text_en` Analyzer has stemming enabled, but for object tokens
-the Analyzer isn't applied. `{TERMS: ["jumps", "runs"]}` would not match the
-indexed (and stemmed!) attribute value. Therefore, the trailing `s` which would
-be stemmed away is removed from both words manually in the example.
+<!-- 0082.part.md -->
 
-Above example is equivalent to:
+Обратите внимание, что в анализаторе `text_en` включена функция stemming, но для объектных лексем она не применяется. `{TERMS: ["jumps", "runs"]}` не будет соответствовать индексированному (и стебельчатому!) значению атрибута. Поэтому в данном примере из обоих слов вручную удаляется концевое `s`, которое должно быть удалено.
+
+Приведенный выше пример эквивалентен следующему:
+
+<!-- 0083.part.md -->
 
 ```aql
 FOR doc IN myView SEARCH PHRASE(doc.title,
@@ -753,55 +761,44 @@ FOR doc IN myView SEARCH PHRASE(doc.title,
 ], "text_en") RETURN doc
 ```
 
+<!-- 0084.part.md -->
+
 ### STARTS_WITH()
 
 `STARTS_WITH(path, prefix) → startsWith`
 
-Match the value of the attribute that starts with `prefix`. If the attribute
-is processed by a tokenizing Analyzer (type `"text"` or `"delimiter"`) or if it
-is an array, then a single token/element starting with the prefix is sufficient
-to match the document.
+Искать значение атрибута, которое начинается с `prefix`. Если атрибут обрабатывается токенизирующим анализатором (тип `"текст"` или `"разделитель"`) или если это массив, то для соответствия документу достаточно одной лексемы/элемента, начинающегося с префикса.
 
-{% hint 'warning' %}
-The alphabetical order of characters is not taken into account by ArangoSearch,
-i.e. range queries in SEARCH operations against Views will not follow the
-language rules as per the defined Analyzer locale (except for the
-[`collation` Analyzer](../analyzers.html#collation)) nor the server language
-(startup option `--default-language`)!
-Also see [Known Issues](../release-notes-known-issues310.html#arangosearch).
-{% endhint %}
+!!!warning ""
 
-There is a corresponding [`STARTS_WITH()` String function](functions-string.html#starts_with)
-that is used outside of `SEARCH` operations.
+    Алфавитный порядок символов не учитывается ArangoSearch, т.е. запросы диапазона в операциях SEARCH против Views не будут следовать правилам языка согласно определенной локали анализатора (кроме анализатора [`collation`](../analyzers.html#collation)) или языку сервера (опция запуска `--default-language`)! Также смотрите [Известные проблемы](../release-notes-known-issues310.html#arangosearch).
 
-- **path** (attribute path expression): the path of the attribute to compare
-  against in the document
-- **prefix** (string): a string to search at the start of the text
-- returns **startsWith** (bool): whether the specified attribute starts with
-  the given prefix
+Существует соответствующая функция [`STARTS_WITH()` String function](../functions/string.md), которая используется вне операций `SEARCH`.
+
+-   **path** (выражение пути атрибута): путь атрибута, с которым нужно сравнить в документе.
+-   **префикс** (строка): строка для поиска в начале текста.
+-   возвращает **startsWith** (bool): начинается ли указанный атрибут с заданного префикса.
 
 ---
 
 `STARTS_WITH(path, prefixes, minMatchCount) → startsWith`
 
-<small>Introduced in: v3.7.1</small>
+<small>Введено в: v3.7.1</small>
 
-Match the value of the attribute that starts with one of the `prefixes`, or
-optionally with at least `minMatchCount` of the prefixes.
+Искать значение атрибута, которое начинается с одного из `префиксов`, или, опционально, хотя бы с `minMatchCount` префиксов.
 
-- **path** (attribute path expression): the path of the attribute to compare
-  against in the document
-- **prefixes** (array): an array of strings to search at the start of the text
-- **minMatchCount** (number, _optional_): minimum number of search prefixes
-  that should be satisfied (see
-  [example](#example-searching-for-one-or-multiple-prefixes)). The default is `1`
-- returns **startsWith** (bool): whether the specified attribute starts with at
-  least `minMatchCount` of the given prefixes
+-   **path** (выражение пути к атрибуту): путь к атрибуту, с которым нужно сравнить в документе.
+-   **prefixes** (массив): массив строк для поиска в начале текста
+-   **minMatchCount** (число, _опционально_): минимальное количество префиксов для поиска, которое должно быть удовлетворено. По умолчанию `1`.
+-   возвращает **startsWith** (bool): начинается ли указанный атрибут хотя бы с `minMatchCount` из заданных префиксов.
 
-#### Example: Searching for an exact value prefix
+#### Пример: Поиск префикса точного значения
 
-To match a document `{ "text": "lorem ipsum..." }` using a prefix and the
-`"identity"` Analyzer you can use it like this:
+Для соответствия документу `{"text": "lorem ipsum..." }` с помощью префикса и анализатора `"identity"` вы можете использовать его следующим образом:
+
+<!-- 0085.part.md -->
+
+<!-- 0086.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -809,11 +806,13 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-#### Example: Searching for a prefix in text
+<!-- 0087.part.md -->
 
-This query will match `{ "text": "lorem ipsum" }` as well as
-`{ "text": [ "lorem", "ipsum" ] }` given a View which indexes the `text`
-attribute and processes it with the `"text_en"` Analyzer:
+#### Пример: Поиск префикса в тексте
+
+Этот запрос будет соответствовать `{ "text": "lorem ipsum" }`, а также `{ "text": ["lorem", "ipsum" ] }`, заданный представлением, которое индексирует атрибут `text` и обрабатывает его с помощью анализатора `"text_en"`:
+
+<!-- 0088.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -821,22 +820,29 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-Note that it will not match `{ "text": "IPS (in-plane switching)" }` without
-modification to the query. The prefixes were passed to `STARTS_WITH()` as-is,
-but the built-in `text_en` Analyzer used for indexing has stemming enabled.
-So the indexed values are the following:
+<!-- 0089.part.md -->
+
+Обратите внимание, что он не будет соответствовать `{"text": "IPS (коммутация в плоскости)" }` без модификации запроса. Префиксы были переданы в `STARTS_WITH()` как есть, но встроенный анализатор `text_en`, используемый для индексирования, имеет включенное стеблирование. Таким образом, индексированные значения выглядят следующим образом:
+
+<!-- 0090.part.md -->
 
 ```aql
 RETURN TOKENS("IPS (in-plane switching)", "text_en")
 ```
 
+<!-- 0091.part.md -->
+
+<!-- 0092.part.md -->
+
 ```json
 [["ip", "in", "plane", "switch"]]
 ```
 
-The _s_ is removed from _ips_, which leads to the prefix _ips_ not matching
-the indexed token _ip_. You may either create a custom text Analyzer with
-stemming disabled to avoid this issue, or apply stemming to the prefixes:
+<!-- 0093.part.md -->
+
+Из _ips_ удаляется _s_, что приводит к тому, что префикс _ips_ не совпадает с индексированной лексемой _ip_. Чтобы избежать этой проблемы, можно либо создать пользовательский анализатор текста с отключенным стеблированием, либо применить стеблирование к префиксам:
+
+<!-- 0094.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -844,10 +850,13 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-#### Example: Searching for one or multiple prefixes
+<!-- 0095.part.md -->
 
-The `STARTS_WITH()` function accepts an array of prefix alternatives of which
-only one has to match:
+#### Пример: Поиск одного или нескольких префиксов
+
+Функция `STARTS_WITH()` принимает массив альтернативных префиксов, из которых только один должен совпадать:
+
+<!-- 0096.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -855,11 +864,13 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-It will match a document `{ "text": "lorem ipsum" }` but also
-`{ "text": "that is something" }`, as at least one of the words start with a
-given prefix.
+<!-- 0097.part.md -->
 
-The same query again, but with an explicit `minMatchCount`:
+Он будет соответствовать документу `{ "text": "lorem ipsum" }`, но и `{"text": "это что-то" }`, поскольку хотя бы одно из слов начинается с заданного префикса.
+
+Снова тот же запрос, но с явным значением `minMatchCount`:
+
+<!-- 0098.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -867,8 +878,11 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-The number can be increased to require that at least this many prefixes must
-be present:
+<!-- 0099.part.md -->
+
+Число может быть увеличено, чтобы требовать наличия по крайней мере такого количества префиксов:
+
+<!-- 0100.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -876,50 +890,35 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-This will still match `{ "text": "lorem ipsum" }` because at least two prefixes
-(`lo` and `ips`) are found, but not `{ "text": "that is something" }` which only
-contains one of the prefixes (`something`).
+<!-- 0101.part.md -->
+
+Это все равно будет соответствовать `{"text": "lorem ipsum" }`, потому что найдены по крайней мере два префикса (`lo` и `ips`), но не `{"text": "that is something" }`, который содержит только один из префиксов (`something`).
 
 ### LEVENSHTEIN_MATCH()
 
-<small>Introduced in: v3.7.0</small>
+<small>Введено в: v3.7.0</small>
 
 `LEVENSHTEIN_MATCH(path, target, distance, transpositions, maxTerms, prefix) → fulfilled`
 
-Match documents with a [Damerau-Levenshtein distance](https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance){:target=\_"blank"}
-lower than or equal to `distance` between the stored attribute value and
-`target`. It can optionally match documents using a pure Levenshtein distance.
+Искать документы с расстоянием [Damerau-Levenshtein distance](https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance) меньшим или равным `distance` между сохраненным значением атрибута и `target`. В качестве опции он может сопоставлять документы, используя чистое расстояние Левенштейна.
 
-See [LEVENSHTEIN_DISTANCE()](functions-string.html#levenshtein_distance)
-if you want to calculate the edit distance of two strings.
+Смотрите [LEVENSHTEIN_DISTANCE()](../functions/string.md), если вы хотите вычислить расстояние редактирования двух строк.
 
-- **path** (attribute path expression\|string): the path of the attribute to
-  compare against in the document or a string
-- **target** (string): the string to compare against the stored attribute
-- **distance** (number): the maximum edit distance, which can be between
-  `0` and `4` if `transpositions` is `false`, and between `0` and `3` if
-  it is `true`
-- **transpositions** (bool, _optional_): if set to `false`, a Levenshtein
-  distance is computed, otherwise a Damerau-Levenshtein distance (default)
-- **maxTerms** (number, _optional_): consider only a specified number of the
-  most relevant terms. One can pass `0` to consider all matched terms, but it may
-  impact performance negatively. The default value is `64`.
-- returns **fulfilled** (bool): `true` if the calculated distance is less than
-  or equal to _distance_, `false` otherwise
-- **prefix** (string, _optional_): if defined, then a search for the exact
-  prefix is carried out, using the matches as candidates. The Levenshtein /
-  Damerau-Levenshtein distance is then computed for each candidate using
-  the `target` value and the remainders of the strings, which means that the
-  **prefix needs to be removed from `target`** (see
-  [example](#example-matching-with-prefix-search)). This option can improve
-  performance in cases where there is a known common prefix. The default value
-  is an empty string (introduced in v3.7.13, v3.8.1).
+-   **path** (выражение пути атрибута|строка): путь атрибута, с которым нужно сравнить в документе, или строка.
+-   **target** (строка): строка для сравнения с сохраненным атрибутом.
+-   **distance** (число): максимальное расстояние редактирования, которое может быть между `0` и `4`, если `transpositions` - `false`, и между `0` и `3`, если `true`.
+-   **transpositions** (bool, _опционально_): если установлено значение `false`, вычисляется расстояние Левенштейна, иначе расстояние Дамерау-Левенштейна (по умолчанию)
+-   **maxTerms** (число, _опционально_): учитывает только заданное число наиболее релевантных терминов. Можно передать `0`, чтобы учитывать все совпадающие термины, но это может негативно сказаться на производительности. Значение по умолчанию равно `64`.
+-   returns **fulfilled** (bool): `true`, если вычисленное расстояние меньше или равно _distance_, `false` в противном случае.
+-   **префикс** (строка, _опционально_): если определен, то выполняется поиск точного префикса, используя совпадения в качестве кандидатов. Затем для каждого кандидата вычисляется расстояние Левенштейна / Дамерау-Левенштейна, используя значение `target` и остатки строк, что означает, что **префикс должен быть удален из `target`**. Эта опция может улучшить производительность в случаях, когда известен общий префикс. Значение по умолчанию - пустая строка (введено в v3.7.13, v3.8.1).
 
-#### Example: Matching with and without transpositions
+<!-- 0102.part.md -->
 
-The Levenshtein distance between _quick_ and _quikc_ is `2` because it requires
-two operations to go from one to the other (remove _k_, insert _k_ at a
-different position).
+#### Пример: Сопоставление с транспозициями и без них
+
+Расстояние Левенштейна между _quick_ и _quikc_ равно `2`, потому что для перехода от одного к другому требуется две операции (удалить _k_, вставить _k_ в другую позицию).
+
+<!-- 0103.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -927,7 +926,11 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-The Damerau-Levenshtein distance is `1` (move _k_ to the end).
+<!-- 0104.part.md -->
+
+Расстояние Дамерау-Левенштейна равно `1` (переместите _k_ в конец).
+
+<!-- 0105.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -935,12 +938,13 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-#### Example: Matching with prefix search
+<!-- 0106.part.md -->
 
-Match documents with a Levenshtein distance of 1 with the prefix `qui`. The edit
-distance is calculated using the search term `kc` (`quikc` with the prefix `qui`
-removed) and the stored value without the prefix (e.g. `ck`). The prefix `qui`
-is constant.
+#### Пример: Сопоставление с префиксным поиском
+
+Сопоставьте документы с расстоянием Левенштейна, равным 1, с префиксом `qui`. Расстояние редактирования вычисляется с помощью поискового термина `kc` (`quikc` с удаленным префиксом `qui`) и сохраненного значения без префикса (например, `ck`). Префикс `qui` является постоянным.
+
+<!-- 0107.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -948,7 +952,11 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-You may compute the prefix and suffix from the input string as follows:
+<!-- 0108.part.md -->
+
+Вы можете вычислить префикс и суффикс из входной строки следующим образом:
+
+<!-- 0109.part.md -->
 
 ```aql
 LET input = "quikc"
@@ -960,13 +968,13 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-#### Example: Basing the edit distance on string length
+<!-- 0110.part.md -->
 
-You may want to pick the maximum edit distance based on string length.
-If the stored attribute is the string _quick_ and the target string is
-_quicksands_, then the Levenshtein distance is 5, with 50% of the
-characters mismatching. If the inputs are _q_ and _qu_, then the distance
-is only 1, although it is also a 50% mismatch.
+#### Пример: Выбор расстояния редактирования на основе длины строки
+
+Вы можете захотеть выбрать максимальное расстояние редактирования в зависимости от длины строки. Если хранимым атрибутом является строка _quick_, а целевой строкой - _quicksands_, то расстояние Левенштейна равно 5, при этом 50% символов не совпадают. Если входными данными являются _q_ и _qu_, то расстояние составляет всего 1, хотя и здесь несовпадение составляет 50%.
+
+<!-- 0111.part.md -->
 
 ```aql
 LET target = "input"
@@ -977,50 +985,40 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
+<!-- 0112.part.md -->
+
 ### LIKE()
 
-<small>Introduced in: v3.7.2</small>
+<small>Введено в: v3.7.2</small>
 
 `LIKE(path, search) → bool`
 
-Check whether the pattern `search` is contained in the attribute denoted by `path`,
-using wildcard matching.
+Проверяет, содержится ли шаблон `search` в атрибуте, обозначенном `path`, используя подстановочный знак.
 
-- `_`: A single arbitrary character
-- `%`: Zero, one or many arbitrary characters
-- `\\_`: A literal underscore
-- `\\%`: A literal percent sign
+-   `_`: Один произвольный символ
+-   `%`: Ноль, один или много произвольных символов
+-   `\_`: Буквальное подчеркивание
+-   `\%`: Буквальный знак процента
 
-{% hint 'info' %}
-Literal backlashes require different amounts of escaping depending on the
-context:
+!!!info ""
 
-- `\` in bind variables (_Table_ view mode) in the web interface (automatically
-  escaped to `\\` unless the value is wrapped in double quotes and already
-  escaped properly)
-- `\\` in bind variables (_JSON_ view mode) and queries in the web interface
-- `\\` in bind variables in arangosh
-- `\\\\` in queries in arangosh
-- Double the amount compared to arangosh in shells that use backslashes for
-  escaping (`\\\\` in bind variables and `\\\\\\\\` in queries)
-  {% endhint %}
+    Буквальные подчеркивания требуют разного количества экранирования в зависимости от контекста:
 
-Searching with the `LIKE()` function in the context of a `SEARCH` operation
-is backed by View indexes. The [String `LIKE()` function](functions-string.html#like)
-is used in other contexts such as in `FILTER` operations and cannot be
-accelerated by any sort of index on the other hand. Another difference is that
-the ArangoSearch variant does not accept a third argument to enable
-case-insensitive matching. This can be controlled with Analyzers instead.
+    -   `\` в переменных привязки (режим просмотра _Таблица_) в веб-интерфейсе (автоматически экранируется в `\`, если значение не заключено в двойные кавычки и уже экранировано должным образом)
+    -   `\` в переменных привязки (режим представления _JSON_) и запросах в веб-интерфейсе
+    -   `\\` в переменных привязки в arangosh
+    -   `\\\\` в запросах в arangosh
+    -   Вдвое больше по сравнению с arangosh в оболочках, использующих обратные слеши для экранирования (`\\\` в переменных привязки и `\\\\` в запросах)
 
-- **path** (attribute path expression): the path of the attribute to compare
-  against in the document
-- **search** (string): a search pattern that can contain the wildcard characters
-  `%` (meaning any sequence of characters, including none) and `_` (any single
-  character). Literal `%` and `_` must be escaped with backslashes.
-- returns **bool** (bool): `true` if the pattern is contained in `text`,
-  and `false` otherwise
+Поиск с помощью функции `LIKE()` в контексте операции `SEARCH` поддерживается индексами View. Функция [String `LIKE()`](string.md) используется в других контекстах, например, в операциях `FILTER`, и не может быть ускорена каким-либо индексом с другой стороны. Еще одно отличие заключается в том, что вариант ArangoSearch не принимает третий аргумент для включения нечувствительного к регистру соответствия. Этим можно управлять с помощью анализаторов.
 
-#### Example: Searching with wildcards
+-   **path** (выражение пути к атрибуту): путь к атрибуту, с которым нужно сравнить в документе.
+-   **search** (строка): шаблон поиска, который может содержать символы подстановки `%` (означает любую последовательность символов, включая ни одного) и `_` (любой отдельный символ). Буквальные `%` и `_` должны быть экранированы обратными слешами.
+-   возвращает **bool** (bool): `true`, если шаблон содержится в `text`, и `false` в противном случае.
+
+#### Пример: Поиск с использованием символов подстановки
+
+<!-- 0113.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -1028,7 +1026,11 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-`LIKE` can also be used in operator form:
+<!-- 0114.part.md -->
+
+`LIKE` также может использоваться в форме оператора:
+
+<!-- 0115.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -1036,98 +1038,75 @@ FOR doc IN viewName
   RETURN doc.text
 ```
 
-## Geo functions
+<!-- 0116.part.md -->
 
-The following functions can be accelerated by View indexes. There are
-corresponding [Geo Functions](functions-geo.html) for the regular geo index
-type, but also general purpose functions such as GeoJSON constructors that can
-be used in conjunction with ArangoSearch.
+## Гео-функции
+
+Следующие функции могут быть ускорены с помощью индексов View. Существуют соответствующие [Geo Functions](geo.md) для обычного типа геоиндексов, а также функции общего назначения, такие как конструкторы GeoJSON, которые можно использовать в сочетании с ArangoSearch.
 
 ### GEO_CONTAINS()
 
-<small>Introduced in: v3.8.0</small>
+<small>Введена в: v3.8.0</small>
 
 `GEO_CONTAINS(geoJsonA, geoJsonB) → bool`
 
-Checks whether the [GeoJSON object](../indexing-geo.html#geojson) `geoJsonA`
-fully contains `geoJsonB` (every point in B is also in A).
+Проверяет, содержит ли объект [GeoJSON](../indexing-geo.html#geojson) `geoJsonA` полностью `geoJsonB` (каждая точка в B также находится в A).
 
-- **geoJsonA** (object\|array): first GeoJSON object or coordinate array
-  (in longitude, latitude order)
-- **geoJsonB** (object\|array): second GeoJSON object or coordinate array
-  (in longitude, latitude order)
-- returns **bool** (bool): `true` when every point in B is also contained in A,
-  `false` otherwise
+-   **geoJsonA** (объект|массив): первый объект GeoJSON или массив координат (в порядке долготы, широты)
+-   **geoJsonB** (объект|массив): второй объект GeoJSON или массив координат (в порядке долготы, широты).
+-   возвращает **bool** (bool): `true`, если каждая точка в B также содержится в A, `false` в противном случае.
 
 ### GEO_DISTANCE()
 
-<small>Introduced in: v3.8.0</small>
+<small>Введено в: v3.8.0</small>
 
 `GEO_DISTANCE(geoJsonA, geoJsonB) → distance`
 
-Return the distance between two [GeoJSON objects](../indexing-geo.html#geojson),
-measured from the `centroid` of each shape.
+Возвращает расстояние между двумя [GeoJSON объектами](../indexing-geo.html#geojson), измеренное от `центроида` каждой фигуры.
 
-- **geoJsonA** (object\|array): first GeoJSON object or coordinate array
-  (in longitude, latitude order)
-- **geoJsonB** (object\|array): second GeoJSON object or coordinate array
-  (in longitude, latitude order)
-- returns **distance** (number): the distance between the centroid points of
-  the two objects on the reference ellipsoid
+-   **geoJsonA** (object|array): первый объект GeoJSON или массив координат (в порядке долготы, широты).
+-   **geoJsonB** (объект|массив): второй объект GeoJSON или массив координат (в порядке долготы, широты).
+-   возвращает **расстояние** (число): расстояние между точками центроида двух объектов на опорном эллипсоиде
 
 ### GEO_IN_RANGE()
 
-<small>Introduced in: v3.8.0</small>
+<small>Введено в: v3.8.0</small>
 
 `GEO_IN_RANGE(geoJsonA, geoJsonB, low, high, includeLow, includeHigh) → bool`
 
-Checks whether the distance between two [GeoJSON objects](../indexing-geo.html#geojson)
-lies within a given interval. The distance is measured from the `centroid` of
-each shape.
+Проверяет, лежит ли расстояние между двумя [GeoJSON объектами](../indexing-geo.html#geojson) в заданном интервале. Расстояние измеряется от `центроида` каждой фигуры.
 
-- **geoJsonA** (object\|array): first GeoJSON object or coordinate array
-  (in longitude, latitude order)
-- **geoJsonB** (object\|array): second GeoJSON object or coordinate array
-  (in longitude, latitude order)
-- **low** (number): minimum value of the desired range
-- **high** (number): maximum value of the desired range
-- **includeLow** (bool, optional): whether the minimum value shall be included
-  in the range (left-closed interval) or not (left-open interval). The default
-  value is `true`
-- **includeHigh** (bool): whether the maximum value shall be included in the
-  range (right-closed interval) or not (right-open interval). The default value
-  is `true`
-- returns **bool** (bool): whether the evaluated distance lies within the range
+-   **geoJsonA** (object|array): первый объект GeoJSON или массив координат (в порядке долготы, широты).
+-   **geoJsonB** (объект|массив): второй объект GeoJSON или массив координат (в порядке долготы, широты).
+-   **low** (число): минимальное значение желаемого диапазона
+-   **high** (число): максимальное значение желаемого диапазона
+-   **includeLow** (bool, необязательный): должно ли минимальное значение быть включено в диапазон (лево-закрытый интервал) или нет (лево-открытый интервал). Значение по умолчанию - `true`
+-   **includeHigh** (bool): включать ли максимальное значение в диапазон (интервал справа-закрытый) или нет (интервал справа-открытый). Значение по умолчанию - `true`.
+-   возвращает **bool** (bool): лежит ли оцениваемое расстояние в диапазоне
 
 ### GEO_INTERSECTS()
 
-<small>Introduced in: v3.8.0</small>
+<small>Введено в: v3.8.0</small>
 
 `GEO_INTERSECTS(geoJsonA, geoJsonB) → bool`
 
-Checks whether the [GeoJSON object](../indexing-geo.html#geojson) `geoJsonA`
-intersects with `geoJsonB` (i.e. at least one point of B is in A or vice versa).
+Проверяет, пересекается ли [GeoJSON объект](../indexing-geo.html#geojson) `geoJsonA` с `geoJsonB` (т.е. хотя бы одна точка B находится в A или наоборот).
 
-- **geoJsonA** (object\|array): first GeoJSON object or coordinate array
-  (in longitude, latitude order)
-- **geoJsonB** (object\|array): second GeoJSON object or coordinate array
-  (in longitude, latitude order)
-- returns **bool** (bool): `true` if A and B intersect, `false` otherwise
+-   **geoJsonA** (object|array): первый объект GeoJSON или массив координат (в порядке долготы, широты).
+-   **geoJsonB** (object|array): второй объект GeoJSON или массив координат (в порядке долготы, широты).
+-   возвращает **bool** (bool): `true`, если A и B пересекаются, `false` в противном случае.
 
-## Scoring Functions
+## Функции оценки
 
-Scoring functions return a ranking value for the documents found by a
-[SEARCH operation](operations-search.html). The better the documents match
-the search expression the higher the returned number.
+Скоринговые функции возвращают значение рейтинга для документов, найденных операцией [SEARCH](../operations/search.md). Чем лучше документы соответствуют поисковому выражению, тем выше возвращаемое число.
 
-The first argument to any scoring function is always the document emitted by
-a `FOR` operation over an `arangosearch` View.
+Первым аргументом любой скоринговой функции всегда является документ, выданный операцией `FOR` над представлением `arangosearch`.
 
-To sort the result set by relevance, with the more relevant documents coming
-first, sort in **descending order** by the score (e.g. `SORT BM25(...) DESC`).
+Чтобы отсортировать набор результатов по релевантности, причем более релевантные документы идут первыми, отсортируйте их в порядке **по убыванию** по баллу (например, `SORT BM25(...) DESC`).
 
-You may calculate custom scores based on a scoring function using document
-attributes and numeric functions (e.g. `TFIDF(doc) * LOG(doc.value)`):
+Вы можете рассчитать пользовательские оценки на основе функции оценки, используя атрибуты документа и числовые функции (например, `TFIDF(doc) * LOG(doc.value)`):
+
+<!-- 0118.part.md -->
 
 ```aql
 FOR movie IN imdbView
@@ -1136,8 +1115,11 @@ FOR movie IN imdbView
   RETURN movie
 ```
 
-Sorting by more than one score is allowed. You may also sort by a mix of
-scores and attributes from multiple Views as well as collections:
+<!-- 0119.part.md -->
+
+Допускается сортировка более чем по одному показателю. Вы также можете сортировать по сочетанию оценок и атрибутов из нескольких представлений, а также коллекций:
+
+<!-- 0120.part.md -->
 
 ```aql
 FOR a IN viewA
@@ -1147,37 +1129,28 @@ FOR a IN viewA
       ...
 ```
 
+<!-- 0121.part.md -->
+
 ### BM25()
 
 `BM25(doc, k, b) → score`
 
-Sorts documents using the
-[**Best Matching 25** algorithm](https://en.wikipedia.org/wiki/Okapi_BM25){:target="\_blank"}
-(Okapi BM25).
+Сортирует документы, используя алгоритм [**Best Matching 25**](https://en.wikipedia.org/wiki/Okapi_BM25) (Okapi BM25).
 
-- **doc** (document): must be emitted by `FOR ... IN viewName`
-- **k** (number, _optional_): calibrates the text term frequency scaling.
-  The default is `1.2`. A `k` value of `0` corresponds to a binary model
-  (no term frequency), and a large value corresponds to using raw term frequency
-- **b** (number, _optional_): determines the scaling by the total text length.
-  The default is `0.75`. At the extreme values of the coefficient `b`, BM25
-  turns into the ranking functions known as:
-  - BM11 for `b` = `1` (corresponds to fully scaling the term weight by the
-    total text length)
-  - BM15 for `b` = `0` (corresponds to no length normalization)
-- returns **score** (number): computed ranking value
+-   **doc** (документ): должен быть испущен `FOR ... IN viewName`
+-   **k** (число, _опционально_): калибрует масштабирование частоты текстовых терминов. По умолчанию `1.2`. Значение `k`, равное `0`, соответствует бинарной модели (без частоты терминов), а большое значение соответствует использованию необработанной частоты терминов.
+-   **b** (число, _опционально_): определяет масштабирование по общей длине текста. По умолчанию `0.75`. При крайних значениях коэффициента `b`, BM25 превращается в функции ранжирования, известные как:
+    -   BM11 для `b` = `1` (соответствует полному масштабированию веса термина по общей длине текста)
+    -   BM15 для `b` = `0` (соответствует отсутствию нормализации длины)
+-   возвращает **score** (число): вычисленное значение ранжирования
 
-{% hint 'info' %}
-The Analyzers used for indexing document attributes must have the `"frequency"`
-feature enabled. The `BM25()` function will otherwise return a score of 0.
-The Analyzers should have the `"norm"` feature enabled, too, or normalization
-will be disabled, which is not meaningful for BM25 and BM11. BM15 does not need
-the `"norm"` feature as it has no length normalization.
-{% endhint %}
+{% hint 'info' %} Анализаторы, используемые для индексирования атрибутов документа, должны иметь включенную функцию `частота`. В противном случае функция `BM25()` вернет значение 0. Анализаторы также должны иметь включенную функцию `"norm"`, иначе нормализация будет отключена, что не имеет смысла для BM25 и BM11. BM15 не нуждается в функции `"norm"`, так как в нем нет нормализации длины. {% endhint %}
 
-#### Example: Sorting by default `BM25()` score
+#### Пример: Сортировка по умолчанию по показателю `BM25()`
 
-Sorting by relevance with BM25 at default settings:
+Сортировка по релевантности с помощью BM25 при настройках по умолчанию:
+
+<!-- 0122.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -1186,10 +1159,13 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-#### Example: Sorting with tuned `BM25()` ranking
+<!-- 0123.part.md -->
 
-Sorting by relevance, with double-weighted term frequency and with full text
-length normalization:
+#### Пример: Сортировка с настроенным ранжированием `BM25()`
+
+Сортировка по релевантности, с удвоенной взвешенной частотой терминов и с нормализацией длины полного текста:
+
+<!-- 0124.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -1198,29 +1174,27 @@ FOR doc IN viewName
   RETURN doc
 ```
 
+<!-- 0125.part.md -->
+
 ### TFIDF()
 
-`TFIDF(doc, normalize) → score`
+`TFIDF(doc, normalize) → score`.
 
-Sorts documents using the
-[**term frequency–inverse document frequency** algorithm](https://en.wikipedia.org/wiki/TF-IDF){:target="\_blank"}
-(TF-IDF).
+Сортирует документы, используя алгоритм [**терминальная частота-инверсная частота документа**](https://en.wikipedia.org/wiki/TF-IDF) (TF-IDF).
 
-- **doc** (document): must be emitted by `FOR ... IN viewName`
-- **normalize** (bool, _optional_): specifies whether scores should be
-  normalized. The default is `false`.
-- returns **score** (number): computed ranking value
+-   **doc** (документ): должен выдаваться `FOR ... IN viewName`
+-   **normalize** (bool, _опционально_): указывает, должны ли баллы быть нормализованы. По умолчанию `false`.
+-   возвращает **score** (число): вычисленное значение рейтинга.
 
-{% hint 'info' %}
-The Analyzers used for indexing document attributes must have the `"frequency"`
-feature enabled. The `TFIDF()` function will otherwise return a score of 0.
-The Analyzers need to have the `"norm"` feature enabled, too, if you want to use
-`TFIDF()` with the `normalize` parameter set to `true`.
-{% endhint %}
+!!!info ""
 
-#### Example: Sorting by default `TFIDF()` score
+    Анализаторы, используемые для индексирования атрибутов документа, должны иметь включенную функцию `частота`. В противном случае функция `TFIDF()` вернет значение 0. Анализаторы должны иметь включенную функцию `"norm"`, если вы хотите использовать `TFIDF()` с параметром `normalize`, установленным в `true`.
 
-Sort by relevance using the TF-IDF score:
+#### Пример: Сортировка по умолчанию по `TFIDF()` показателю
+
+Сортировка по релевантности с использованием показателя TF-IDF:
+
+<!-- 0126.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -1229,9 +1203,13 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-#### Example: Sorting by `TFIDF()` score with normalization
+<!-- 0127.part.md -->
 
-Sort by relevance using a normalized TF-IDF score:
+#### Пример: Сортировка по показателю `TFIDF()` с нормализацией
+
+Сортировка по релевантности с использованием нормализованного показателя TF-IDF:
+
+<!-- 0128.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -1240,10 +1218,13 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-#### Example: Sort by value and `TFIDF()`
+<!-- 0129.part.md -->
 
-Sort by the value of the `text` attribute in ascending order, then by the TFIDF
-score in descending order where the attribute values are equivalent:
+#### Пример: Сортировка по значению и `TFIDF()`
+
+Сортировка по значению атрибута `text` в порядке возрастания, затем по показателю TFIDF в порядке убывания, если значения атрибутов эквивалентны:
+
+<!-- 0130.part.md -->
 
 ```aql
 FOR doc IN viewName
@@ -1252,95 +1233,79 @@ FOR doc IN viewName
   RETURN doc
 ```
 
-## Search Highlighting Functions
+<!-- 0131.part.md -->
 
-{% include hint-ee-arangograph.md feature="Search highlighting" %}
+## Функции выделения поиска
+
+!!!info ""
+
+    Выделение поиска доступно только в версии Enterprise Edition, включая платформу ArangoGraph Insights Platform.
 
 ### OFFSET_INFO()
 
 `OFFSET_INFO(doc, paths) → offsetInfo`
 
-Returns the attribute paths and substring offsets of matched terms, phrases, or
-_n_-grams for search highlighting purposes.
+Возвращает пути атрибутов и смещения подстрок совпавших терминов, фраз или _n_-грамм для целей выделения поиска.
 
-- **doc** (document): must be emitted by `FOR ... IN viewName`
-- **paths** (string\|array): a string or an array of strings, each describing an
-  attribute and array element path you want to get the offsets for. Use `.` to
-  access nested objects, and `[n]` with `n` being an array index to specify array
-  elements. The attributes need to be indexed by Analyzers with the `offset`
-  feature enabled.
-- returns **offsetInfo** (array): an array of objects, limited to a default of
-  10 offsets per path. Each object has the following attributes:
+-   **doc** (документ): должен быть выдан `FOR ... IN viewName`
 
-  - **name** (array): the attribute and array element path as an array of
-    strings and numbers. You can pass this name to the
-    [`VALUE()` function](functions-document.html) to dynamically look up the value.
-  - **offsets** (array): an array of arrays with the matched positions. Each
-    inner array has two elements with the start offset and the length of a match.
+-   **paths** (строка|массив): строка или массив строк, каждая из которых описывает путь атрибута и элемента массива, для которых вы хотите получить смещения. Используйте `.` для доступа к вложенным объектам и `[n]` с `n` - индексом массива для указания элементов массива. Атрибуты должны быть проиндексированы анализаторами с включенной функцией `offset`.
 
-    {% hint 'warning' %}
-    The offsets describe the positions in bytes, not characters. You may need
-    to account for characters encoded using multiple bytes.
-    {% endhint %}
+-   возвращает **offsetInfo** (массив): массив объектов, ограниченный по умолчанию 10 смещениями на путь. Каждый объект имеет следующие атрибуты:
+
+    -   **имя** (массив): атрибут и путь элемента массива в виде массива строк и чисел. Вы можете передать это имя функции [`VALUE()`](document.md) для динамического поиска значения.
+
+    -   **offsets** (массив): массив массивов с совпадающими позициями. Каждый внутренний массив имеет два элемента с начальным смещением и длиной совпадения.
+
+!!!warning ""
+
+    Смещение описывает позиции в байтах, а не в символах. Может потребоваться учет символов, закодированных с использованием нескольких байтов.
 
 ---
 
 `OFFSET_INFO(doc, rules) → offsetInfo`
 
-- **doc** (document): must be emitted by `FOR ... IN viewName`
-- **rules** (array): an array of objects with the following attributes:
-  - **name** (string): an attribute and array element path
-    you want to get the offsets for. Use `.` to access nested objects,
-    and `[n]` with `n` being an array index to specify array elements. The
-    attributes need to be indexed by Analyzers with the `offset` feature enabled.
-  - **options** (object): an object with the following attributes:
-    - **maxOffsets** (number, _optional_): the total number of offsets to
-      collect per path. Default: `10`.
-    - **limits** (object, _optional_): an object with the following attributes:
-      - **term** (number, _optional_): the total number of term offsets to
-        collect per path. Default: 2<sup>32</sup>.
-      - **phrase** (number, _optional_): the total number of phrase offsets to
-        collect per path. Default: 2<sup>32</sup>.
-      - **ngram** (number, _optional_): the total number of _n_-gram offsets to
-        collect per path. Default: 2<sup>32</sup>.
-- returns **offsetInfo** (array): an array of objects, each with the following
-  attributes:
+-   **doc** (документ): должен быть выдан `FOR ... IN viewName`
+-   **rules** (массив): массив объектов со следующими атрибутами:
+    -   **name** (строка): атрибут и путь элемента массива, для которого вы хотите получить смещения. Используйте `.` для доступа к вложенным объектам и `[n]` с `n` - индексом массива для указания элементов массива. Атрибуты должны быть проиндексированы анализаторами с включенной функцией `offset`.
+    -   **options** (объект): объект со следующими атрибутами:
+        -   **maxOffsets** (число, _опционально_): общее количество смещений для сбора по каждому пути. По умолчанию: `10`.
+        -   **limits** (объект, _опционально_): объект со следующими атрибутами:
+            -   **term** (число, _опционально_): общее количество смещений терминов, которые необходимо собрать для каждого пути. По умолчанию: 2<sup>32</sup>.
+            -   **phrase** (число, _опционально_): общее количество смещений фраз для сбора по каждому пути. По умолчанию: 2<sup>32</sup>.
+            -   **ngram** (число, _опционально_): общее количество _n_-грамм, которые нужно собрать для каждого пути. По умолчанию: 2<sup>32</sup>.
+-   возвращает **offsetInfo** (массив): массив объектов, каждый из которых имеет следующие атрибуты:
+    -   **имя** (массив): атрибут и путь элемента массива в виде массива строк и чисел. Вы можете передать это имя в [VALUE()](document.md) для динамического поиска значения.
+    -   **offsets** (массив): массив массивов с совпадающими позициями, урезанными до заданных пределов. Каждый внутренний массив имеет два элемента с начальным смещением и длиной совпадения.
 
-  - **name** (array): the attribute and array element path as an array of
-    strings and numbers. You can pass this name to the
-    [VALUE()](functions-document.html) to dynamically look up the value.
-  - **offsets** (array): an array of arrays with the matched positions, capped
-    to the specified limits. Each inner array has two elements with the start
-    offset and the length of a match.
+!!!warning ""
 
-    {% hint 'warning' %}
-    The start offsets and lengths describe the positions in bytes, not characters.
-    You may need to account for characters encoded using multiple bytes.
-    {% endhint %}
+    Начальное смещение и длина описывают позиции в байтах, а не в символах. Может потребоваться учет символов, закодированных с использованием нескольких байтов.
 
-**Examples**
+**Примеры**
 
-Search a View and get the offset information for the matches:
+Поиск в представлении и получение информации о смещении для совпадений:
 
-    {% arangoshexample examplevar="examplevar" script="script" result="result" %}
-    @startDocuBlockInline aqlOffsetInfo
-    @EXAMPLE_ARANGOSH_OUTPUT{aqlOffsetInfo}
-    ~ db._create("food");
-    ~ db.food.save({ name: "avocado", description: { en: "The avocado is a medium-sized, evergreen tree, native to the Americas." } });
-    ~ db.food.save({ name: "tomato", description: { en: "The tomato is the edible berry of the tomato plant." } });
-    ~ var analyzers = require("@arangodb/analyzers");
-    ~ var analyzer = analyzers.save("text_en_offset", "text", { locale: "en", stopwords: [] }, ["frequency", "norm", "position", "offset"]);
-    ~ db._createView("food_view", "arangosearch", { links: { food: { fields: { description: { fields: { en: { analyzers: ["text_en_offset"] } } } } } } });
-    ~ assert(db._query(`FOR d IN food_view COLLECT WITH COUNT INTO c RETURN c`).toArray()[0] === 2);
-    | db._query(`FOR doc IN food_view
-    |   SEARCH ANALYZER(TOKENS("avocado tomato", "text_en_offset") ANY == doc.description.en, "text_en_offset")
-        RETURN OFFSET_INFO(doc, ["description.en"])`);
-    ~ db._dropView("food_view");
-    ~ db._drop("food");
-    ~ analyzers.remove(analyzer.name);
-    @END_EXAMPLE_ARANGOSH_OUTPUT
-    @endDocuBlock aqlOffsetInfo
-    {% endarangoshexample %}
-    {% include arangoshexample.html id=examplevar script=script result=result %}
+```
+@startDocuBlockInline aqlOffsetInfo
+@EXAMPLE_ARANGOSH_OUTPUT{aqlOffsetInfo}
+~ db._create("food");
+~ db.food.save({ name: "avocado", description: { en: "Авокадо - это вечнозеленое дерево среднего размера, родом из Америки". } });
+~ db.food.save({ name: "tomato", description: { en: "Помидор - это съедобная ягода растения томата". } });
+~ var analyzers = require("@arangodb/analyzers");
+~ var analyzer = analyzers.save("text_en_offset", "text", { locale: "en", stopwords: [] }, ["frequency", "norm", "position", "offset"]);
+~ db._createView("food_view", "arangosearch", { links: { food: { fields: { описание: { fields: { en: { analyzers: ["text_en_offset"] } } } } } } });
+~ assert(db._query(`FOR d IN food_view COLLECT WITH COUNT INTO c RETURN c`).toArray()[0] === 2);
+| db._query(`FOR doc IN food_view
+| SEARCH ANALYZER(TOKENS("авокадо-помидор", "text_en_offset") ANY == doc.description.en, "text_en_offset")
+	RETURN OFFSET_INFO(doc, ["description.en"])`);
+~ db._dropView("food_view");
+~ db._drop("food");
+~ analyzers.remove(analyzer.name);
+@END_EXAMPLE_ARANGOSH_OUTPUT
+@endDocuBlock aqlOffsetInfo
+```
 
-For full examples, see [Search Highlighting](../arangosearch-search-highlighting.html).
+Полные примеры смотрите в [Выделение поиска](../arangosearch-search-highlighting.html).
+
+<!-- 0134.part.md -->

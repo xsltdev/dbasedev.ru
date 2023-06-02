@@ -1,22 +1,20 @@
 # FILTER
 
-The `FILTER` statement can be used to restrict the results to elements that
-match an arbitrary logical condition.
+Оператор `FILTER` можно использовать для ограничения результатов элементами, которые соответствуют произвольному логическому условию.
 
-## Syntax
+## Синтаксис
 
 <pre><code>FILTER <em>expression</em></code></pre>
 
-_expression_ must be a condition that evaluates to either `false` or `true`.
+_expression_ должно быть условием, которое оценивается как `false` или `true`.
 
-## Usage
+## Использование
 
-If the condition result is false, the current element is skipped, so it will
-not be processed further and not be part of the result. If the condition is
-true, the current element is not skipped and can be further processed.
+Если результат условия равен false, текущий элемент пропускается, поэтому он не будет обрабатываться дальше и не станет частью результата. Если условие истинно, то текущий элемент не пропускается и может быть обработан дальше.
 
-See [Operators](operators.html) for a list of comparison operators, logical
-operators etc. that you can use in conditions.
+Список операторов сравнения, логических операторов и т.д., которые можно использовать в условиях, см. в разделе [Операторы](../operators.md).
+
+<!-- 0001.part.md -->
 
 ```aql
 FOR u IN users
@@ -24,10 +22,11 @@ FOR u IN users
   RETURN u
 ```
 
-It is allowed to specify multiple `FILTER` statements in a query, even in
-the same block. If multiple `FILTER` statements are used, their results will be
-combined with a logical `AND`, meaning all filter conditions must be true to
-include an element.
+<!-- 0002.part.md -->
+
+В запросе разрешается указывать несколько операторов `FILTER`, даже в одном и том же блоке. Если используется несколько операторов `FILTER`, их результаты будут объединены логическим `AND`, то есть все условия фильтра должны быть истинными, чтобы включить элемент.
+
+<!-- 0003.part.md -->
 
 ```aql
 FOR u IN users
@@ -36,30 +35,30 @@ FOR u IN users
   RETURN u
 ```
 
-In the above example, all array elements of `users` that have an attribute
-`active` with value `true` and that have an attribute `age` with a value less
-than `39` (including `null` ones) will be included in the result. All other
-elements of `users` will be skipped and not be included in the result produced
-by `RETURN`.
+<!-- 0004.part.md -->
 
-{% hint 'info' %}
-See [Accessing Data from Collections](fundamentals-document-data.html)
-for a description of the impact of non-existent or null attributes.
-{% endhint %}
+В приведенном выше примере все элементы массива `users`, имеющие атрибут `active` со значением `true` и атрибут `age` со значением меньше `39` (включая `null`), будут включены в результат. Все остальные элементы `users` будут пропущены и не будут включены в результат, выдаваемый `RETURN`.
 
-While `FILTER` typically occurs in combination with `FOR`, it can also be used
-at the top level or in subqueries without a surrounding `FOR` loop.
+!!!info ""
+
+    Описание влияния несуществующих или нулевых атрибутов см. в [Accessing Data from Collections](fundamentals-document-data.html).
+
+Хотя `FILTER` обычно используется в комбинации с `FOR`, он также может использоваться на верхнем уровне или в подзапросах без окружающего цикла `FOR`.
+
+<!-- 0005.part.md -->
 
 ```aql
 FILTER false
 RETURN ASSERT(false, "never reached")
 ```
 
-## Order of operations
+<!-- 0006.part.md -->
 
-Note that the positions of `FILTER` statements can influence the result of a query.
-There are 16 active users in the [test data](examples.html#example-data)
-for instance:
+## Порядок операций
+
+Обратите внимание, что позиции операторов `FILTER` могут влиять на результат запроса. Например, в [тестовых данных](examples.html#example-data) 16 активных пользователей:
+
+<!-- 0007.part.md -->
 
 ```aql
 FOR u IN users
@@ -67,7 +66,11 @@ FOR u IN users
   RETURN u
 ```
 
-We can limit the result set to 5 users at most:
+<!-- 0008.part.md -->
+
+Мы можем ограничить набор результатов максимум 5 пользователями:
+
+<!-- 0009.part.md -->
 
 ```aql
 FOR u IN users
@@ -76,10 +79,11 @@ FOR u IN users
   RETURN u
 ```
 
-This may return the user documents of Jim, Diego, Anthony, Michael and Chloe for
-instance. Which ones are returned is undefined, since there is no `SORT` statement
-to ensure a particular order. If we add a second `FILTER` statement to only return
-women...
+<!-- 0010.part.md -->
+
+Это может вернуть документы пользователей, например, Джима, Диего, Энтони, Майкла и Хлои. Какие из них будут возвращены, не определено, так как нет оператора `SORT` для обеспечения определенного порядка. Если мы добавим второй оператор `FILTER`, чтобы вернуть только женщин...
+
+<!-- 0011.part.md -->
 
 ```aql
 FOR u IN users
@@ -89,11 +93,11 @@ FOR u IN users
   RETURN u
 ```
 
-... it might just return the Chloe document, because the `LIMIT` is applied before
-the second `FILTER`. No more than 5 documents arrive at the second `FILTER` block,
-and not all of them fulfill the gender criterion, even though there are more than
-5 active female users in the collection. A more deterministic result can be achieved
-by adding a `SORT` block:
+<!-- 0012.part.md -->
+
+... он может просто вернуть документ Chloe, потому что `LIMIT` применяется перед вторым `FILTER`. Во второй блок `FILTER` попадает не более 5 документов, и не все из них удовлетворяют критерию пола, даже если в коллекции более 5 активных пользователей женского пола. Более детерминированного результата можно добиться, добавив блок `SORT`:
+
+<!-- 0013.part.md -->
 
 ```aql
 FOR u IN users
@@ -104,9 +108,11 @@ FOR u IN users
   RETURN u
 ```
 
-This will return the users _Mariah_, _Mary_, and _Isabella_. If sorted by age in
-`DESC` order, then the _Sophia_ and _Emma_ documents are returned. A `FILTER` after a
-`LIMIT` is not very common however, and you probably want such a query instead:
+<!-- 0014.part.md -->
+
+Это вернет пользователей _Mariah_, _Mary_ и _Isabella_. Если отсортировать по возрасту в порядке `DESC`, то будут возвращены документы _Sophia_ и _Emma_. Однако `FILTER` после `LIMIT` не очень распространен, и вам, вероятно, нужен такой запрос:
+
+<!-- 0015.part.md -->
 
 ```aql
 FOR u IN users
@@ -116,7 +122,8 @@ FOR u IN users
   RETURN u
 ```
 
-The significance of where `FILTER` blocks are placed allows that this single
-keyword can assume the roles of two SQL keywords, `WHERE` as well as `HAVING`.
-AQL's `FILTER` thus works with `COLLECT` aggregates the same as with any other
-intermediate result, document attribute etc.
+<!-- 0016.part.md -->
+
+Значение места размещения блоков `FILTER` позволяет этому единственному ключевому слову брать на себя роль двух ключевых слов SQL, `WHERE` и `HAVING`. Таким образом, `FILTER` в AQL работает с агрегатами `COLLECT` так же, как и с любым другим промежуточным результатом, атрибутом документа и т.д.
+
+<!-- 0017.part.md -->

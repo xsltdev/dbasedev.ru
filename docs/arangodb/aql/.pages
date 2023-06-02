@@ -6,6 +6,6 @@ nav:
     - operators.md
     - data-queries.md
     - operations
-#    - functions
+    - functions
 #    - graphs
 #    - advanced

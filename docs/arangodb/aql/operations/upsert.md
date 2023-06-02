@@ -1,47 +1,31 @@
 # UPSERT
 
-The `UPSERT` keyword can be used for checking whether certain documents exist,
-and to update/replace them in case they exist, or create them in case they do not exist.
+Ключевое слово `UPSERT` может быть использовано для проверки существования определенных документов, а также для их обновления/замены, если они существуют, или создания, если их не существует.
 
-Each `UPSERT` operation is restricted to a single collection, and the
-[collection name](../appendix-glossary.html#collection-name) must not be dynamic.
-Only a single `UPSERT` statement per collection is allowed per AQL query, and
-it cannot be followed by read or write operations that access the same collection, by
-traversal operations, or AQL functions that can read documents.
+Каждая операция `UPSERT` ограничена одной коллекцией, и имя коллекции не должно быть динамическим. Только один оператор `UPSERT` для коллекции разрешен в одном запросе AQL, и за ним не могут следовать операции чтения или записи, которые обращаются к той же коллекции, операции обхода или функции AQL, которые могут читать документы.
 
-## Syntax
+## Синтаксис
 
-The syntax for upsert and repsert operations is:
+Синтаксис операций `upsert` и `repsert` следующий:
 
 <pre><code>UPSERT <em>searchExpression</em> INSERT <em>insertExpression</em> UPDATE <em>updateExpression</em> IN <em>collection</em>
 UPSERT <em>searchExpression</em> INSERT <em>insertExpression</em> REPLACE <em>updateExpression</em> IN <em>collection</em></code></pre>
 
-Both variants can optionally end with an `OPTIONS { … }` clause.
+Оба варианта могут опционально заканчиваться предложением `OPTIONS { ... }`.
 
-When using the `UPDATE` variant of the upsert operation, the found document
-will be partially updated, meaning only the attributes specified in
-_updateExpression_ will be updated or added. When using the `REPLACE` variant
-of upsert (repsert), existing documents will be replaced with the contexts of
-_updateExpression_.
+При использовании варианта `UPDATE` операции `upsert` найденный документ будет частично обновлен, то есть будут обновлены или добавлены только атрибуты, указанные в _updateExpression_. При использовании `REPLACE` варианта операции `upsert` (`repsert`), существующие документы будут заменены контекстами _updateExpression_.
 
-Updating a document will modify the document's revision number with a server-generated value.
-The system attributes `_id`, `_key` and `_rev` cannot be updated, `_from` and `_to` can.
+Обновление документа изменит номер ревизии документа на генерируемое сервером значение. Системные атрибуты `_id`, `_key` и `_rev` не могут быть обновлены, `_from` и `_to` могут.
 
-The _searchExpression_ contains the document to be looked for. It must be an object
-literal without dynamic attribute names. In case no such document can be found in
-_collection_, a new document will be inserted into the collection as specified in the
-_insertExpression_.
+Выражение _searchExpression_ содержит документ, который нужно искать. Это должен быть литерал объекта без динамических имен атрибутов. Если в _коллекции_ такой документ не найден, в коллекцию будет вставлен новый документ, указанный в _insertExpression_.
 
-In case at least one document in _collection_ matches the _searchExpression_, it will
-be updated using the _updateExpression_. When more than one document in the collection
-matches the _searchExpression_, it is undefined which of the matching documents will
-be updated. It is therefore often sensible to make sure by other means (such as unique
-indexes, application logic etc.) that at most one document matches _searchExpression_.
+Если хотя бы один документ в _коллекции_ соответствует _searchExpression_, он будет обновлен с помощью _updateExpression_. Если более одного документа в коллекции соответствует _поисковомувыражению_, не определено, какой из документов будет обновлен. Поэтому часто целесообразно убедиться другими способами (например, с помощью уникальных индексов, логики приложения и т.д.), что только один документ соответствует _searchExpression_.
 
-The following query will look in the _users_ collection for a document with a specific
-_name_ attribute value. If the document exists, its _logins_ attribute will be increased
-by one. If it does not exist, a new document will be inserted, consisting of the
-attributes _name_, _logins_, and _dateCreated_:
+<!-- 0001.part.md -->
+
+Следующий запрос будет искать в коллекции _users_ документ с определенным значением атрибута _name_. Если документ существует, то его атрибут _logins_ будет увеличен на единицу. Если он не существует, будет вставлен новый документ, состоящий из атрибутов _name_, _logins_ и _dateCreated_:
+
+<!-- 0002.part.md -->
 
 ```aql
 UPSERT { name: 'superuser' }
@@ -49,43 +33,37 @@ INSERT { name: 'superuser', logins: 1, dateCreated: DATE_NOW() }
 UPDATE { logins: OLD.logins + 1 } IN users
 ```
 
-Note that in the `UPDATE` case it is possible to refer to the previous version of the
-document using the `OLD` pseudo-value.
+<!-- 0003.part.md -->
 
-## Query options
+Обратите внимание, что в случае `UPDATE` можно ссылаться на предыдущую версию документа, используя псевдо-значение `OLD`.
+
+## Параметры запроса
 
 ### `ignoreErrors`
 
-The `ignoreErrors` option can be used to suppress query errors that may occur
-when trying to violate unique key constraints.
+Опция `ignoreErrors` может быть использована для подавления ошибок запроса, которые могут возникнуть при попытке нарушить ограничения уникального ключа.
 
 ### `keepNull`
 
-When updating or replacing an attribute with a null value, ArangoDB will not remove the
-attribute from the document but store a null value for it. To get rid of attributes in
-an upsert operation, set them to null and provide the `keepNull` option.
+При обновлении или замене атрибута с нулевым значением ArangoDB не будет удалять атрибут из документа, а сохранит для него нулевое значение. Чтобы избавиться от атрибутов в операции upsert, установите для них значение `null` и предоставьте опцию `keepNull`.
 
 ### `mergeObjects`
 
-The option `mergeObjects` controls whether object contents will be
-merged if an object attribute is present in both the `UPDATE` query and in the
-to-be-updated document.
+Опция `mergeObjects` определяет, будет ли содержимое объекта объединено, если атрибут объекта присутствует как в запросе `UPDATE`, так и в обновляемом документе.
 
-{% hint 'tip' %}
-The default value for `mergeObjects` is `true`, so there is no need to specify it
-explicitly.
-{% endhint %}
+!!!tip ""
+
+    Значение по умолчанию для `mergeObjects` равно `true`, поэтому нет необходимости указывать его явно.
 
 ### `waitForSync`
 
-To make sure data are durable when an update query returns, there is the `waitForSync`
-query option.
+Для обеспечения долговечности данных при возврате запроса обновления существует опция запроса `waitForSync`.
 
 ### `ignoreRevs`
 
-In order to not accidentally update documents that have been written and updated since
-you last fetched them you can use the option `ignoreRevs` to either let ArangoDB compare
-the `_rev` value and only succeed if they still match, or let ArangoDB ignore them (default):
+Чтобы случайно не обновить документы, которые были написаны и обновлены с момента последнего получения, вы можете использовать опцию `ignoreRevs`, чтобы позволить ArangoDB сравнивать значение `_rev` и добиваться успеха, только если они совпадают, или позволить ArangoDB игнорировать их (по умолчанию):
+
+<!-- 0004.part.md -->
 
 ```aql
 FOR i IN 1..1000
@@ -95,24 +73,19 @@ FOR i IN 1..1000
   IN users OPTIONS { ignoreRevs: false }
 ```
 
-{% hint 'info' %}
-You need to add the `_rev` value in the _updateExpression_. It will not be used
-within the _searchExpression_. Even worse, if you use an outdated `_rev` in the
-_searchExpression_, `UPSERT` will trigger the `INSERT` path instead of the
-`UPDATE` path, because it has not found a document exactly matching the
-_searchExpression_.
-{% endhint %}
+<!-- 0005.part.md -->
+
+!!!info ""
+
+    Вам необходимо добавить значение `_rev` в *updateExpression*. Оно не будет использоваться в *searchExpression*. Хуже того, если вы используете устаревшее значение `_rev` в *searchExpression*, `UPSERT` запустит путь `INSERT` вместо пути `UPDATE`, потому что он не нашел документ, точно соответствующий *searchExpression*.
 
 ### `exclusive`
 
-The RocksDB engine does not require collection-level locks. Different write
-operations on the same collection do not block each other, as
-long as there are no _write-write conflicts_ on the same documents. From an application
-development perspective it can be desired to have exclusive write access on collections,
-to simplify the development. Note that writes do not block reads in RocksDB.
-Exclusive access can also speed up modification queries, because we avoid conflict checks.
+Движок RocksDB не требует блокировок на уровне коллекции. Различные операции записи в одну и ту же коллекцию не блокируют друг друга, пока нет конфликтов _запись-запись_ на одних и тех же документах. С точки зрения разработки приложений может быть желательным иметь исключительный доступ на запись в коллекции, чтобы упростить разработку. Обратите внимание, что записи не блокируют чтения в RocksDB. Исключительный доступ также может ускорить запросы на модификацию, так как мы избегаем проверки конфликтов.
 
-Use the `exclusive` option to achieve this effect on a per query basis:
+Используйте опцию `exclusive` для достижения этого эффекта на основе каждого запроса:
+
+<!-- 0006.part.md -->
 
 ```aql
 FOR i IN 1..1000
@@ -122,11 +95,13 @@ FOR i IN 1..1000
   IN users OPTIONS { exclusive: true }
 ```
 
+<!-- 0007.part.md -->
+
 ### `indexHint`
 
-The `indexHint` option will be used as a hint for the document lookup
-performed as part of the `UPSERT` operation, and can help in cases such as
-`UPSERT` not picking the best index automatically.
+Опция `indexHint` будет использоваться в качестве подсказки для поиска документа, выполняемого в рамках операции `UPSERT`, и может помочь в таких случаях, как `UPSERT` не выбирает лучший индекс автоматически.
+
+<!-- 0008.part.md -->
 
 ```aql
 UPSERT { a: 1234 }
@@ -135,14 +110,15 @@ UPSERT { a: 1234 }
   OPTIONS { indexHint: "index_name" }
 ```
 
-The index hint is passed through to an internal `FOR` loop that is used for the
-lookup. Also see [`indexHint` Option of the `FOR` Operation](operations-for.html#indexhint).
+<!-- 0009.part.md -->
+
+Подсказка индекса передается во внутренний цикл `FOR`, который используется для поиска. Также смотрите [Опция `indexHint` операции `FOR`](operations-for.html#indexhint).
 
 ### `forceIndexHint`
 
-Makes the index or indexes specified in `indexHint` mandatory if enabled. The
-default is `false`. Also see
-[`forceIndexHint` Option of the `FOR` Operation](operations-for.html#forceindexhint).
+Делает индекс или индексы, указанные в `indexHint`, обязательными, если они включены. По умолчанию `false`. Также смотрите [Опция `forceIndexHint` операции `FOR`](for.md).
+
+<!-- 0010.part.md -->
 
 ```aql
 UPSERT { a: 1234 }
@@ -151,21 +127,17 @@ UPSERT { a: 1234 }
   OPTIONS { indexHint: … , forceIndexHint: true }
 ```
 
-## Returning documents
+<!-- 0011.part.md -->
 
-`UPSERT` statements can optionally return data. To do so, they need to be followed
-by a `RETURN` statement (intermediate `LET` statements are allowed, too). These statements
-can optionally perform calculations and refer to the pseudo-values `OLD` and `NEW`.
-In case the upsert performed an insert operation, `OLD` will have a value of `null`.
-In case the upsert performed an update or replace operation, `OLD` will contain the
-previous version of the document, before update/replace.
+## Возвращаемые документы
 
-`NEW` will always be populated. It will contain the inserted document in case the
-upsert performed an insert, or the updated/replaced document in case it performed an
-update/replace.
+Операторы `UPSERT` могут по желанию возвращать данные. Для этого за ними должен следовать оператор `RETURN` (допускаются также промежуточные операторы `LET`). Эти операторы могут по желанию выполнять вычисления и ссылаться на псевдо-значения `OLD` и `NEW`. В случае, если upsert выполнил операцию вставки, `OLD` будет иметь значение `null`. В случае если upsert выполнил операцию обновления или замены, `OLD` будет содержать предыдущую версию документа, до обновления/замены.
 
-This can also be used to check whether the upsert has performed an insert or an update
-internally:
+`NEW` всегда будет заполнен. Он будет содержать вставленный документ, если upsert выполнил вставку, или обновленный/замещенный документ, если он выполнил обновление/замену.
+
+Это также можно использовать для проверки того, выполнил ли upsert вставку или обновление:
+
+<!-- 0012.part.md -->
 
 ```aql
 UPSERT { name: 'superuser' }
@@ -174,55 +146,32 @@ UPDATE { logins: OLD.logins + 1 } IN users
 RETURN { doc: NEW, type: OLD ? 'update' : 'insert' }
 ```
 
-## Transactionality
+<!-- 0013.part.md -->
 
-On a single server, upserts are executed transactionally in an all-or-nothing
-fashion.
+## Транзакционность
 
-If the RocksDB engine is used and intermediate commits are enabled, a query may
-execute intermediate transaction commits in case the running transaction (AQL
-query) hits the specified size thresholds. In this case, the query's operations
-carried out so far will be committed and not rolled back in case of a later
-abort/rollback. That behavior can be controlled by adjusting the intermediate
-commit settings for the RocksDB engine.
+На одном сервере апсерты выполняются транзакционно по принципу "все или ничего".
 
-For sharded collections, the entire query and/or upsert operation may not be
-transactional, especially if it involves different shards and/or DB-Servers.
+Если используется движок RocksDB и включены промежуточные фиксации, запрос может выполнять промежуточные фиксации транзакций в случае, если запущенная транзакция (AQL-запрос) достигнет заданных пороговых значений размера. В этом случае операции запроса, выполненные до сих пор, будут зафиксированы и не будут откатаны в случае последующего отмены/отката. Это поведение можно контролировать, изменяя настройки промежуточной фиксации для движка RocksDB.
 
-## Limitations
+Для коллекций с шардированием весь запрос и/или операция upsert могут не быть транзакционными, особенно если они затрагивают разные шарды и/или DB-серверы.
 
-- The lookup and the insert/update/replace parts are executed one after
-  another, so that other operations in other threads can happen in
-  between. This means if multiple UPSERT queries run concurrently, they
-  may all determine that the target document does not exist and then
-  create it multiple times!
+## Ограничения
 
-  Note that due to this gap between the lookup and insert/update/replace,
-  even with a unique index there may be duplicate key errors or conflicts.
-  But if they occur, the application/client code can execute the same query
-  again.
+-   Части поиска и вставки/обновления/замены выполняются одна за другой, так что в промежутке могут выполняться другие операции в других потоках. Это означает, что если несколько запросов UPSERT выполняются одновременно, все они могут определить, что целевой документ не существует, а затем создать его несколько раз!
 
-  To prevent this from happening, one should add a unique index to the lookup
-  attribute(s). Note that in the cluster a unique index can only be created if
-  it is equal to the shard key attribute of the collection or at least contains
-  it as a part.
+    Обратите внимание, что из-за этого разрыва между поиском и вставкой/обновлением/заменой, даже при наличии уникального индекса могут возникать ошибки дублирования ключей или конфликты. Но если они возникнут, код приложения/клиента может повторно выполнить тот же самый запрос.
 
-  An alternative to making an UPSERT statement work atomically is to use the
-  `exclusive` option to limit write concurrency for this collection to 1, which
-  helps avoiding conflicts but is bad for throughput!
+    Чтобы этого не произошло, необходимо добавить уникальный индекс к атрибуту(ам) поиска. Обратите внимание, что в кластере уникальный индекс может быть создан только в том случае, если он равен атрибуту ключа шарда коллекции или, по крайней мере, содержит его как часть.
 
-- Using very large transactions in an UPSERT (e.g. UPSERT over all documents in
-  a collection) an **intermediate commit** can be triggered. This intermediate
-  commit will write the data that has been modified so far. However this will
-  have the side-effect that atomicity of this operation cannot be guaranteed
-  anymore and that ArangoDB cannot guarantee to that read your own writes in
-  upsert will work.
+    Альтернативой тому, чтобы заставить оператор UPSERT работать атомарно, является использование опции `exclusive` для ограничения параллелизма записи для этой коллекции до 1, что помогает избежать конфликтов, но плохо для throughput!
 
-  This will only be an issue if you write a query where your search condition
-  would hit the same document multiple times, and only if you have large
-  transactions. In order to avoid this issues you can increase the
-  `intermediateCommit` thresholds for data and operation counts.
+-   При использовании очень больших транзакций в UPSERT (например, UPSERT над всеми документами в коллекции) может быть запущен **промежуточный коммит**. Этот промежуточный коммит запишет данные, которые были изменены на данный момент. Однако это будет иметь побочный эффект: атомарность этой операции больше не может быть гарантирована, и ArangoDB не может гарантировать, что чтение ваших собственных записей в upsert будет работать.
 
-- The lookup attribute(s) from the search expression should be indexed in order
-  to improve UPSERT performance. Ideally, the search expression contains the
-  shard key, as this allows the lookup to be restricted to a single shard.
+<!-- 0014.part.md -->
+
+    Это будет проблемой только в том случае, если вы пишете запрос, в котором условие поиска попадает на один и тот же документ несколько раз, и только в том случае, если у вас большие транзакции. Чтобы избежать этой проблемы, вы можете увеличить пороговые значения `intermediateCommit` для количества данных и операций.
+
+-   Атрибут(ы) поиска из поискового выражения должен быть проиндексирован для улучшения производительности UPSERT. В идеале, поисковое выражение содержит ключ шарда, так как это позволяет ограничить поиск одним шардом.
+
+<!-- 0015.part.md -->

@@ -1,164 +1,172 @@
 # UPDATE
 
-{{ page.description }}
-{:class="lead"}
+Каждая операция `UPDATE` ограничена одной коллекцией, и имя коллекции не должно быть динамическим. В одном запросе AQL допускается только один оператор `UPDATE` для одной коллекции, и за ним не могут следовать операции чтения или записи, обращающиеся к той же коллекции, операции обхода или функции AQL, которые могут читать документы.
 
-Each `UPDATE` operation is restricted to a single collection, and the
-[collection name](../appendix-glossary.html#collection-name) must not be dynamic.
-Only a single `UPDATE` statement per collection is allowed per AQL query, and
-it cannot be followed by read or write operations that access the same collection,
-by traversal operations, or AQL functions that can read documents.
+Нельзя обновлять системные атрибуты `_id`, `_key` и `_rev`, но можно обновлять атрибуты `_from` и `_to`.
 
-You cannot update the `_id`, `_key`, and `_rev` system attributes, but you can
-update the `_from` and `_to` attributes.
+Обновление документа изменяет номер ревизии документа (атрибут `_rev`) на генерируемое сервером значение.
 
-Updating a document modifies the document's revision number (`_rev` attribute)
-with a server-generated value.
+## Синтаксис
 
-## Syntax
-
-The two syntaxes for an update operation are:
+Для операции обновления существует два синтаксиса:
 
 <pre><code>UPDATE <em>document</em> IN <em>collection</em>
 UPDATE <em>keyExpression</em> WITH <em>document</em> IN <em>collection</em></code></pre>
 
-Both variants can optionally end with an `OPTIONS { … }` clause.
+Оба варианта могут опционально заканчиваться предложением `OPTIONS { ... }`.
 
-`collection` must contain the name of the collection in which the document
-should be updated.
+`collection` должно содержать имя коллекции, в которой должен быть обновлен документ.
 
-`document` must be an object and contain the attributes and values to update.
-**Attributes that don't yet exist** in the stored document **are added** to it.
-**Existing attributes are set to the provided attribute values** (excluding the
-immutable `_id` and `_key` attributes and the system-managed `_rev` attribute).
-The operation leaves other existing attributes not specified in `document` untouched.
-This distinguishes the `UPDATE` from the `REPLACE` operation, which affects all
-attributes of the stored document and not only the attributes you specify in the
-operation.
+`document` должен быть объектом и содержать атрибуты и значения для обновления. **Атрибуты, которые еще не существуют** в хранимом документе, **добавляются** к нему. **Существующие атрибуты устанавливаются в предоставленные значения атрибутов** (за исключением неизменяемых атрибутов `_id` и `_key` и управляемого системой атрибута `_rev`). Операция оставляет нетронутыми другие существующие атрибуты, не указанные в `document`. Это отличает операцию `UPDATE` от операции `REPLACE`, которая затрагивает все атрибуты хранимого документа, а не только те, которые вы указали в операции.
 
-Sub-attributes are recursively merged by default, but you can let top-level
-attributes replace existing ones by disabling the [`mergeObjects` option](#mergeobjects).
+Под-атрибуты рекурсивно объединяются по умолчанию, но вы можете позволить атрибутам верхнего уровня заменить существующие, отключив опцию `mergeObjects`.
 
 ### `UPDATE <document> IN <collection>`
 
-Using the first syntax, the `document` object must have a `_key` attribute with
-the document key. The existing document with this key is updated with the
-attributes provided by the `document` object (except for the `_id`, `_key`, and
-`_rev` system attributes).
+При использовании первого синтаксиса объект `document` должен иметь атрибут `_key` с ключом документа. Существующий документ с этим ключом обновляется атрибутами, предоставленными объектом `document` (за исключением системных атрибутов `_id`, `_key` и `_rev`).
 
-The following query adds or updates the `name` attribute of the document
-identified by the key `my_key` in the `users` collection. The key is passed via
-the `_key` attribute alongside other attributes:
+<!-- 0001.part.md -->
+
+Следующий запрос добавляет или обновляет атрибут `name` документа, идентифицированного ключом `my_key` в коллекции `users`. Ключ передается через атрибут `_key` наряду с другими атрибутами:
+
+<!-- 0002.part.md -->
 
 ```aql
 UPDATE { _key: "my_key", name: "Jon" } IN users
 ```
 
-The following query is invalid because the object does not contain a `_key`
-attribute and thus it is not possible to determine the document to
-be updated:
+<!-- 0003.part.md -->
+
+Следующий запрос является некорректным, поскольку объект не содержит атрибута `_key` и поэтому невозможно определить обновляемый документ:
+
+<!-- 0004.part.md -->
 
 ```aql
 UPDATE { name: "Jon" } IN users
 ```
 
-You can combine the `UPDATE` operation with a `FOR` loop to determine the
-necessary key attributes, like shown below:
+<!-- 0005.part.md -->
+
+Вы можете объединить операцию `UPDATE` с циклом `FOR` для определения необходимых ключевых атрибутов, как показано ниже:
+
+<!-- 0006.part.md -->
 
 ```aql
 FOR u IN users
   UPDATE { _key: u._key, name: CONCAT(u.firstName, " ", u.lastName) } IN users
 ```
 
-Note that the `UPDATE` and `FOR` operations are independent of each other and
-`u` does not automatically define a document for the `UPDATE` statement.
-Thus, the following query is invalid:
+<!-- 0007.part.md -->
+
+Обратите внимание, что операции `UPDATE` и `FOR` независимы друг от друга, и `u` не определяет автоматически документ для оператора `UPDATE`. Таким образом, следующий запрос является некорректным:
+
+<!-- 0008.part.md -->
 
 ```aql
 FOR u IN users
   UPDATE { name: CONCAT(u.firstName, " ", u.lastName) } IN users
 ```
 
+<!-- 0009.part.md -->
+
 ### `UPDATE <keyExpression> WITH <document> IN <collection>`
 
-Using the second syntax, the document to update is defined by the
-`keyExpression`. It can either be a string with the document key, an object
-which contains a `_key` attribute with the document key, or an expression that
-evaluates to either of these two. The existing document with this key is
-updated with the attributes provided by the `document` object (except for
-the `_id`, `_key`, and `_rev` system attributes).
+При использовании второго синтаксиса документ для обновления определяется `keyExpression`. Это может быть либо строка с ключом документа, либо объект, содержащий атрибут `_key` с ключом документа, либо выражение, которое оценивается как одно из этих двух. Существующий документ с этим ключом обновляется атрибутами, предоставленными объектом `document` (за исключением системных атрибутов `_id`, `_key` и `_rev`).
 
-The following query adds or updates the `name` attribute of the document
-identified by the key `my_key` in the `users` collection. The key is passed as
-a string in the `keyExpression`. The attributes to add or update are passed
-separately as the `document` object:
+Следующий запрос добавляет или обновляет атрибут `name` документа, идентифицированного ключом `my_key` в коллекции `users`. Ключ передается в виде строки в `keyExpression`. Атрибуты для добавления или обновления передаются отдельно как объект `document`:
+
+<!-- 0010.part.md -->
 
 ```aql
 UPDATE "my_key" WITH { name: "Jon" } IN users
 ```
 
-The `document` object may contain a `_key` attribute, but it is ignored.
+<!-- 0011.part.md -->
 
-You cannot define the document to update using an `_id` attribute, nor pass a
-document identifier as a string (like `"users/john"`). However, you can use
-`PARSE_IDENTIFIER(<id>).key` as `keyExpression` to get the document key as a
-string:
+Объект `document` может содержать атрибут `_key`, но он игнорируется.
+
+Вы не можете определить документ для обновления с помощью атрибута `_id` или передать идентификатор документа в виде строки (например, `"users/john"`). Однако вы можете использовать `PARSE_IDENTIFIER(<id>).key` в качестве `keyExpression` для получения ключа документа в виде строки:
+
+<!-- 0012.part.md -->
 
 ```aql
 LET key = PARSE_IDENTIFIER("users/john").key
 UPDATE key WITH { ... } IN users
 ```
 
-### Comparison of the syntaxes
+<!-- 0013.part.md -->
 
-Both syntaxes of the `UPDATE` operation allow you to define the document to
-modify and the attributes to add or update. The document to update is effectively
-identified by a document key in combination with the specified collection.
+### Сравнение синтаксисов
 
-The `UPDATE` operation supports different ways of specifying the document key.
-You can choose the syntax variant that is the most convenient for you.
+Оба синтаксиса операции `UPDATE` позволяют вам определить документ для изменения и атрибуты для добавления или обновления. Документ для обновления эффективно идентифицируется ключом документа в сочетании с указанной коллекцией.
 
-The following queries are equivalent:
+Операция `UPDATE` поддерживает различные способы указания ключа документа. Вы можете выбрать наиболее удобный для вас вариант синтаксиса.
+
+Следующие запросы эквивалентны:
+
+<!-- 0014.part.md -->
 
 ```aql
 FOR u IN users
   UPDATE u WITH { name: CONCAT(u.firstName, " ", u.lastName) } IN users
 ```
 
+<!-- 0015.part.md -->
+
+<!-- 0016.part.md -->
+
 ```aql
 FOR u IN users
   UPDATE u._key WITH { name: CONCAT(u.firstName, " ", u.lastName) } IN users
 ```
+
+<!-- 0017.part.md -->
+
+<!-- 0018.part.md -->
 
 ```aql
 FOR u IN users
   UPDATE { _key: u._key } WITH { name: CONCAT(u.firstName, " ", u.lastName) } IN users
 ```
 
+<!-- 0019.part.md -->
+
+<!-- 0020.part.md -->
+
 ```aql
 FOR u IN users
   UPDATE { _key: u._key, name: CONCAT(u.firstName, " ", u.lastName) } IN users
 ```
 
-## Dynamic key expressions
+<!-- 0021.part.md -->
 
-An `UPDATE` operation may update arbitrary documents, using either of the two
-syntaxes:
+## Выражения динамических ключей
+
+Операция `UPDATE` может обновлять произвольные документы, используя любой из двух синтаксисов:
+
+<!-- 0022.part.md -->
 
 ```aql
 FOR i IN 1..1000
   UPDATE { _key: CONCAT("test", i), name: "Paula" } IN users
 ```
 
+<!-- 0023.part.md -->
+
+<!-- 0024.part.md -->
+
 ```aql
 FOR i IN 1..1000
   UPDATE CONCAT("test", i) WITH { name: "Paula" } IN users
 ```
 
-## Target a different collection
+<!-- 0025.part.md -->
 
-The documents an `UPDATE` operation modifies can be in a different collection
-than the ones produced by a preceding `FOR` operation:
+## Нацелить на другую коллекцию
+
+Документы, которые изменяет операция `UPDATE`, могут находиться в другой коллекции, чем те, которые были созданы предыдущей операцией `FOR`:
+
+<!-- 0026.part.md -->
 
 ```aql
 FOR u IN users
@@ -166,22 +174,17 @@ FOR u IN users
   UPDATE u WITH { status: "inactive" } IN backup
 ```
 
-Note how documents are read from the `users` collection but updated in another
-collection called `backup`. Both collections need to use matching document keys
-for this to work.
+<!-- 0027.part.md -->
 
-Although the `u` variable holds a whole document, it is only used to define the
-target document. The `_key` attribute of the object is extracted and the target
-document is solely defined by the document key string value and the specified
-collection of the `UPDATE` operation (`backup`). There is no link to the
-original collection (`users`).
+Обратите внимание, как документы считываются из коллекции `users`, но обновляются в другой коллекции `backup`. Чтобы это работало, обе коллекции должны использовать совпадающие ключи документов.
 
-## Using the current value of a document attribute
+Хотя переменная `u` содержит целый документ, она используется только для определения целевого документа. Атрибут `_key` объекта извлекается, и целевой документ определяется только значением строки ключа документа и указанной коллекцией операции `UPDATE` (`backup`). Ссылка на исходную коллекцию (`users`) отсутствует.
 
-The pseudo-variable `OLD` is not supported inside of `WITH` clauses (it is
-available after `UPDATE`). To access the current attribute value, you can
-usually refer to a document via the variable of the `FOR` loop, which is used
-to iterate over a collection:
+## Использование текущего значения атрибута документа
+
+Псевдопеременная `OLD` не поддерживается в выражениях `WITH` (она доступна после `UPDATE`). Чтобы получить доступ к текущему значению атрибута, обычно можно обратиться к документу через переменную цикла `FOR`, который используется для итерации по коллекции:
+
+<!-- 0028.part.md -->
 
 ```aql
 FOR doc IN users
@@ -190,16 +193,21 @@ FOR doc IN users
   } IN users
 ```
 
-If there is no loop, because a single document is updated only, then there
-might not be a variable like above (`doc`), which would let you refer to the
-document which is being updated:
+<!-- 0029.part.md -->
+
+Если цикла нет, потому что обновляется только один документ, то может не быть переменной, как указано выше (`doc`), которая позволит вам ссылаться на обновляемый документ:
+
+<!-- 0030.part.md -->
 
 ```aql
 UPDATE "john" WITH { ... } IN users
 ```
 
-To access the current value in this situation, you need to retrieve the document
-first and store it in a variable:
+<!-- 0031.part.md -->
+
+Чтобы получить доступ к текущему значению в этой ситуации, необходимо сначала получить документ и сохранить его в переменной:
+
+<!-- 0032.part.md -->
 
 ```aql
 LET doc = FIRST(FOR u IN users FILTER u._key == "john" RETURN u)
@@ -208,8 +216,11 @@ UPDATE doc WITH {
 } IN users
 ```
 
-You can modify an existing attribute based on its current value this way,
-to increment a counter for instance:
+<!-- 0033.part.md -->
+
+Таким образом можно изменить существующий атрибут на основе его текущего значения, например, увеличить счетчик:
+
+<!-- 0034.part.md -->
 
 ```aql
 UPDATE doc WITH {
@@ -217,11 +228,13 @@ UPDATE doc WITH {
 } IN users
 ```
 
-If the attribute `karma` doesn't exist yet, `doc.karma` evaluates to `null`.
-The expression `null + 1` results in the new attribute `karma` being set to `1`.
-If the attribute does exist, then it is increased by `1`.
+<!-- 0035.part.md -->
 
-Arrays can be mutated, too:
+Если атрибут `karma` еще не существует, `doc.karma` оценивается в `null`. Выражение `null + 1` приводит к тому, что новый атрибут `karma` устанавливается в `1`. Если атрибут уже существует, то он увеличивается на `1`.
+
+Массивы также могут быть изменены:
+
+<!-- 0036.part.md -->
 
 ```aql
 UPDATE doc WITH {
@@ -229,21 +242,27 @@ UPDATE doc WITH {
 } IN users
 ```
 
-If the attribute `hobbies` doesn't exist yet, it is conveniently initialized
-as `[ "swimming" ]` and otherwise extended.
+<!-- 0037.part.md -->
 
-## Query options
+Если атрибут `hobbies` еще не существует, его удобно инициализировать как `["swimming" ]` и в противном случае расширить.
 
-You can optionally set query options for the `UPDATE` operation:
+## Параметры запроса
+
+Вы можете опционально установить параметры запроса для операции `UPDATE`:
+
+<!-- 0038.part.md -->
 
 ```aql
 UPDATE ... IN users OPTIONS { ... }
 ```
 
+<!-- 0039.part.md -->
+
 ### `ignoreErrors`
 
-You can use `ignoreErrors` to suppress query errors that may occur when trying to
-update non-existing documents or when violating unique key constraints:
+Вы можете использовать `ignoreErrors` для подавления ошибок запроса, которые могут возникнуть при попытке обновления несуществующих документов или при нарушении ограничений уникального ключа:
+
+<!-- 0040.part.md -->
 
 ```aql
 FOR i IN 1..1000
@@ -252,15 +271,15 @@ FOR i IN 1..1000
   OPTIONS { ignoreErrors: true }
 ```
 
-You cannot modify the `_id`, `_key`, and `_rev` system attributes, but attempts
-to change them are ignored and not considered errors.
+<!-- 0041.part.md -->
+
+Вы не можете изменять системные атрибуты `_id`, `_key` и `_rev`, но попытки изменить их игнорируются и не считаются ошибками.
 
 ### `keepNull`
 
-When updating an attribute to the `null` value, ArangoDB does not remove the attribute
-from the document but stores this `null` value. To remove attributes in an update
-operation, set them to `null` and set the `keepNull` option to `false`. This removes
-the attributes you specify but not any previously stored attributes with the `null` value:
+При обновлении атрибута до значения `null`, ArangoDB не удаляет атрибут из документа, а сохраняет это значение `null`. Чтобы удалить атрибуты в операции обновления, задайте им значение `null` и установите опцию `keepNull` в `false`. При этом удаляются указанные вами атрибуты, но не все ранее сохраненные атрибуты со значением `null`:
+
+<!-- 0042.part.md -->
 
 ```aql
 FOR u IN users
@@ -268,18 +287,17 @@ FOR u IN users
   OPTIONS { keepNull: false }
 ```
 
-The above query removes the `notNeeded` attribute from the documents and updates
-the `foobar` attribute normally.
+<!-- 0043.part.md -->
+
+Приведенный выше запрос удаляет атрибут `notNeeded` из документов и нормально обновляет атрибут `foobar`.
 
 ### `mergeObjects`
 
-The option `mergeObjects` controls whether object contents are
-merged if an object attribute is present in both the `UPDATE` query and in the
-to-be-updated document.
+Опция `mergeObjects` управляет тем, объединяется ли содержимое объекта, если атрибут объекта присутствует как в запросе `UPDATE`, так и в обновляемом документе.
 
-The following query sets the updated document's `name` attribute to the exact
-same value that is specified in the query. This is due to the `mergeObjects` option
-being set to `false`:
+Следующий запрос устанавливает атрибут `name` обновленного документа в то же значение, которое указано в запросе. Это происходит из-за того, что опция `mergeObjects` установлена в `false`:
+
+<!-- 0044.part.md -->
 
 ```aql
 FOR u IN users
@@ -289,8 +307,11 @@ FOR u IN users
   OPTIONS { mergeObjects: false }
 ```
 
-Contrary, the following query merges the contents of the `name` attribute in the
-original document with the value specified in the query:
+<!-- 0045.part.md -->
+
+Напротив, следующий запрос объединяет содержимое атрибута `name` в исходном документе со значением, указанным в запросе:
+
+<!-- 0046.part.md -->
 
 ```aql
 FOR u IN users
@@ -300,17 +321,17 @@ FOR u IN users
   OPTIONS { mergeObjects: true }
 ```
 
-Attributes in `name` that are present in the to-be-updated document but not in the
-query are preserved. Attributes that are present in both are overwritten
-with the values specified in the query.
+<!-- 0047.part.md -->
 
-Note: the default value for `mergeObjects` is `true`, so there is no need to specify it
-explicitly.
+Атрибуты в `name`, которые присутствуют в обновляемом документе, но не в запросе, сохраняются. Атрибуты, присутствующие в обоих документах, перезаписываются значениями, указанными в запросе.
+
+Примечание: значение по умолчанию для `mergeObjects` равно `true`, поэтому нет необходимости указывать его явно.
 
 ### `waitForSync`
 
-To make sure data are durable when an update query returns, there is the `waitForSync`
-query option:
+Для обеспечения долговечности данных при выполнении запроса на обновление существует опция запроса `waitForSync`:
+
+<!-- 0048.part.md -->
 
 ```aql
 FOR u IN users
@@ -318,11 +339,13 @@ FOR u IN users
   OPTIONS { waitForSync: true }
 ```
 
+<!-- 0049.part.md -->
+
 ### `ignoreRevs`
 
-In order to not accidentally overwrite documents that have been modified since you last fetched
-them, you can use the option `ignoreRevs` to either let ArangoDB compare the `_rev` value and
-only succeed if they still match, or let ArangoDB ignore them (default):
+Чтобы случайно не перезаписать документы, которые были изменены с момента последнего извлечения, вы можете использовать опцию `ignoreRevs`, чтобы либо позволить ArangoDB сравнивать значение `_rev` и добиваться успеха, только если они совпадают, либо позволить ArangoDB игнорировать их (по умолчанию):
+
+<!-- 0050.part.md -->
 
 ```aql
 FOR i IN 1..1000
@@ -331,16 +354,15 @@ FOR i IN 1..1000
   OPTIONS { ignoreRevs: false }
 ```
 
+<!-- 0051.part.md -->
+
 ### `exclusive`
 
-The RocksDB engine does not require collection-level locks. Different write
-operations on the same collection do not block each other, as
-long as there are no _write-write conflicts_ on the same documents. From an application
-development perspective it can be desired to have exclusive write access on collections,
-to simplify the development. Note that writes do not block reads in RocksDB.
-Exclusive access can also speed up modification queries, because we avoid conflict checks.
+Движок RocksDB не требует блокировок на уровне коллекции. Различные операции записи в одну и ту же коллекцию не блокируют друг друга, если нет конфликтов _запись-запись_ на одних и тех же документах. С точки зрения разработки приложений может быть желательным иметь исключительный доступ на запись в коллекции, чтобы упростить разработку. Обратите внимание, что записи не блокируют чтения в RocksDB. Исключительный доступ также может ускорить запросы на модификацию, поскольку мы избегаем проверки конфликтов.
 
-Use the `exclusive` option to achieve this effect on a per query basis:
+Используйте опцию `exclusive` для достижения этого эффекта на основе каждого запроса:
+
+<!-- 0052.part.md -->
 
 ```aql
 FOR doc IN collection
@@ -349,26 +371,28 @@ FOR doc IN collection
   OPTIONS { exclusive: true }
 ```
 
+<!-- 0053.part.md -->
+
 ### `refillIndexCaches`
 
-Whether to update existing entries in the in-memory edge cache if
-edge documents are updated.
+Нужно ли обновлять существующие записи в кэше границ в памяти при обновлении документов границ.
+
+<!-- 0054.part.md -->
 
 ```aql
 UPDATE { _key: "123", _from: "vert/C", _to: "vert/D" } IN edgeColl
   OPTIONS { refillIndexCaches: true }
 ```
 
-## Returning the modified documents
+<!-- 0055.part.md -->
 
-You can optionally return the documents modified by the query. In this case, the `UPDATE`
-operation needs to be followed by a `RETURN` operation. Intermediate `LET` operations are
-allowed, too. These operations can refer to the pseudo-variables `OLD` and `NEW`.
-The `OLD` pseudo-variable refers to the document revisions before the update, and `NEW`
-refers to the document revisions after the update.
+## Возвращение измененных документов
 
-Both `OLD` and `NEW` contain all document attributes, even those not specified
-in the update expression.
+При желании можно вернуть документы, измененные запросом. В этом случае за операцией `UPDATE` должна следовать операция `RETURN`. Допускаются также промежуточные операции `LET`. Эти операции могут ссылаться на псевдопеременные `OLD` и `NEW`. Псевдопеременная `OLD` ссылается на ревизии документа до обновления, а `NEW` - на ревизии документа после обновления.
+
+И `OLD`, и `NEW` содержат все атрибуты документа, даже те, которые не указаны в выражении обновления.
+
+<!-- 0056.part.md -->
 
 ```aql
 UPDATE document IN collection options RETURN OLD
@@ -377,8 +401,11 @@ UPDATE keyExpression WITH document IN collection options RETURN OLD
 UPDATE keyExpression WITH document IN collection options RETURN NEW
 ```
 
-Following is an example using a variable named `previous` to capture the original
-documents before modification. For each modified document, the document key is returned.
+<!-- 0057.part.md -->
+
+Ниже приведен пример использования переменной с именем `previous` для получения исходных документов до их модификации. Для каждого измененного документа возвращается ключ документа.
+
+<!-- 0058.part.md -->
 
 ```aql
 FOR u IN users
@@ -387,8 +414,11 @@ FOR u IN users
   RETURN previous._key
 ```
 
-The following query uses the `NEW` pseudo-value to return the updated documents,
-without some of the system attributes:
+<!-- 0059.part.md -->
+
+Следующий запрос использует псевдо-значение `NEW`, чтобы вернуть обновленные документы без некоторых системных атрибутов:
+
+<!-- 0060.part.md -->
 
 ```aql
 FOR u IN users
@@ -397,7 +427,11 @@ FOR u IN users
   RETURN UNSET(updated, "_key", "_id", "_rev")
 ```
 
-It is also possible to return both `OLD` and `NEW`:
+<!-- 0061.part.md -->
+
+Также можно вернуть и `OLD`, и `NEW`:
+
+<!-- 0062.part.md -->
 
 ```aql
 FOR u IN users
@@ -405,17 +439,14 @@ FOR u IN users
   RETURN { before: OLD, after: NEW }
 ```
 
-## Transactionality
+<!-- 0063.part.md -->
 
-On a single server, updates are executed transactionally in an all-or-nothing
-fashion.
+## Транзакционность
 
-If the RocksDB engine is used and intermediate commits are enabled, a query may
-execute intermediate transaction commits in case the running transaction (AQL
-query) hits the specified size thresholds. In this case, the query's operations
-carried out so far are committed and not rolled back in case of a later
-abort/rollback. That behavior can be controlled by adjusting the intermediate
-commit settings for the RocksDB engine.
+На одном сервере обновления выполняются транзакционно по принципу "все или ничего".
 
-For sharded collections, the entire query and/or update operation may not be
-transactional, especially if it involves different shards and/or DB-Servers.
+Если используется движок RocksDB и включены промежуточные фиксации, запрос может выполнять промежуточные фиксации транзакций в случае, если запущенная транзакция (AQL-запрос) достигает заданных пороговых значений размера. В этом случае операции запроса, выполненные до этого момента, фиксируются и не откатываются в случае последующего отмены/отката. Это поведение можно контролировать, изменяя настройки промежуточной фиксации для движка RocksDB.
+
+Для коллекций с шардированием вся операция запроса и/или обновления может не быть транзакционной, особенно если она затрагивает разные шарды и/или DB-серверы.
+
+<!-- 0064.part.md -->

@@ -112,14 +112,11 @@ FOR … IN … OPTIONS { indexHint: … , forceIndexHint: true }
 
 <small>Добавлено в: v3.9.1</small>
 
-In some rare cases it can be beneficial to not do an index lookup or scan,
-but to do a full collection scan.
-An index lookup can be more expensive than a full collection scan if
-the index lookup produces many (or even all documents) and the query cannot
-be satisfied from the index data alone.
+В некоторых редких случаях может быть выгодно не выполнять поиск или сканирование индекса, а выполнить полное сканирование коллекции. Поиск по индексу может быть дороже, чем сканирование полной коллекции, если поиск по индексу выдает много (или даже все документы), а запрос не может быть удовлетворен только на основе данных индекса.
 
-Consider the following query and an index on the `value` attribute being
-present:
+Рассмотрим следующий запрос и индекс на присутствие атрибута `value`:
+
+<!-- 0001.part.md -->
 
 ```aql
 FOR doc IN collection
@@ -127,18 +124,13 @@ FOR doc IN collection
   RETURN doc.other
 ```
 
-In this case, the optimizer will likely pick the index on `value`, because
-it will cover the query's `FILTER` condition. To return the value for the
-`other` attribute, the query must additionally look up the documents for
-each index value that passes the `FILTER` condition. If the number of
-index entries is large (close or equal to the number of documents in the
-collection), then using an index can cause more work than just scanning
-over all documents in the collection.
+<!-- 0002.part.md -->
 
-The optimizer will likely prefer index scans over full collection scans,
-even if an index scan turns out to be slower in the end.
-You can force the optimizer to not use an index for any given `FOR`
-loop by using the `disableIndex` hint and setting it to `true`:
+В этом случае оптимизатор, скорее всего, выберет индекс на `value`, потому что он будет удовлетворять условию `FILTER` запроса. Чтобы вернуть значение атрибута `other`, запрос должен дополнительно просмотреть документы для каждого значения индекса, которое удовлетворяет условию `FILTER`. Если количество записей индекса велико (близко или равно количеству документов в коллекции), то использование индекса может вызвать больше работы, чем простое сканирование всех документов в коллекции.
+
+Оптимизатор, скорее всего, предпочтет сканирование индекса полному сканированию коллекции, даже если сканирование индекса в итоге окажется медленнее. Вы можете заставить оптимизатора не использовать индекс для любого цикла `FOR`, используя подсказку `disableIndex` и установив ее в значение `true`:
+
+<!-- 0003.part.md -->
 
 ```aql
 FOR doc IN collection OPTIONS { disableIndex: true }
@@ -146,57 +138,47 @@ FOR doc IN collection OPTIONS { disableIndex: true }
   RETURN doc.other
 ```
 
-Using `disableIndex: false` has no effect on geo indexes or fulltext indexes.
+<!-- 0004.part.md -->
 
-Note that setting `disableIndex: true` plus `indexHint` is ambiguous. In
-this case the optimizer will always prefer the `disableIndex` hint.
+Использование `disableIndex: false` не влияет на геоиндексы или полнотекстовые индексы.
+
+Обратите внимание, что установка `disableIndex: true` плюс `indexHint` является неоднозначной. В этом случае оптимизатор всегда предпочтет подсказку `disableIndex`.
 
 ### `maxProjections`
 
-<small>Introduced in: v3.9.1</small>
+<small>Введено в: v3.9.1</small>
 
-By default, the query optimizer will consider up to 5 document attributes
-per FOR loop to be used as projections. If more than 5 attributes of a
-collection are accessed in a `FOR` loop, the optimizer will prefer to
-extract the full document and not use projections.
+По умолчанию, оптимизатор запросов будет рассматривать не более 5 атрибутов документа на цикл FOR для использования в качестве проекций. Если в цикле `FOR` обращается более 5 атрибутов коллекции, оптимизатор предпочтет извлечь полный документ и не использовать проекции.
 
-The threshold value of 5 attributes is arbitrary and can be adjusted
-by using the `maxProjections` hint.
-The default value for `maxProjections` is `5`, which is compatible with the
-previously hard-coded default value.
+Пороговое значение в 5 атрибутов является произвольным и может быть изменено с помощью подсказки `maxProjections`. Значение по умолчанию для `maxProjections` равно `5`, что совместимо с ранее жестко заданным значением по умолчанию.
 
-For example, using a `maxProjections` hint of 7, the following query will
-extract 7 attributes as projections from the original document:
+Например, при использовании подсказки `maxProjections`, равной 7, следующий запрос извлечет 7 атрибутов в качестве проекций из исходного документа:
+
+<!-- 0005.part.md -->
 
 ```aql
 FOR doc IN collection OPTIONS { maxProjections: 7 }
   RETURN [ doc.val1, doc.val2, doc.val3, doc.val4, doc.val5, doc.val6, doc.val7 ]
 ```
 
-Normally it is not necessary to adjust the value of `maxProjections`, but
-there are a few corner cases where it can make sense:
+<!-- 0006.part.md -->
 
-- It can be beneficial to increase `maxProjections` when extracting many small
-  attributes from very large documents, and a full copy of the documents should
-  be avoided.
-- It can be beneficial to decrease `maxProjections` to _avoid_ using
-  projections, if the cost of projections is higher than doing copies of the
-  full documents. This can be the case for very small documents.
+Обычно нет необходимости корректировать значение `maxProjections`, но есть несколько угловых случаев, когда это может иметь смысл:
 
-{% hint 'info' %}
-Starting with version 3.10, `maxProjections` can be used in
-[Graph Traversals](graphs-traversals.html#working-with-named-graphs) (Enterprise Edition only).
-{% endhint %}
+- Может быть полезно увеличить `maxProjections` при извлечении множества мелких атрибутов из очень больших документов, при этом следует избегать полного копирования документов.
+- Может быть выгодно уменьшить `maxProjections`, чтобы _избежать_ использования проекций, если стоимость проекций выше, чем создание копий полных документов. Это может быть актуально для очень маленьких документов.
+
+!!!info ""
+
+    Начиная с версии 3.10, `maxProjections` можно использовать в [Graph Traversals](graphs-traversals.html#working-with-named-graphs) (только в Enterprise Edition).
 
 ### `useCache`
 
-<small>Introduced in: v3.10.0</small>
+<small>Введено в: v3.10.0</small>.
 
-You can disable in-memory caches that you may have enabled for persistent indexes
-on a case-by-case basis. This is useful for queries that access indexes with
-enabled in-memory caches, but for which it is known that using the cache will
-have a negative performance impact. In this case, you can set the `useCache`
-hint to `false`:
+Вы можете отключить кэширование в памяти, которое было включено для постоянных индексов в каждом конкретном случае. Это полезно для запросов, которые обращаются к индексам с включенным кэшем в памяти, но для которых известно, что использование кэша будет иметь негативное влияние на производительность. В этом случае можно установить подсказку `useCache` на `false`:
+
+<!-- 0007.part.md -->
 
 ```aql
 FOR doc IN collection OPTIONS { useCache: false }
@@ -204,25 +186,26 @@ FOR doc IN collection OPTIONS { useCache: false }
   ...
 ```
 
-You can set the hint individually per `FOR` loop.
-If you do not set the `useCache` hint, it will implicitly default to `true`.
+<!-- 0008.part.md -->
 
-The hint does not have any effect on `FOR` loops that do not use indexes, or
-on `FOR` loops that access indexes that do not have in-memory caches enabled.
-It also does not affect queries for which an existing in-memory
-cache cannot be used (i.e. because the query's filter condition does not contain
-equality lookups for all index attributes). It cannot be used for `FOR`
-operations that iterate over Views or perform graph traversals.
+Вы можете установить подсказку отдельно для каждого цикла `FOR`. Если вы не зададите подсказку `useCache`, она неявно будет иметь значение по умолчанию `true`.
 
-Also see [Caching of index values](../indexing-persistent.html#caching-of-index-values).
+Подсказка не влияет на циклы `FOR`, которые не используют индексы, или на циклы `FOR`, которые обращаются к индексам, не имеющим включенного кэша в памяти. Он также не влияет на запросы, для которых существующий кэш в памяти не может быть использован (т.е. потому что условие фильтрации запроса не содержит поиска равенства для всех атрибутов индекса). Его нельзя использовать для операций `FOR`, которые выполняют итерации над представлениями или обход графов.
+
+Также смотрите [Кэширование значений индексов](../indexing-persistent.html#caching-of-index-values).
 
 ### `lookahead`
 
-The multi-dimensional index type `zkd` supports an optional index hint for
-tweaking performance:
+Тип многомерного индекса `zkd` поддерживает необязательную подсказку индекса для настройки производительности:
+
+<!-- 0009.part.md -->
 
 ```aql
 FOR … IN … OPTIONS { lookahead: 32 }
 ```
 
-See [Multi-dimensional indexes](../indexing-multi-dim.html#lookahead-index-hint).
+<!-- 0010.part.md -->
+
+См. [Многомерные индексы](../indexing-multi-dim.html#lookahead-index-hint).
+
+<!-- 0011.part.md -->

@@ -1,72 +1,75 @@
 # RETURN
 
-The `RETURN` statement can be used to produce the result of a query.
-It is mandatory to specify a `RETURN` statement at the end of each block in a
-data-selection query, otherwise the query result would be undefined. Using
-`RETURN` on the main level in data-modification queries is optional.
+Оператор `RETURN` можно использовать для получения результата запроса. Обязательно указывать оператор `RETURN` в конце каждого блока в запросе на выборку данных, иначе результат запроса будет неопределен. Использование `RETURN` на основном уровне в запросах на модификацию данных необязательно.
 
-## Syntax
+## Синтаксис
 
-The general syntax for `RETURN` is:
+Общий синтаксис для `RETURN` следующий:
 
 <pre><code>RETURN <em>expression</em></code></pre>
 
-There is also a variant [`RETURN DISTINCT`](#return-distinct).
+Существует также вариант `RETURN DISTINCT`.
 
-The _expression_ returned by `RETURN` is produced for each iteration in the block the
-`RETURN` statement is placed in. That means the result of a `RETURN` statement
-is **always an array**. This includes an empty array if no documents matched the
-query and a single return value returned as array with one element.
+Выражение, возвращаемое `RETURN`, создается для каждой итерации в блоке, в котором находится оператор `RETURN`. Это означает, что результатом оператора `RETURN` всегда является **массив**. Он включает в себя пустой массив, если ни один документ не соответствует запросу, и единственное возвращаемое значение, возвращаемое как массив с одним элементом.
 
-To return all elements from the currently iterated array without modification,
-the following simple form can be used:
+Чтобы вернуть все элементы из текущего итерируемого массива без изменений, можно использовать следующую простую форму:
 
 <pre><code>FOR <em>variableName</em> IN <em>expression</em>
   RETURN <em>variableName</em></code></pre>
 
-As `RETURN` allows specifying an expression, arbitrary computations can be
-performed to calculate the result elements. Any of the variables valid in the
-scope the `RETURN` is placed in can be used for the computations.
+Поскольку `RETURN` позволяет указать выражение, для вычисления элементов результата могут быть выполнены произвольные вычисления. Для вычислений могут быть использованы любые переменные, действующие в области видимости, в которой находится `RETURN`.
 
-## Usage
+## Использование
 
-To iterate over all documents of a collection called _users_ and return the
-full documents, you can write:
+Чтобы перебрать все документы коллекции _users_ и вернуть полные документы, вы можете написать:
+
+<!-- 0001.part.md -->
 
 ```aql
 FOR u IN users
   RETURN u
 ```
 
-In each iteration of the for-loop, a document of the _users_ collection is
-assigned to a variable _u_ and returned unmodified in this example. To return
-only one attribute of each document, you could use a different return expression:
+<!-- 0002.part.md -->
+
+В каждой итерации цикла for-loop документ коллекции _users_ присваивается переменной _u_ и возвращается в этом примере в неизменном виде. Чтобы вернуть только один атрибут каждого документа, можно использовать другое выражение возврата:
+
+<!-- 0003.part.md -->
 
 ```aql
 FOR u IN users
   RETURN u.name
 ```
 
-Or to return multiple attributes, an object can be constructed like this:
+<!-- 0004.part.md -->
+
+Или, чтобы вернуть несколько атрибутов, объект можно построить следующим образом:
+
+<!-- 0005.part.md -->
 
 ```aql
 FOR u IN users
   RETURN { name: u.name, age: u.age }
 ```
 
-Note: `RETURN` will close the current scope and eliminate all local variables in it.
-This is important to remember when working with [subqueries](fundamentals-subqueries.html).
+<!-- 0006.part.md -->
 
-[Dynamic attribute names](fundamentals-data-types.html#objects--documents) are
-supported as well:
+Примечание: `RETURN` закроет текущую область видимости и удалит все локальные переменные в ней. Это важно помнить при работе с [подзапросами](../fundamentals/subqueries.md).
+
+Также поддерживаются [динамические имена атрибутов](../fundamentals/data-types.md):
+
+<!-- 0007.part.md -->
 
 ```aql
 FOR u IN users
   RETURN { [ u._id ]: u.age }
 ```
 
-The document _\_id_ of every user is used as expression to compute the
-attribute key in this example:
+<!-- 0008.part.md -->
+
+Документ _id_ каждого пользователя используется в качестве выражения для вычисления ключа атрибута в этом примере:
+
+<!-- 0009.part.md -->
 
 ```json
 [
@@ -82,9 +85,11 @@ attribute key in this example:
 ]
 ```
 
-The result contains one object per user with a single key/value pair each.
-This is usually not desired. For a single object, that maps user IDs to ages,
-the individual results need to be merged and returned with another `RETURN`:
+<!-- 0010.part.md -->
+
+Результат содержит один объект для каждого пользователя с одной парой ключ/значение. Обычно это нежелательно. Для получения единого объекта, который сопоставляет идентификаторы пользователей с возрастами, отдельные результаты должны быть объединены и возвращены с помощью другого `RETURN`:
+
+<!-- 0011.part.md -->
 
 ```aql
 RETURN MERGE(
@@ -92,6 +97,10 @@ RETURN MERGE(
     RETURN { [ u._id ]: u.age }
 )
 ```
+
+<!-- 0012.part.md -->
+
+<!-- 0013.part.md -->
 
 ```json
 [
@@ -103,16 +112,20 @@ RETURN MERGE(
 ]
 ```
 
-Keep in mind that if the key expression evaluates to the same value multiple
-times, only one of the key/value pairs with the duplicate name will survive
-[MERGE()](functions-document.html#merge). To avoid this, you can go without
-dynamic attribute names, use static names instead and return all document
-properties as attribute values:
+<!-- 0014.part.md -->
+
+Следует помнить, что если ключевое выражение оценивает одно и то же значение несколько раз, только одна из пар ключ/значение с дублирующим именем сохранится [MERGE()](../functions/document.md). Чтобы избежать этого, можно обойтись без динамических имен атрибутов, использовать вместо них статические имена и возвращать все свойства документа в качестве значений атрибутов:
+
+<!-- 0015.part.md -->
 
 ```aql
 FOR u IN users
   RETURN { name: u.name, age: u.age }
 ```
+
+<!-- 0016.part.md -->
+
+<!-- 0017.part.md -->
 
 ```json
 [
@@ -131,38 +144,37 @@ FOR u IN users
 ]
 ```
 
+<!-- 0018.part.md -->
+
 ## `RETURN DISTINCT`
 
-`RETURN` can optionally be followed by the `DISTINCT` keyword.
-The `DISTINCT` keyword will ensure uniqueness of the values returned by the
-`RETURN` statement:
+За `RETURN` по желанию может следовать ключевое слово `DISTINCT`. Ключевое слово `DISTINCT` обеспечивает уникальность значений, возвращаемых оператором `RETURN`:
 
 <pre><code>FOR <em>variableName</em> IN <em>expression</em>
   RETURN DISTINCT <em>expression</em></code></pre>
 
-`RETURN DISTINCT` is not allowed on the top-level of a query if there is no `FOR`
-loop preceding it.
+`RETURN DISTINCT` не допускается на верхнем уровне запроса, если ему не предшествует цикл `FOR`.
 
-Below example returns `["foo", "bar", "baz"]`:
+Приведенный ниже пример возвращает `["foo", "bar", "baz"]`:
+
+<!-- 0019.part.md -->
 
 ```aql
 FOR value IN ["foo", "bar", "bar", "baz", "foo"]
   RETURN DISTINCT value
 ```
 
-{% hint 'tip' %}
-`RETURN DISTINCT` will not change the order of the results it is applied on,
-unlike [`COLLECT`](operations-collect.html#collect-vs-return-distinct).
-{% endhint %}
+<!-- 0020.part.md -->
 
-If the `DISTINCT` is applied on an expression that itself is an array or a subquery,
-the `DISTINCT` will not make the values in each array or subquery result unique, but instead
-ensure that the result contains only distinct arrays or subquery results. To make
-the result of an array or a subquery unique, simply apply the `DISTINCT` for the
-array or the subquery.
+!!!tip ""
 
-For example, the following query will apply `DISTINCT` on its subquery results,
-but not inside the subquery:
+    `RETURN DISTINCT` не изменит порядок результатов, к которым он применяется, в отличие от [`COLLECT`](collect.md).
+
+Если `DISTINCT` применяется к выражению, которое само является массивом или подзапросом, `DISTINCT` не делает значения в каждом результате массива или подзапроса уникальными, а гарантирует, что результат содержит только различные массивы или результаты подзапроса. Чтобы сделать результат массива или подзапроса уникальным, просто примените `DISTINCT` для массива или подзапроса.
+
+Например, следующий запрос применит `DISTINCT` к результатам подзапроса, но не внутри подзапроса:
+
+<!-- 0021.part.md -->
 
 ```aql
 FOR what IN 1..2
@@ -172,17 +184,21 @@ FOR what IN 1..2
   )
 ```
 
-Here we will have a `FOR` loop with two iterations that each execute a subquery. The
-`DISTINCT` here is applied on the two subquery results. Both subqueries return the
-same result value (that is `[ 1, 2, 3, 4, 1, 3 ]`), so after `DISTINCT` there will
-only be one occurrence of the value `[ 1, 2, 3, 4, 1, 3 ]` left:
+<!-- 0022.part.md -->
+
+Здесь у нас будет цикл `FOR` с двумя итерациями, каждая из которых выполняет подзапрос. Здесь `DISTINCT` применяется к результатам двух подзапросов. Оба подзапроса возвращают одно и то же значение результата (то есть `[ 1, 2, 3, 4, 1, 3 ]`), поэтому после `DISTINCT` останется только одно вхождение значения `[ 1, 2, 3, 4, 1, 3 ]`:
+
+<!-- 0023.part.md -->
 
 ```json
 [[1, 2, 3, 4, 1, 3]]
 ```
 
-If the goal is to apply the `DISTINCT` inside the subquery, it needs to be moved
-there:
+<!-- 0024.part.md -->
+
+Если целью является применение `DISTINCT` внутри подзапроса, его нужно переместить туда:
+
+<!-- 0025.part.md -->
 
 ```aql
 FOR what IN 1..2
@@ -193,10 +209,11 @@ FOR what IN 1..2
   RETURN sub
 ```
 
-In the above case, the `DISTINCT` will make the subquery results unique, so that
-each subquery will return a unique array of values (`[ 1, 2, 3, 4 ]`). As the subquery
-is executed twice and there is no `DISTINCT` on the top-level, that array will be
-returned twice:
+<!-- 0026.part.md -->
+
+В приведенном выше случае `DISTINCT` сделает результаты подзапроса уникальными, так что каждый подзапрос вернет уникальный массив значений (`[ 1, 2, 3, 4 ]`). Поскольку подзапрос выполняется дважды и на верхнем уровне нет `DISTINCT`, этот массив будет возвращен дважды:
+
+<!-- 0027.part.md -->
 
 ```json
 [
@@ -204,3 +221,7 @@ returned twice:
   [1, 2, 3, 4]
 ]
 ```
+
+<!-- 0028.part.md -->
+
+<!-- 0029.part.md -->
