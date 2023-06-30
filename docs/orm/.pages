@@ -2,3 +2,5 @@ title: ORM
 nav:
     - index.md
     - prisma
+    - mongoose.md
+    - sequelize.md
