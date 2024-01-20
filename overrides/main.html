@@ -21,32 +21,6 @@ page.meta.source %} {% include "partials/source-link.html"
 
 <!-- Comments -->
 {% block content %}
-<!-- Breadcrumbs -->
-
-{% if page and not page.is_homepage and not
-page.meta.no_breadcrumb %}
-<p style="color: var(--md-default-fg-color--light)">
-	<small>
-		<a
-			href="/"
-			style="color: var(--md-default-fg-color--light)"
-			><img
-				style="vertical-align: text-bottom"
-				width="18"
-				src="https://raw.githubusercontent.com/squidfunk/mkdocs-material/master/material/.icons/material/home.svg"
-		/></a>
-		{% for doc in page.ancestors|reverse %} {% if
-		doc.url %} &gt;
-		<a
-			href="/{{ doc.url }}"
-			style="color: var(--md-default-fg-color)"
-			>{{ doc.title }}</a
-		>
-
-		{% endif %} {% endfor %}
-	</small>
-</p>
-{% endif %}
 
 <!-- Content -->
 {{ super() }}
